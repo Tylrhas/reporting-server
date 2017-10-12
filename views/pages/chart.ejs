@@ -14,8 +14,9 @@
     <h1>Locations Launched Chart</h1>
   </div>
 </div>
+<div class="row">
 <div class="container">
-<div class="filters">
+<div class="filters col-md-4">
 <h4>Filter Data:</h4>
 <form>
   Start Date:
@@ -30,25 +31,15 @@
   <option value="ss">Self Storage</option>
 </select>
 </form>
-
 </div>
+<div class="col-md-8">
 <canvas id="myChart" width="400" height="400"></canvas>
+</div>
+</div>
 </div>
 <script>
 var ctx = document.getElementById("myChart").getContext('2d');
-var myChart = new Chart(ctx, {
-    type: 'bar',
-    data: <%- JSON.stringify(chart) %>,
-    options: {
-        scales: {
-            yAxes: [{
-                ticks: {
-                    beginAtZero:true
-                }
-            }]
-        }
-    }
-});
+var myChart = new Chart(ctx,<%- JSON.stringify(chart) %>);
 </script>
 </body>
 </html>
