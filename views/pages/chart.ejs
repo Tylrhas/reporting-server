@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <% include ../partials/header.ejs %>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.0/Chart.bundle.js"></script>
+</head>
+
+<body>
+
+  <% include ../partials/nav.ejs %>
+
+<div class="jumbotron text-center">
+  <div class="container">
+    <h1>Locations Launched Chart</h1>
+  </div>
+</div>
+<div class="container">
+<div class="filters">
+<h4>Filter Data:</h4>
+<form>
+  Start Date:
+  <input type="date" name="StartDate" min="2015-12-31">
+  End Date:
+  <input type="date" name="StartDate" min="2015-12-31">
+  Vertical:
+  <select name="Vertical">
+  <option value="all">All</option>
+  <option value="mf">Multi-Family</option>
+  <option value="sl">Senior Living</option>
+  <option value="ss">Self Storage</option>
+</select>
+</form>
+
+</div>
+<canvas id="myChart" width="400" height="400"></canvas>
+</div>
+<script>
+var ctx = document.getElementById("myChart").getContext('2d');
+var myChart = new Chart(ctx, {
+    type: 'bar',
+    data: <%- JSON.stringify(chart) %>,
+    options: {
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero:true
+                }
+            }]
+        }
+    }
+});
+</script>
+</body>
+</html>
