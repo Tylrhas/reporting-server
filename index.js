@@ -3,7 +3,7 @@ var express = require('express');
 var app = express();
 const https = require("https");
 
-//required models 
+//required models for page load 
 var locationmodel = require('./api/models/locationmodel');
 
 //basic configs for the app
