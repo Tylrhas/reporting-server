@@ -1,4 +1,9 @@
-A Node app that uses chart.js to display metrics
+A Node app that Displays Metrics
+
+This app uses:
+Node.js
+Bootstrap 
+Chart.js
 
 #Todo
 Add footer patial that contains the JS 
