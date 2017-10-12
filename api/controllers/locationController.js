@@ -11,6 +11,6 @@ if( Object.keys(req.query).length != 0){
 else{
 	//if no strings are present send all of the locations
 	res.setHeader('Content-Type', 'application/json');
-    res.json(location_model.getAllLocations);
+    res.json(location_model.getAllLocations());
 }
 };
