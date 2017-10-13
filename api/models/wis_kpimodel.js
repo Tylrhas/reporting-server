@@ -1,15 +1,47 @@
 //get env vars
 require('dotenv').config();
-
-//the Guts of the API
-const {Pool,Client} = require('pg');
-var parse = require('pg-connection-string').parse;
+//require express for use of exports
 var express = require('express');
+//connection for the database
+const { Pool, Client } = require('pg')
+// pools will use environment variables
+// for connection information
+const pool = new Pool({
+  user: process.env.PGUSER,
+  host: process.env.PGHOST,
+  database:process.env.PGDATABASE ,
+  password: process.env.PGPASSWORD,
+  port: process.env.PGPORT,
+  ssl: true
+})
 
-const connectionString = process.env.DATABASE_URL;
-
-exports.getCurrentQuarter = function(req){
+// use of models
+exports.getCurrentQuarter = function(req,res){
 	//var query = buildQuery(req);
-    return 'working';
+     runKPIQuery(req, res, returnData);
+}
 
+//functions for said models
+function runKPIQuery(req,res,callback){
+var data  = null;
+
+  const query = {
+  // give the query a unique name
+  name: 'fetch-user',
+  text: 'SELECT * FROM lp_tasks',
+}
+
+pool.query(query,(err, result) => {
+  callback(req, res, err, result);
+ })
+}
+
+function returnData(req, res, err, result){
+   if (err) {
+    console.log(err.stack)
+  } else {
+    console.log(result.rows[0])
+
+    res.json(result.rows)
+  }
 }
