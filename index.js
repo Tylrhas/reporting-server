@@ -22,7 +22,7 @@ app.get('/', function(request, response) {
 });
 app.get('/locations_launched', function(request, response) {
   //get all locations on initial page load
-  var data = locationmodel.getAllLocations();
+  var data = locationmodel.getAllLocationsnoAPI();
   response.render('pages/chart', {chart: data} );
 });
 

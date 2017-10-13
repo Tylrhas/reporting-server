@@ -2,20 +2,20 @@
 require('dotenv').config();
 
 //the Guts of the API
-const {Pool,Client} = require('pg');
 
 var express = require('express');
 
-const connectionString = process.env.DATABASE_URL;
-
-exports.getlocationsfiltered = function(req){
+exports.getlocationsfiltered = function(req, res){
 	var query = buildQuery(req);
-    return query;
+    res.json(query)
 
 }
 
-exports.getAllLocations = function(){
-    return return_starter_data();
+exports.getAllLocations = function(req, res){
+    res.send(return_starter_data())
+}
+exports.getAllLocationsnoAPI = function(req, res){
+    return return_starter_data()
 }
 
 function buildQuery(req) {
