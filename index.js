@@ -6,7 +6,7 @@ var app = express();
 const https = require("https");
 
 //required models for page load 
-var locationmodel = require('./api/models/locationmodel');
+var locationmodel = require('./api/db/location');
 
 //basic configs for the app
 app.set('port', (process.env.PORT || 5000));
