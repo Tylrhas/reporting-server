@@ -2,6 +2,12 @@
 require('dotenv').config();
 //require express for use of exports
 var express = require('express');
+//add event emmitter 
+const EventEmitter = require('events');
+
+class MyEmitter extends EventEmitter {}
+
+const myEmitter = new MyEmitter();
 //connection for the database
 const { Pool, Client } = require('pg')
 
@@ -18,6 +24,11 @@ exports.quarterKpiNoName = function (req, res) {
 }
 
 exports.wisQuarterKpi = function (req, res) {
+  //listen for the queries to be done
+  myEmitter.on('queryDone', () => {
+    console.log('The query is Done!')
+    //run a check to see if all queries are done if they are send the results
+  })
   //set res as a global var
   getKPIData(res,req)
 }
@@ -39,15 +50,21 @@ function getKPIData(response,req) {
   //queries.QCScore = false
   //queries.locationCount = false
   createPool()
+  //build time query
   KpiQuery(response,createBuildTimeQuery(req))
+  //qc score query
+  //KpiQuery(response,createBuildTimeQuery(req))
+  //locations launched query
+  //KpiQuery(response,createBuildTimeQuery(req))
 }
-function KpiQuery(response,query) {
+function KpiQuery(query) {
   pool.query(query, (err, res) => {
     //console.log(err, res)
     //add the results to the results object
     results[query.name] = res.rows
     //add that the query is done to the queries object 
     queries[query.name] = true
+    myEmitter.emit('queryDone');
     formatdata(response, query.name, res.rows)
     console.log(results)
     pool.end()
