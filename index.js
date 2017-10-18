@@ -7,6 +7,17 @@ const https = require("https");
 
 //required models for page load 
 var locationmodel = require('./api/db/location');
+var wisKpi  = require('./api/db/wisKpi')
+
+function getQuarter(d) {
+  d = d || new Date(); // If no date supplied, use today
+  var q = [4,1,2,3];
+  return q[Math.floor(d.getMonth() / 3)];
+}
+
+function getYear(){
+return (new Date()).getFullYear()
+}
 
 //basic configs for the app
 app.set('port', (process.env.PORT || 5000));
@@ -20,6 +31,11 @@ app.set('view engine', 'ejs');
 app.get('/', function(request, response) {
   response.render('pages/index');
 });
+//WIS KPI Chart
+app.get('/wis/kpi/:name', function(request, response){
+var data = wisKpi.getcurrentQuarterdata(getQuarter(),getYear(),request.params.name);
+  response.render('pages/chart', {chart: data} );
+})
 app.get('/locations_launched', function(request, response) {
   //get all locations on initial page load
   var data = locationmodel.getAllLocationsnoAPI();
@@ -41,3 +57,4 @@ app.use('/api', require('./api/routes/index'));
 app.listen(app.get('port'), function() {
   console.log('Node app is running on port', app.get('port'));
 });
+

@@ -33,6 +33,15 @@ exports.wisQuarterKpi = function (req, res) {
   getKPIData(res,req)
 }
 
+exports.getcurrentQuarterdata = function (currentQuarter, year, wisName) {
+  //listen for the queries to be done
+  myEmitter.on('queryDone', () => {
+    console.log('The query is Done!')
+    //run a check to see if all queries are done if they are send the results
+  })
+  //set res as a global var
+  getKPIData(res,req)
+}
 //Begin functions that get and format KPI data
 function createPool() {
   pool = new Pool({
@@ -57,7 +66,8 @@ function getKPIData(response,req) {
   //locations launched query
   //KpiQuery(response,createBuildTimeQuery(req))
 }
-function KpiQuery(query) {
+function KpiQuery(response,query) {
+  console.log(query)
   pool.query(query, (err, res) => {
     //console.log(err, res)
     //add the results to the results object
