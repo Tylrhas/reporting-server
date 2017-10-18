@@ -1,8 +1,11 @@
 require('dotenv').config()
-var fs = require('fs');
-var readline = require('readline');
-var google = require('googleapis');
-var googleAuth = require('google-auth-library');
+var fs = require('fs')
+var readline = require('readline')
+var google = require('googleapis')
+var googleAuth = require('google-auth-library')
+const { Pool, Client } = require('pg')
+var pool
+var client
 
 // If modifying these scopes, delete your previously saved credentials
 // at ~/.credentials/sheets.googleapis.com-nodejs-quickstart.json
@@ -116,11 +119,82 @@ function listMajors(auth) {
       console.log('No data found.');
     } else {
       console.log('Name, Major:');
-      for (var i = 5; i < rows.length; i++) {
+      createPool()
+      for (var i = 4; i < rows.length; i++) {
         var row = rows[i];
+        if (row[0] !== ""){
+        checkForData(checkForIdQuery(row[0]),row)
         // Print columns A and E, which correspond to indices 0 and 4.
-        console.log(row);
+        console.log(row[0]);
+        }
       }
     }
   });
+}
+function createPool(){
+  pool = new Pool({
+    user: process.env.PGUSER,
+    host: process.env.PGHOST,
+    database: process.env.PGDATABASE,
+    password: process.env.PGPASSWORD,
+    port: process.env.PGPORT,
+    ssl: true
+  })
+}
+function checkForData(query,row){
+  pool.connect((err, client, release) => {
+  if (err) {
+    return console.error('Error acquiring client', err.stack)
+  }
+  client.query(query, (err, result) => {
+    //release client back to the pool
+    release()
+    if (err) {
+      return console.error('Error executing query', err.stack)
+    }
+    console.log(result.rows)
+    console.log(result.rows)
+    //if data doesnt exist then add it
+    if(Object.keys(result.rows).length === 0 ){
+      //addQCData()
+      console.log('adding data')
+      addQCData(addQCDataQuery(row),client,release)
+    }
+    else {
+      console.log('updating data')
+    }
+    //GetGoogleSheetData
+  })
+})
+}
+function checkForIdQuery(NsId) {
+  var query = {
+    // give the query a unique name
+    name: 'checkForExistingData',
+    text: 'SELECT * FROM gd_qcscore where id= $1::int',
+    values: [NsId]
+  }
+  return query
+}
+function addQCData(query,client,release){
+  client.query(query, (err, result) => {
+    //release client back to the pool
+    release()
+    if (err) {
+      return console.error('Error executing query', err.stack)
+    }
+    console.log(result.rows)
+    console.log('data')
+   
+  })
+
+}
+function addQCDataQuery(row){
+ var query = {
+    // give the query a unique name
+    name: 'addQCData',
+    text: 'INSERT INTO gd_qcscore(id, projectmanager, wis, staging, prelive, live) VALUES($1, $2, $3, $4, $5, $6) RETURNING *',
+    values: [row[0],row[4],row[6],row[7],row[7],row[9]]
+  }
+  return query
 }
