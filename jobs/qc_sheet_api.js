@@ -1,30 +1,57 @@
+//pass i and row.length into functions and check if it is the last row row.length -1
 require('dotenv').config()
 var fs = require('fs')
 var readline = require('readline')
 var google = require('googleapis')
 var googleAuth = require('google-auth-library')
 const { Pool, Client } = require('pg')
+//require express for use of exports
+var express = require('express');
+
+//add event emmitter 
+const EventEmitter = require('events');
+class MyEmitter extends EventEmitter { }
+const myEmitter = new MyEmitter();
+
+//global vars for easier use of callbacks
 var pool
 var client
+var updateStatus
+var rowsWithId = []
+var completedQueries = []
 
 // If modifying these scopes, delete your previously saved credentials
 // at ~/.credentials/sheets.googleapis.com-nodejs-quickstart.json
 var SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly'];
 var TOKEN_DIR = (process.env.HOME || process.env.HOMEPATH ||
-    process.env.USERPROFILE) + '/.credentials/';
+  process.env.USERPROFILE) + '/.credentials/';
 var TOKEN_PATH = TOKEN_DIR + 'sheets.googleapis.com-nodejs-quickstart.json';
 
-// Load client secrets from a local file.
-fs.readFile('client_secret.json', function processClientSecrets(err, content) {
-  if (err) {
-    console.log('Error loading client secret file: ' + err);
-    return;
-  }
-  // Authorize a client with the loaded credentials, then call the
-  // Google Sheets API.
-  authorize(JSON.parse(content), listMajors);
-});
 
+exports.updateQCScores = function (req, res) {
+  // Listen for the emmiter to say the updates are done
+  myEmitter.once('QCUpdatesDone', () => {
+    //push an array of each number of queries done and then compare the two on event and see if they are the same
+    res.setHeader('Content-Type', 'application/json');
+    res.json(updateStatus)
+  })
+  // Load client secrets from a local file.
+  fs.readFile('client_secret.json', function processClientSecrets(err, content) {
+    if (err) {
+      updateStatus = {
+        'Status': 'Failed',
+        'Error': 'Error loading client secret file: ' + err
+      }
+      console.log('Error loading client secret file: ' + err);
+      myEmitter.emit('QCUpdatesDone');
+      return;
+    }
+    // Authorize a client with the loaded credentials, then call the
+    // Google Sheets API.
+    authorize(JSON.parse(content), getQcScoresSheet);
+    //retrun the status of the update
+  });
+}
 /**
  * Create an OAuth2 client with the given credentials, and then execute the
  * given callback function.
@@ -40,7 +67,7 @@ function authorize(credentials, callback) {
   var oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
 
   // Check if we have previously stored a token.
-  fs.readFile(TOKEN_PATH, function(err, token) {
+  fs.readFile(TOKEN_PATH, function (err, token) {
     if (err) {
       getNewToken(oauth2Client, callback);
     } else {
@@ -68,11 +95,16 @@ function getNewToken(oauth2Client, callback) {
     input: process.stdin,
     output: process.stdout
   });
-  rl.question('Enter the code from that page here: ', function(code) {
+  rl.question('Enter the code from that page here: ', function (code) {
     rl.close();
-    oauth2Client.getToken(code, function(err, token) {
+    oauth2Client.getToken(code, function (err, token) {
       if (err) {
+        updateStatus = {
+          'Status': 'Failed',
+          'Error': 'Error while trying to retrieve access token ' + err
+        }
         console.log('Error while trying to retrieve access token', err);
+        myEmitter.emit('QCUpdatesDone');
         return;
       }
       oauth2Client.credentials = token;
@@ -99,39 +131,65 @@ function storeToken(token) {
   console.log('Token stored to ' + TOKEN_PATH);
 }
 
-/**
- * Print the names and majors of students in a sample spreadsheet:
- * https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
- */
-function listMajors(auth) {
+
+function getQcScoresSheet(auth) {
   var sheets = google.sheets('v4');
   sheets.spreadsheets.values.get({
     auth: auth,
     spreadsheetId: process.env.spreadsheetId,
-    range: process.env.googleSheetTabName+'!A:V',
-  }, function(err, response) {
+    range: process.env.googleSheetTabName + '!A:V',
+  }, function (err, response) {
     if (err) {
       console.log('The API returned an error: ' + err);
+      updateStatus = {
+        'Status': 'Failed',
+        'Error': 'The API returned an error: ' + err
+      }
+      myEmitter.emit('QCUpdatesDone');
       return;
     }
     var rows = response.values;
     if (rows.length == 0) {
       console.log('No data found.');
     } else {
-      console.log('Name, Major:');
+      resetVars()
+      //create connection pool
       createPool()
-      for (var i = 4; i < rows.length; i++) {
-        var row = rows[i];
-        if (row[0] !== ""){
-        checkForData(checkForIdQuery(row[0]),row)
-        // Print columns A and E, which correspond to indices 0 and 4.
-        console.log(row[0]);
-        }
-      }
+      createValueArray(rows)
+      updateQCScores()
+
     }
   });
 }
-function createPool(){
+function resetVars(){
+  //reset array to 0
+  rowsWithId = []
+  completedQueries = []
+  pool =''
+  client =''
+  updateStatus = ''
+}
+function createValueArray(rows) {
+  //iterate through rows and log or update data
+  for (var i = 4; i < rows.length; i++) {
+    var row = rows[i];
+    //make sure the row has an ID
+    if (row[0] !== "") {
+      rowsWithId.push(row)
+      console.log(row[0])
+    }
+  }
+}
+
+function updateQCScores() {
+  console.log(rowsWithId.length)
+  for (var i = 0; i < rowsWithId.length; i++) {
+    var row = rowsWithId[i];
+
+    checkForData(checkForIdQuery(row[0]), row, i)
+  }
+}
+function createPool() {
   pool = new Pool({
     user: process.env.PGUSER,
     host: process.env.PGHOST,
@@ -141,31 +199,41 @@ function createPool(){
     ssl: true
   })
 }
-function checkForData(query,row){
+function checkForData(query, row, i) {
   pool.connect((err, client, release) => {
-  if (err) {
-    return console.error('Error acquiring client', err.stack)
-  }
-  client.query(query, (err, result) => {
-    //release client back to the pool
-    release()
     if (err) {
-      return console.error('Error executing query', err.stack)
+      updateStatus = {
+        'Status': 'Failed',
+        'Error': 'Error acquiring client' + err.stack
+      }
+      console.error('Error acquiring client', err.stack)
+      myEmitter.emit('QCUpdatesDone');
+      return
     }
-    console.log(result.rows)
-    console.log(result.rows)
-    //if data doesnt exist then add it
-    if(Object.keys(result.rows).length === 0 ){
-      //addQCData()
-      console.log('adding data')
-      addQCData(addQCDataQuery(row),client,release)
-    }
-    else {
-      console.log('updating data')
-    }
-    //GetGoogleSheetData
+    client.query(query, (err, result) => {
+      //release client back to the pool
+      release()
+      if (err) {
+        updateStatus = {
+          'Status': 'Failed',
+          'Error': 'Error executing query' + err.stack
+        }
+        console.error('Error executing query', err.stack)
+        myEmitter.emit('QCUpdatesDone');
+        return
+      }
+      //if data doesnt exist then add it
+      if (Object.keys(result.rows).length === 0) {
+        //addQCData()
+        console.log('adding data')
+        sqlQueryQcScore(addQCDataQuery(row), client, release, i)
+      }
+      else {
+        sqlQueryQcScore(updateQCDataQuery(row), client, release, i)
+      }
+      //GetGoogleSheetData
+    })
   })
-})
 }
 function checkForIdQuery(NsId) {
   var query = {
@@ -176,25 +244,52 @@ function checkForIdQuery(NsId) {
   }
   return query
 }
-function addQCData(query,client,release){
+function sqlQueryQcScore(query, client, release, i) {
   client.query(query, (err, result) => {
     //release client back to the pool
     release()
     if (err) {
-      return console.error('Error executing query', err.stack)
+      updateStatus = {
+        'Status': 'Failed',
+        'Error': 'Error executing query' + err.stack
+      }
+      myEmitter.emit('QCUpdatesDone');
+      console.error('Error executing query', err.stack)
+      return
     }
-    console.log(result.rows)
-    console.log('data')
-   
+    console.log('i= ' + i + 'length of array= ' + rowsWithId.length)
+    //push the completed query into array
+    completedQueries.push(rowsWithId[i])
+    console.log(completedQueries.length+' '+rowsWithId.length)
+    //check if the completed queries and the queries array are the same length
+    if (completedQueries.length === rowsWithId.length) {
+      updateStatus = {
+        'Status': 'Sucess',
+        'Message': 'QC Scores Have Been Updated'
+      }
+      console.log('QCUpdatesDone')
+      pool.end()
+      console.log('pool has drained')
+      myEmitter.emit('QCUpdatesDone')
+      return
+    }
   })
-
 }
-function addQCDataQuery(row){
- var query = {
+function addQCDataQuery(row) {
+  var query = {
     // give the query a unique name
     name: 'addQCData',
-    text: 'INSERT INTO gd_qcscore(id, projectmanager, wis, staging, prelive, live) VALUES($1, $2, $3, $4, $5, $6) RETURNING *',
-    values: [row[0],row[4],row[6],row[7],row[7],row[9]]
+    text: 'INSERT INTO gd_qcscore(id, projectmanager, wis, staging, prelive, live) VALUES($1::int, $2, $3, $4, $5, $6) RETURNING *',
+    values: [row[0], row[4], row[6], row[7], row[7], row[9]]
+  }
+  return query
+}
+function updateQCDataQuery(row) {
+  var query = {
+    // give the query a unique name
+    name: 'updateQCData',
+    text: 'UPDATE gd_qcscore SET projectmanager = $2, wis = $3, staging = $4, prelive = $5, live = $6  WHERE ID = $1::int',
+    values: [row[0], row[4], row[6], row[7], row[7], row[9]]
   }
   return query
 }

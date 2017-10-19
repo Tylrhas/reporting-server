@@ -7,7 +7,8 @@ const https = require("https");
 
 //required models for page load 
 var locationmodel = require('./api/db/location');
-var wisKpi  = require('./api/db/wisKpi')
+var wisKpi  = require('./api/db/wis_kpi')
+var jobs = require('./jobs/index')
 
 function getQuarter(d) {
   d = d || new Date(); // If no date supplied, use today
@@ -42,6 +43,10 @@ app.get('/locations_launched', function(request, response) {
   response.render('pages/chart', {chart: data} );
 });
 
+app.get('/jobs', function(request, response) {
+  response.render('pages/jobs');
+});
+
 // shows you have to get the config vars
 app.get('/times', function(request, response) {
     var result = ''
@@ -53,6 +58,8 @@ app.get('/times', function(request, response) {
 
 // Require the API endpoints 
 app.use('/api', require('./api/routes/index'));
+// Require the job endpoints 
+app.use('/jobs', require('./jobs/index'));
 
 app.listen(app.get('port'), function() {
   console.log('Node app is running on port', app.get('port'));
