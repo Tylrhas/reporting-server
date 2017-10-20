@@ -42,6 +42,9 @@ app.get('/locations_launched', function(request, response) {
   var data = locationmodel.getAllLocationsnoAPI();
   response.render('pages/chart', {chart: data} );
 });
+app.get('/monthlygoals', function(request, response) {
+  response.render('pages/monthlygoals');
+});
 
 app.get('/jobs', function(request, response) {
   response.render('pages/jobs');
