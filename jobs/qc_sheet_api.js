@@ -27,6 +27,28 @@ var TOKEN_DIR = (process.env.HOME || process.env.HOMEPATH ||
   process.env.USERPROFILE) + '/.credentials/';
 var TOKEN_PATH = TOKEN_DIR + 'sheets.googleapis.com-nodejs-quickstart.json';
 
+exports.updateQCScoresNoAPI = function (req, res) {
+  // Listen for the emmiter to say the updates are done
+  myEmitter.once('QCUpdatesDone', () => {
+    return updateStatus
+  })
+  // Load client secrets from a local file.
+  fs.readFile('client_secret.json', function processClientSecrets(err, content) {
+    if (err) {
+      updateStatus = {
+        'Status': 'Failed',
+        'Error': 'Error loading client secret file: ' + err
+      }
+      console.log('Error loading client secret file: ' + err);
+      myEmitter.emit('QCUpdatesDone');
+      return;
+    }
+    // Authorize a client with the loaded credentials, then call the
+    // Google Sheets API.
+    authorize(JSON.parse(content), getQcScoresSheet);
+    //retrun the status of the update
+  });
+}
 
 exports.updateQCScores = function (req, res) {
   // Listen for the emmiter to say the updates are done

@@ -24,15 +24,39 @@
         <div class="container">
                 <div class="alert fade in alert-dismissable hide" role="alert">
                 </div>
+                <div class="row">
             <button class="btn btn-default" id="QCScores">Update QC Scores</button>
+            </div>
+            <div class="row">
+            <button class="btn btn-default" id="LPTasks">Update LP Tasks</button>
+            </div>
         </div>
     </div>
+
     <script>
         //api calls for the updatables
         $('#QCScores').click(function () {
             $(".alert").addClass( "alert-info" ).removeClass("hide");
             $(".alert").html('Updating QC Scores <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>');
             $.get("../jobs/qc_score", function (data) {
+                if(data.Status === 'Sucess'){
+                    console.log(data.Message)
+                    $(".alert").html(data.Message+'<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>');
+                    $(".alert").removeClass("alert-info").addClass('alert-success');
+                }
+                else{
+                    $(".alert").html(data.message+'<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'); 
+                    $(".alert").removeClass("alert-info").addClass('alert-danger');
+                }
+                alert("Load was performed.");
+            });
+        })
+
+
+        $('#LPTasks').click(function () {
+            $(".alert").addClass( "alert-info" ).removeClass("hide");
+            $(".alert").html('Updating LP Table Scores <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>');
+            $.get("../jobs/lp_tasks", function (data) {
                 if(data.Status === 'Sucess'){
                     console.log(data.Message)
                     $(".alert").html(data.Message+'<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>');

@@ -7,22 +7,9 @@
     .jumbotron .btn-primary:hover {
       background: #7646c1; }
   .jumbotron p {
-    color: #d9ccee;
-    max-width: 75%;
     margin: 1em auto 2em; }
   .navbar + .jumbotron {
     margin-top: -20px; }
-  .jumbotron .lang-logo {
-    display: block;
-    background: #B01302;
-    border-radius: 50%;
-    overflow: hidden;
-    width: 100px;
-    height: 100px;
-    margin: auto;
-    border: 2px solid white; }
-    .jumbotron .lang-logo img {
-      max-width: 100%; }
 .navbar{
     background-color: #29b6f6;
     border-color: transparent;
@@ -39,4 +26,7 @@
 }
 .dropdown-menu{
   background-color: #29b6f6;
+}
+.jumbotron h1 {
+  color:#FF9800;
 }
