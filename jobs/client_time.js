@@ -36,9 +36,6 @@ function checkTask(task){
         console.log('true')
         console.log(task.parent_ids)
     }
-    if(checkParentFolder(task) && checkStartDate(task) && checkStartDate(task) ){
-        //all deps met now log time
-    }
 }
 
 function checkParentFolder(task){
