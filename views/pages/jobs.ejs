@@ -3,73 +3,107 @@
 
 <head>
     <% include ../partials/header.ejs %>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.0/Chart.bundle.js"></script>
-    <style>
-    .hide{
-        display: none;
-    }
-    </style>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.0/Chart.bundle.js"></script>
+        <style>
+            .hide {
+                display: none;
+            }
+        </style>
 </head>
 
 <body>
 
     <% include ../partials/nav.ejs %>
 
-    <div class="jumbotron text-center">
-        <div class="container">
-            <h1>Updateables</h1>
+        <div class="jumbotron text-center">
+            <div class="container">
+                <h1>Updateables</h1>
+            </div>
         </div>
-    </div>
-    <div class="row">
-        <div class="container">
+        <div class="row">
+            <div class="container">
                 <div class="alert fade in alert-dismissable hide" role="alert">
                 </div>
                 <div class="row">
-            <button class="btn btn-default" id="QCScores">Update QC Scores</button>
-            </div>
-            <div class="row">
-            <button class="btn btn-default" id="LPTasks">Update LP Tasks</button>
+                    <div class="col-md-3 job">
+                        <h3>QC Scores</h3>
+                        <div class="row">
+                            <p>Last Run: some date time</p>
+                        </div>
+                        <div class="row">
+                            <p>Status: Successful</p>
+                        </div>
+                        <div class="row">
+                            <button class="btn btn-ghost" id="QCScores">Update QC Scores</button>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 job middle">
+                        <h3>LP Tasks</h3>
+                        <div class="row">
+                            <p>Last Run: some date time</p>
+                        </div>
+                        <div class="row">
+                            <p>Status: Error</p>
+                        </div>
+                        <div class="row">
+                            <button class="btn btn-ghost" id="LPTasks">Update LP Tasks</button>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 job">
+                            <h3>New Job</h3>
+                            <div class="row">
+                                <p>Last Run: some date time</p>
+                            </div>
+                            <div class="row">
+                                <p>Status: Successful</p>
+                            </div>
+                            <div class="row">
+                                <button class="btn btn-ghost" id="newJob">Update New Job</button>
+                            </div>
+                        </div>
+                </div>
             </div>
         </div>
-    </div>
 
-    <script>
-        //api calls for the updatables
-        $('#QCScores').click(function () {
-            $(".alert").addClass( "alert-info" ).removeClass("hide");
-            $(".alert").html('Updating QC Scores <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>');
-            $.get("../jobs/qc_score", function (data) {
-                if(data.Status === 'Sucess'){
-                    console.log(data.Message)
-                    $(".alert").html(data.Message+'<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>');
-                    $(".alert").removeClass("alert-info").addClass('alert-success');
-                }
-                else{
-                    $(".alert").html(data.message+'<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'); 
-                    $(".alert").removeClass("alert-info").addClass('alert-danger');
-                }
-                alert("Load was performed.");
-            });
-        })
+        <script>
+            //api calls for the updatables
+            $('#QCScores').click(function () {
+                $(".alert").addClass("alert-info").removeClass("hide");
+                $(".alert").html('Updating QC Scores <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>');
+                $.get("../jobs/qc_score", function (data) {
+                    if (data.Status === 'Sucess') {
+                        console.log(data.Message)
+                        $(".alert").html(data.Message + '<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>');
+                        $(".alert").removeClass("alert-info").addClass('alert-success');
+                    }
+                    else {
+                        $(".alert").html(data.message + '<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>');
+                        $(".alert").removeClass("alert-info").addClass('alert-danger');
+                    }
+                    alert("Load was performed.");
+                });
+            })
 
 
-        $('#LPTasks').click(function () {
-            $(".alert").addClass( "alert-info" ).removeClass("hide");
-            $(".alert").html('Updating LP Table Scores <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>');
-            $.get("../jobs/lp_tasks", function (data) {
-                if(data.Status === 'Sucess'){
-                    console.log(data.Message)
-                    $(".alert").html(data.Message+'<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>');
-                    $(".alert").removeClass("alert-info").addClass('alert-success');
-                }
-                else{
-                    $(".alert").html(data.message+'<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'); 
-                    $(".alert").removeClass("alert-info").addClass('alert-danger');
-                }
-                alert("Load was performed.");
-            });
-        })
-    </script>
+            $('#LPTasks').click(function () {
+                $(".alert").addClass("alert-info").removeClass("hide");
+                $(".alert").html('Updating LP Table Scores <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>');
+                $.get("../jobs/lp_tasks", function (data) {
+                    if (data.Status === 'Sucess') {
+                        console.log(data.Message)
+                        $(".alert").html(data.Message + '<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>');
+                        $(".alert").removeClass("alert-info").addClass('alert-success');
+                    }
+                    else {
+                        $(".alert").html(data.message + '<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>');
+                        $(".alert").removeClass("alert-info").addClass('alert-danger');
+                    }
+                    alert("Load was performed.");
+                });
+            })
+        </script>
 </body>
 
 </html>

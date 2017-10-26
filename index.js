@@ -2,6 +2,8 @@
 require('dotenv').config()
 
 //REQUIRED PACKAGES
+var favicon = require('serve-favicon')
+var path = require('path')
 var express = require('express');
 var app = express();
 const https = require("https");
@@ -12,6 +14,7 @@ var wisKpi  = require('./api/db/wis_kpi')
 var jobs = require('./jobs/index')
 
 //CONFIGS
+app.use(favicon(path.join(__dirname, 'public', 'favicon.png')))
 app.set('port', (process.env.PORT || 5000))
 app.use(express.static(__dirname + '/public'))
 
