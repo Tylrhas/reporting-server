@@ -138,21 +138,21 @@ function logClientTime(assignment) {
         estupdated = false;
     }
     //TODO JSON POST Update and log update to database
-    updateClientTime(updateTime,estupdated,url);
-    insertData(insertData(updateTime, estupdated))
+    updateClientTime(updateTime, estupdated, url, assignment);
 }
-function updateClientTime(jsonPayload,estUpdated,url){
+function updateClientTime(jsonPayload,estUpdated,url,assignment){
     request.post({ url: url, json:jsonPayload, headers: { "Authorization": auth } }, (error, response, body) => {
-
+        insertData(assignment['treeitem_id'], true, estupdated, body);
     })
 }
 
-function insertData(updateTime, estupdated){
+function insertData(taskid, timeLogged, estUpdated, responseBody){
+    //TODO CHANGE THE TABLE NAME FOR THE CLIENT TIME LOGGER
     var query = {
 		// give the query a unique name
 		name: 'addQCLPClientTime',
-		text: 'INSERT INTO users (id, lp_task_name, task_type, owners, start_date, end_date, hrs_logged, date_done, project_id ) VALUES ($1::int, $2::text, $3::text, $4::text, $5::text, $6::text, $7::text, $8::text, $9::int  0) ON CONFLICT (id) DO UPDATE SET level = users.level + 1;',
-		values: [task['key'], task['name'], task['pick_list_custom_field:102046'], task['owner'], task['expected_start'], task['expected_finish'], task['hours_logged'], task['date_done'], task['project_id']]
+		text: 'INSERT INTO users (lptask, timelogged, estupdated, response) VALUES ($1::int, $2::bool, $3::bool, 4::text);',
+		values: [ taskid, timeLogged, estUpdated, responseBody ]
 	}
 	return query
 }
