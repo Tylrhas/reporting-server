@@ -112,12 +112,12 @@ function getTodaysDate() {
 }
 
 function logClientTime(assignment) {
-    $update_time_url = 'https://app.liquidplanner.com/api/workspaces/'.$workspace_id.'/tasks/'.$treeitem_id.'/track_time';
-
+    var update_time_url = 'https://app.liquidplanner.com/api/workspaces/'+process.env.LPWorkspaceId+'/tasks/'+assignment['treeitem_id']+'/track_time';
+    var estupdated;
     var updateTime = {
         'work': hours_per_day,
         'activity_id': 224571,
-        'member_id': $client_lp_id
+        'member_id': process.env.LPClientId
     }
 
 
@@ -128,14 +128,31 @@ function logClientTime(assignment) {
     updateTime['high'] = $new_effort_remaining;
     //if the low effort is less than or equal to one days work add more hours on the the expected time
 
-    if (new_effort_remaining < parseInt(process.env.LPClientHoursPerDay)) {
+    if (new_effort_remaining <= parseInt(process.env.LPClientHoursPerDay)) {
         updateTime['low'] = parseInt(process.env.LPClientTimeUpdate);
         updateTime['high'] = parseInt(process.env.LPClientTimeUpdate);
         //update the estimated to true for the log
-        var estupdated = true;
+        estupdated = true;
     }
     else {
-        var estupdated = false;
+        estupdated = false;
     }
     //TODO JSON POST Update and log update to database
+    updateClientTime(updateTime,estupdated,url);
+    insertData(insertData(updateTime, estupdated))
+}
+function updateClientTime(jsonPayload,estUpdated,url){
+    request.post({ url: url, json:jsonPayload, headers: { "Authorization": auth } }, (error, response, body) => {
+
+    })
+}
+
+function insertData(updateTime, estupdated){
+    var query = {
+		// give the query a unique name
+		name: 'addQCLPClientTime',
+		text: 'INSERT INTO users (id, lp_task_name, task_type, owners, start_date, end_date, hrs_logged, date_done, project_id ) VALUES ($1::int, $2::text, $3::text, $4::text, $5::text, $6::text, $7::text, $8::text, $9::int  0) ON CONFLICT (id) DO UPDATE SET level = users.level + 1;',
+		values: [task['key'], task['name'], task['pick_list_custom_field:102046'], task['owner'], task['expected_start'], task['expected_finish'], task['hours_logged'], task['date_done'], task['project_id']]
+	}
+	return query
 }
