@@ -52,7 +52,7 @@
                     </div>
 
                     <div class="col-md-3 job">
-                            <h3>New Job</h3>
+                            <h3>Client Time</h3>
                             <div class="row">
                                 <p>Last Run: some date time</p>
                             </div>
@@ -60,7 +60,7 @@
                                 <p>Status: Successful</p>
                             </div>
                             <div class="row">
-                                <button class="btn btn-ghost" id="newJob">Update New Job</button>
+                                <button class="btn btn-ghost" id="clientTime">Update Client Time</button>
                             </div>
                         </div>
                 </div>
@@ -90,6 +90,23 @@
             $('#LPTasks').click(function () {
                 $(".alert").addClass("alert-info").removeClass("hide");
                 $(".alert").html('Updating LP Table Scores <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>');
+                $.get("../jobs/lp_tasks", function (data) {
+                    if (data.Status === 'Sucess') {
+                        console.log(data.Message)
+                        $(".alert").html(data.Message + '<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>');
+                        $(".alert").removeClass("alert-info").addClass('alert-success');
+                    }
+                    else {
+                        $(".alert").html(data.message + '<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>');
+                        $(".alert").removeClass("alert-info").addClass('alert-danger');
+                    }
+                    alert("Load was performed.");
+                });
+            })
+
+            $('#clientTime').click(function () {
+                $(".alert").addClass("alert-info").removeClass("hide");
+                $(".alert").html('Updating clientTime <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>');
                 $.get("../jobs/lp_tasks", function (data) {
                     if (data.Status === 'Sucess') {
                         console.log(data.Message)

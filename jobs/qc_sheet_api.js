@@ -7,7 +7,7 @@ var googleAuth = require('google-auth-library')
 const { Pool, Client } = require('pg')
 //require express for use of exports
 var express = require('express');
-
+ 
 //add event emmitter 
 const EventEmitter = require('events');
 class MyEmitter extends EventEmitter { }
@@ -26,6 +26,43 @@ var SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly'];
 var TOKEN_DIR = (process.env.HOME || process.env.HOMEPATH ||
   process.env.USERPROFILE) + '/.credentials/';
 var TOKEN_PATH = TOKEN_DIR + 'sheets.googleapis.com-nodejs-quickstart.json';
+
+exports.getAlldata = function(req, res){
+  myEmitter.once('QCUpdatesDone', () => {
+        res.setHeader('Content-Type', 'application/json');
+        res.json(updateStatus)
+        console.log()
+    })
+  createPool();
+
+  pool.connect((err, client, release) => {
+    if (err) {
+      updateStatus = {
+        'Status': 'Failed',
+        'Error': 'Error acquiring client' + err.stack
+      }
+      console.error('Error acquiring client', err.stack)
+      myEmitter.emit('QCUpdatesDone');
+      return
+    }
+    client.query('SELECT * from gd_qcscore', (err, result) => {
+      //release client back to the pool
+      release()
+      if (err) {
+        updateStatus = {
+          'Status': 'Failed',
+          'Error': 'Error executing query' + err.stack
+        }
+        console.error('Error executing query', err.stack)
+        myEmitter.emit('QCUpdatesDone');
+        return
+      }
+      updateStatus = result;
+
+      myEmitter.emit('QCUpdatesDone');
+})
+})
+}
 
 exports.updateQCScoresNoAPI = function (req, res) {
   // Listen for the emmiter to say the updates are done
@@ -213,11 +250,11 @@ function updateQCScores() {
 }
 function createPool() {
   pool = new Pool({
-    user: process.env.PGUSER,
-    host: process.env.PGHOST,
-    database: process.env.PGDATABASE,
-    password: process.env.PGPASSWORD,
-    port: process.env.PGPORT,
+    user: process.env.localDbUSER,
+    host: process.env.localDbHOST,
+    database: process.env.localDbDATABASE,
+    password: process.env.localDbPASSWORD,
+    port: process.env.localDbPORT,
     ssl: true
   })
 }
@@ -301,7 +338,7 @@ function addQCDataQuery(row) {
   var query = {
     // give the query a unique name
     name: 'addQCData',
-    text: 'INSERT INTO gd_qcscore(id, projectmanager, wis, staging, prelive, live) VALUES($1::int, $2, $3, $4, $5, $6) RETURNING *',
+    text: 'INSERT INTO gd_qcscore (id, projectmanager, wcs, staging, prelive, live) VALUES($1::int, $2::text, $3::text, $4::int, $5::int, $6::int) RETURNING *',
     values: [row[0], row[4], row[6], row[7], row[7], row[9]]
   }
   return query
@@ -310,7 +347,7 @@ function updateQCDataQuery(row) {
   var query = {
     // give the query a unique name
     name: 'updateQCData',
-    text: 'UPDATE gd_qcscore SET projectmanager = $2, wis = $3, staging = $4, prelive = $5, live = $6  WHERE ID = $1::int',
+    text: 'UPDATE gd_qcscore SET projectmanager = $2, wcs = $3, staging = $4, prelive = $5, live = $6  WHERE ID = $1::int',
     values: [row[0], row[4], row[6], row[7], row[7], row[9]]
   }
   return query

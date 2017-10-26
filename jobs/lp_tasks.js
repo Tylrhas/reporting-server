@@ -45,9 +45,9 @@ function parseLPData(data) {
 	console.log(Object.keys(data).length)
 	for (var i = 0; i < Object.keys(data).length; i++) {
 		var task = data[i]
-		//console.log(task['key'] +' '+ task['name']  +' '+ task['pick_list_custom_field:102046'] +' '+ task['owner'] +' '+task['expected_start'] +' '+task['expected_finish'] +' '+task['hours_logged'] +' '+task['date_done'] +' '+task['project_id']);
+		console.log(task['key'] +' '+ task['name']  +' '+ task['pick_list_custom_field:102046'] +' '+ task['owner'] +' '+task['expected_start'] +' '+task['expected_finish'] +' '+task['hours_logged'] +' '+task['date_done'] +' '+task['project_id']);
 		query = addLPTaskQuery(task)
-		console.log(query)
+		//console.log(query)
 		//logTask(query);
 	}
 }
@@ -100,7 +100,7 @@ function addLPTaskQuery(task) {
 	var query = {
 		// give the query a unique name
 		name: 'addQCLPTask',
-		text: 'INSERT INTO users (id, lp_task_name, task_type, owners, start_date, end_date, hrs_logged, date_done, project_id ) VALUES ($1::int, $2::text, $3::text, $4::text, $5::text, $6::text, $7::text, $8::text, $9::int  0) ON CONFLICT (id) DO UPDATE SET level = users.level + 1;',
+		text: 'INSERT INTO users (id, task_name, task_type, milestone, owners, e_start, e_finish, started_on, date_done, deadline, hours, project_id, in_tags, updated_on ) VALUES ($1::int, $2::text, $3::text, $4::text, $5::text, $6::date, $7::date, $8::date, $9::date, $10::date, $11::real, $12::int, $13::text, $14::date) ON CONFLICT (id) DO UPDATE SET task_name = $2::text , task_type = $3::text, milestone = $4::text, owners = $5::text, e_start = $6::date, e_finish = $7::date, started_on = $8::date, date_done = $9::date, deadline = $10::date, hours = $11::real, project_id = $12::int, in_tags = $13::text, updated_on = $14::date',
 		values: [task['key'], task['name'], task['pick_list_custom_field:102046'], task['owner'], task['expected_start'], task['expected_finish'], task['hours_logged'], task['date_done'], task['project_id']]
 	}
 	return query

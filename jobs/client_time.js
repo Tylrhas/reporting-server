@@ -2,6 +2,7 @@ require('dotenv').config()
 const request = require("request");
 //require express for use of exports
 var express = require('express');
+const { Pool, Client } = require('pg')
 
 //add event emmitter 
 const EventEmitter = require('events');
@@ -23,8 +24,16 @@ exports.logClientTime = function (req, res) {
     })
     getallclienttasks();
 }
+exports.logClientTimeJob = function () {
+    myEmitter.once('sendresults', () => {
+        return sendData
+    })
+    getallclienttasks();
+}
 
 function getallclienttasks() {
+    //create pool for the data to be logged to 
+    createPool();
     request.get({ url: url, headers: { "Authorization": auth } }, (error, response, body) => {
         let json = JSON.parse(body);
         parseLPData(json);
@@ -81,7 +90,8 @@ function getAssignment(task) {
             else {
                 //estimated start is not null and time will be logged
                 if (checkStartDate(task.assignments[i])) {
-                    //task is supposed to start today
+                        console.log(task.assignments[i]);
+                    //task is supposed to start toda
                     logClientTime(task.assignments[i]);
                 }
             }
@@ -89,7 +99,6 @@ function getAssignment(task) {
     }
 }
 function checkStartDate(assignment) {
-    console.log(assignment);
     var startDate = assignment['expected_start'].split("T")[0];
     var todaysDate = getTodaysDate();
     console.log(startDate + ' ' + startDate);
@@ -115,7 +124,7 @@ function logClientTime(assignment) {
     var update_time_url = 'https://app.liquidplanner.com/api/workspaces/'+process.env.LPWorkspaceId+'/tasks/'+assignment['treeitem_id']+'/track_time';
     var estupdated;
     var updateTime = {
-        'work': hours_per_day,
+        'work': parseInt(process.env.LPClientHoursPerDay),
         'activity_id': 224571,
         'member_id': process.env.LPClientId
     }
@@ -124,8 +133,8 @@ function logClientTime(assignment) {
     var low_effort_remaining = parseInt(assignment['low_effort_remaining']);
     var new_effort_remaining = low_effort_remaining - parseInt(process.env.LPClientHoursPerDay);
     //update the updateTime var with the new info
-    updateTime['low'] = $new_effort_remaining;
-    updateTime['high'] = $new_effort_remaining;
+    updateTime['low'] = new_effort_remaining;
+    updateTime['high'] = new_effort_remaining;
     //if the low effort is less than or equal to one days work add more hours on the the expected time
 
     if (new_effort_remaining <= parseInt(process.env.LPClientHoursPerDay)) {
@@ -138,21 +147,66 @@ function logClientTime(assignment) {
         estupdated = false;
     }
     //TODO JSON POST Update and log update to database
-    updateClientTime(updateTime, estupdated, url, assignment);
+    updateClientTime(updateTime, estupdated, update_time_url, assignment);
 }
 function updateClientTime(jsonPayload,estUpdated,url,assignment){
     request.post({ url: url, json:jsonPayload, headers: { "Authorization": auth } }, (error, response, body) => {
-        insertData(assignment['treeitem_id'], true, estupdated, body);
+        console.log(body);
+        buildClientTimeQuery(assignment['treeitem_id'], true, estupdated, body);
     })
 }
 
-function insertData(taskid, timeLogged, estUpdated, responseBody){
+function buildClientTimeQuery(taskid, timeLogged, estUpdated, responseBody){
     //TODO CHANGE THE TABLE NAME FOR THE CLIENT TIME LOGGER
     var query = {
 		// give the query a unique name
 		name: 'addQCLPClientTime',
-		text: 'INSERT INTO users (lptask, timelogged, estupdated, response) VALUES ($1::int, $2::bool, $3::bool, 4::text);',
+		text: 'INSERT INTO lp_clienttime (lp_task, time_logged, est_updated, response) VALUES ($1::int, $2::bool, $3::bool, 4::text);',
 		values: [ taskid, timeLogged, estUpdated, responseBody ]
 	}
-	return query
+	insertClientTime(query)
+}
+
+function insertClientTime(query){
+
+    pool.connect((err, client, release) => {
+    if (err) {
+      sendData = {
+        'Status': 'Failed',
+        'Error': 'Error acquiring client' + err.stack
+      }
+      console.error('Error acquiring client', err.stack)
+      myEmitter.emit('sendresults');
+      return
+    }
+    client.query(query, (err, result) => {
+      //release client back to the pool
+      release()
+      if (err) {
+        sendData = {
+          'Status': 'Failed',
+          'Error': 'Error executing query' + err.stack
+        }
+        console.error('Error executing query', err.stack)
+        myEmitter.emit('sendresults');
+        return
+      }
+      else{
+        console.log('time loged')
+        return
+      }
+    })
+  })
+
+}
+
+function createPool() {
+  pool = new Pool({
+    user: process.env.localDbUSER,
+    host: process.env.localDbHOST,
+    database: process.env.localDbDATABASE,
+    password: process.env.localDbPASSWORD,
+    port: process.env.localDbPORT,
+    ssl: true
+  })
 }
