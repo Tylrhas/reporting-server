@@ -11,6 +11,7 @@ schedule.scheduleJob('* 22 * * *', function(){
   QCSheet.updateQCScoresNoAPI()
 });
 */
-schedule.scheduleJob('45 16 * * 1-5', function(){
+schedule.scheduleJob('45 15 * * 1-5', function(){
+	console.log('Updating Client Time');
   clientTime.logClientTimeJob();
 });

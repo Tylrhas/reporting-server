@@ -9,6 +9,7 @@ var clientTime = require('./client_time');
 
 router.get('/qc_score', qcScore.updateQCScores);
 router.get('/lp_tasks', lpTask.updateLpTasksTable);
+router.get('/lp_tasks/getAllTasks', lpTask.getAllTasks);
 router.get('/client_time', clientTime.logClientTime);
 router.get('/qc_score/allscores', qcScore.getAlldata);
 

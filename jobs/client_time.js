@@ -121,7 +121,8 @@ function getTodaysDate() {
 }
 
 function logClientTime(assignment) {
-    var update_time_url = 'https://app.liquidplanner.com/api/workspaces/'+process.env.LPWorkspaceId+'/tasks/'+assignment['treeitem_id']+'/track_time';
+    var update_time_url = 'https://app.liquidplanner.com/api/workspaces/158330/tasks/'+assignment['treeitem_id']+'/track_time';
+    console.log(update_time_url);
     var estupdated;
     var updateTime = {
         'work': parseInt(process.env.LPClientHoursPerDay),
@@ -146,10 +147,12 @@ function logClientTime(assignment) {
     else {
         estupdated = false;
     }
+
+    //app.liquidplanner.com/api/workspaces/undefined/tasks/41674907/track_time
     //TODO JSON POST Update and log update to database
     updateClientTime(updateTime, estupdated, update_time_url, assignment);
 }
-function updateClientTime(jsonPayload,estUpdated,url,assignment){
+function updateClientTime(jsonPayload,estupdated,url,assignment){
     request.post({ url: url, json:jsonPayload, headers: { "Authorization": auth } }, (error, response, body) => {
         console.log(body);
         buildClientTimeQuery(assignment['treeitem_id'], true, estupdated, body);
@@ -161,8 +164,8 @@ function buildClientTimeQuery(taskid, timeLogged, estUpdated, responseBody){
     var query = {
 		// give the query a unique name
 		name: 'addQCLPClientTime',
-		text: 'INSERT INTO lp_clienttime (lp_task, time_logged, est_updated, response) VALUES ($1::int, $2::bool, $3::bool, 4::text);',
-		values: [ taskid, timeLogged, estUpdated, responseBody ]
+		text: 'INSERT INTO lp_clienttime (lp_task, time_logged, est_updated, response) VALUES($1::int, $2::bool, $3::bool, $4::text) RETURNING *;',
+		values: [taskid, timeLogged, estUpdated, responseBody]
 	}
 	insertClientTime(query)
 }
@@ -199,7 +202,6 @@ function insertClientTime(query){
   })
 
 }
-
 function createPool() {
   pool = new Pool({
     user: process.env.localDbUSER,

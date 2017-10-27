@@ -107,7 +107,7 @@
             $('#clientTime').click(function () {
                 $(".alert").addClass("alert-info").removeClass("hide");
                 $(".alert").html('Updating clientTime <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>');
-                $.get("../jobs/lp_tasks", function (data) {
+                $.get("../jobs/client_time", function (data) {
                     if (data.Status === 'Sucess') {
                         console.log(data.Message)
                         $(".alert").html(data.Message + '<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>');
