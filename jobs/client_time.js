@@ -35,6 +35,12 @@ exports.logClientTimeJob = function () {
     myEmitter.once('sendresults', () => {
         return sendData
     })
+
+    myEmitter.once('queueComplete', () => {
+        //run through queue now that is complete
+        processQueue();
+    })
+
     getallclienttasks();
 }
 
