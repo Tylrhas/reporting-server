@@ -25,6 +25,7 @@ exports.logClientTime = function (req, res) {
     })
 
     myEmitter.once('queueComplete', () => {
+        console.log('queue complete')
         //run through queue now that is complete
         processQueue();
     })
@@ -88,7 +89,7 @@ function checkDependencies(task) {
     }
     else {
         //there are no dependencies
-        console.log('dependencies met');
+        console.log('No dependencies');
         return true;
     }
 }
@@ -132,7 +133,13 @@ function getTodaysDate() {
     // get todays date and format it 
     var dateObj = new Date();
     var month = dateObj.getMonth() + 1; //months from 1-12
+    if(month<10){
+        month='0'+month;
+    } 
     var day = dateObj.getDate();
+    if(day<10){
+        day = '0'+day
+    }
     var year = dateObj.getFullYear();
     newdate = year + "-" + month + "-" + day;
     return newdate;
@@ -165,10 +172,9 @@ function logClientTime(assignment) {
     else {
         estupdated = false;
     }
+    console.log('updateTime '+updateTime+ 'url '+update_time_url);
 
-    //app.liquidplanner.com/api/workspaces/undefined/tasks/41674907/track_time
-    //TODO JSON POST Update and log update to database
-    updateClientTime(updateTime, estupdated, update_time_url, assignment);
+    //updateClientTime(updateTime, estupdated, update_time_url, assignment);
 }
 function updateClientTime(jsonPayload, estupdated, url, assignment) {
     request.post({ url: url, json: jsonPayload, headers: { "Authorization": auth } }, (error, response, body) => {
@@ -236,14 +242,19 @@ function addToQueue(assignment) {
     upddateQueue.push(assignment);
 }
 function processQueue() {
+    console.log(upddateQueue.length);
     setInterval(function () {
-        if (upddateQueue.length != 0) {
-            assignment = upddateQueue.pop();
-            logClientTime(assignment);
-        }
-        else {
-            //queue has processed and send results
-            myEmitter.emit('sendresults');
-        }
+        popArray()
     }, 400)
+}
+
+function popArray(){
+    if (upddateQueue.length != 0) {
+        assignment = upddateQueue.pop();
+        logClientTime(assignment);
+    }
+    else {
+        //queue has processed and send results
+        myEmitter.emit('sendresults');
+    }
 }

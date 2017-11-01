@@ -71,6 +71,16 @@ exports.updateLpTasksTable = function (req, res) {
 	getLPReport()
 }
 
+exports.updateLpTasksTableJob = function (req, res) {
+	queries = 0;
+	completedQueries = 0;
+	//listen for the job to have finished running
+	myEmitter.once('sendresults', () => {
+		return sendData
+	})
+	getLPReport()
+}
+
 function getLPReport() {
 	console.log('Getting Task Report')
 	request.get({ url: url, headers: { "Authorization": auth } }, (error, response, body) => {
@@ -96,8 +106,6 @@ function parseLPData(data) {
 }
 
 function logTask(query) {
-	console.log(query);
-	//TODO Connect To pool and then add the data
 	pool.connect((err, client, release) => {
 		if (err) {
 			updateStatus = {
