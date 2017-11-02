@@ -245,7 +245,7 @@ function processQueue() {
     console.log(upddateQueue.length);
     setInterval(function () {
         popArray()
-    }, 400)
+    }, 600)
 }
 
 function popArray(){
