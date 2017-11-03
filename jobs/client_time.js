@@ -174,7 +174,7 @@ function logClientTime(assignment) {
     }
     console.log('updateTime '+updateTime+ 'url '+update_time_url);
 
-    //updateClientTime(updateTime, estupdated, update_time_url, assignment);
+    updateClientTime(updateTime, estupdated, update_time_url, assignment);
 }
 function updateClientTime(jsonPayload, estupdated, url, assignment) {
     request.post({ url: url, json: jsonPayload, headers: { "Authorization": auth } }, (error, response, body) => {
