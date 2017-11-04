@@ -11,70 +11,76 @@
   <div class="container">
 <div class="page-header text-center">
 
-    <h1>Monthly Goals</h1>
+    <h1>PM Project Weights</h1>
   </div>
 </div>
 <div class="row">
 <div class="container">
 <div class="col-md-12">
-<canvas id="monthlyGoals" width="1200" height="600"></canvas>
+<canvas id="pmProjectWeight" width="1200" height="600"></canvas>
 </div>
 </div>
 </div>
 <script>
-        var ctx = document.getElementById("monthlyGoals");
+        var ctx = document.getElementById("pmProjectWeight");
         var myChart = new Chart(ctx, {
-            type: 'bar',
+            type: 'horizontalBar',
             data: {
-                labels: ['Jan17', 'Feb17', 'Mar17', 'Apr17', 'May17', 'Jun17', 'Jul17', 'Aug17', 'Sep17', 'Oct17', 'Nov17', 'Dec17'],
+                labels: ['Alicia.Brewer', 'Alison.Nobis', 'April.Wolber'],
                 datasets: [{
-                        type: 'bar',
-                        label: 'MRR Launched',
-                        data: [51862.13, 70425.18, 84639.45, 10345.3, 0, 0, 0, 0, 0, 0, 0, 0],
-                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                        borderColor: 'rgba(255,99,132,1)',
+                        type: 'horizontalBar',
+                        label: 'Planning',
+                        data: [4,1,7],
+                        backgroundColor: 'rgba(7,209,59, 0.75)',
+                        borderColor: 'rgba(7,209,59,1)',
                         stack: 1
                     },
                     {
-                        type: 'bar',
-                        label: 'MRR Backlog',
-                        data: [0, 0, 0, 30486.1, 54974.76, 71543.3, 3661, 1353.5, 14914.96, 250, 1050, 665.23],
-                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
+                        type: 'horizontalBar',
+                        label: 'Creative',
+                        data: [1,0,1],
+                        backgroundColor: 'rgba(7,209,188, 0.75)',
+                        borderColor: 'rgba(7,209,188, 1)',
                         stack: 1
                     },
                     {
-                        type: 'line',
-                        label: 'MRR Goals',
-                        data: [61290,51840,72030,55296,58061,60826,60826,71885,82944,82944,82944,82944],
-                        fill: false,
-                        backgroundColor: "rgba(75,192,192,0.4)",
-                        borderColor: "rgba(75,192,192,1)",
+                        type: 'horizontalBar',
+                        label: 'Build - Initial',
+                        data: [9,1,2],
+                        backgroundColor: 'rgba(7,121,209, 0.75)',
+                        borderColor: 'rgba(7,121,209, 1)',
+                        stack: 1
                     },
                     {
-                        type: 'bar',
-                        label: '1-time Launched',
-                        data: [192257.39,239370.75,357641.50,0,0,0,0,0,0,0,0,0],
-                        backgroundColor: 'rgba(255, 206, 86, 0.2)',
-                        borderColor: 'rgba(255, 206, 86, 1)',
-                        stack: 2
+                        type: 'horizontalBar',
+                        label: 'Build - All',
+                        data: [4,7,0],
+                        backgroundColor: 'rgba(7,7,209, 0.75)',
+                        borderColor: 'rgba(7,7,209, 1)',
+                        stack: 1
                     },
                     {
-                        type: 'bar',
-                        label: '1-time Backlog',
-                        data: [0,0,0,0361897.48,372545.00,307950.00,0,0,0,0,0,0],
-                        backgroundColor: 'rgba(153, 102, 255, 0.2)',
-                        borderColor: 'rgba(153, 102, 255, 1)',
-                        stack: 2
+                        type: 'horizontalBar',
+                        label: 'Launch Prep',
+                        data: [3,0,0],
+                        backgroundColor: 'rgba(183,7,209, 0.75)',
+                        borderColor: 'rgba(183,7,209, 1)',
+                        stack: 1
                     },
-
                     {
-                        type: 'line',
-                        label: '1Time Goal',
-                        data: [214516,181440,252104,193536,203213,212890,212890,251597,290304,417000,417000,417000],
-                        fill: false,
-                        backgroundColor: "rgba(255,159,64,0.4)",
-                        borderColor: "rgba(255,159,64,1)",
+                        type: 'horizontalBar',
+                        label: 'Launched',
+                        data: [1,0,0],
+                        backgroundColor: 'rgba(209,7,88, 0.75)',
+                        borderColor: 'rgba(209,7,88, 1)',
+                        stack: 1
+                    },
+                  {
+                        type: 'horizontalBar',
+                        label: 'Weighted Project Count',
+                        data: [29.83,8.38,13.17],
+                        backgroundColor: 'rgba(209,64,7, 0.75)',
+                        borderColor: 'rgba(209,64,7,1)'
                     },
                 ]
             },
@@ -82,7 +88,15 @@
                 responsive: true,
                 legend: {
                     position: 'top'
-                }
+                },
+                   scales: {
+                        xAxes: [{
+                            stacked: true,
+                        }],
+                        yAxes: [{
+                            stacked: true
+                        }]
+                    }
             }
         });
 

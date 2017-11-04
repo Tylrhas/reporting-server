@@ -18,8 +18,6 @@ var client;
 var weightedResults;
 
 exports.getPMWeightedData = function(req, res){
-    console.log('process.env.projectTypeWeight');
-  console.log(process.env.projectTypeWeight);
     //reset the query results
     weightedResults = [];
       createPool();

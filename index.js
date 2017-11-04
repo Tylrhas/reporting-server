@@ -40,7 +40,9 @@ app.get('/locations_launched', function(request, response) {
 app.get('/monthlygoals', function(request, response) {
   response.render('pages/monthlygoals');
 });
-
+app.get('/pmweight', function(request, response) {
+  response.render('pages/pmweight');
+});
 
 //ADMIN PAGES
 app.get('/jobs', function(request, response) {
@@ -55,6 +57,7 @@ app.use('/jobs', require('./jobs/index'))
 
 //JOBS SCHEDULER
 require('./jobs/scheduler')
+
 
 app.listen(app.get('port'), function() {
   console.log('Node app is running on port', app.get('port'))
