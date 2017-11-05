@@ -1,0 +1,25 @@
+<% include ../partials/header.ejs %>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.0/Chart.bundle.js"></script>
+
+<% include ../partials/nav.ejs %>
+    <div class="loginmodal-container">
+        <h1>Login to Your Account</h1>
+        <br>
+        <form id="signup" name="signup" method="post" action="/signup">
+            <label for="email">Email Address</label>
+            <input class="text" name="email" type="email" />
+            <label for="firstname">Firstname</label>
+            <input name="firstname" type="text" />
+            <label for="lastname">Lastname</label>
+            <input name="lastname" type="text" />
+            <label for="password">Password</label>
+            <input name="password" type="password" />
+            <input class="btn" type="submit" value="Sign Up" />
+        </form>
+              
+
+        <div class="login-help">
+            <a href="/signup">Register</a>
+        </div>
+    </div>
+    <% include ../partials/footer.ejs %>

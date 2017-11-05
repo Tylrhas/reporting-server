@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <% include ../partials/header.ejs %>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.0/Chart.bundle.js"></script>
+</head>
+
+<body>
+
+  <% include ../partials/nav.ejs %>
+  <div class="container">
+<div class="page-header text-center">
+
+    <h1>PM Project Weights</h1>
+  </div>
+</div>
+<div class="row">
+<div class="container">
+<div class="col-md-12">
+<canvas id="pmProjectWeight" width="1200" height="600"></canvas>
+</div>
+</div>
+</div>
+<script>
+        var ctx = document.getElementById("pmProjectWeight");
+        var myChart = new Chart(ctx, {
+            type: 'horizontalBar',
+            data: {
+                labels: ['Alicia.Brewer', 'Alison.Nobis', 'April.Wolber'],
+                datasets: [{
+                        type: 'horizontalBar',
+                        label: 'Planning',
+                        data: [4,1,7],
+                        backgroundColor: 'rgba(7,209,59, 0.75)',
+                        borderColor: 'rgba(7,209,59,1)',
+                        stack: 1
+                    },
+                    {
+                        type: 'horizontalBar',
+                        label: 'Creative',
+                        data: [1,0,1],
+                        backgroundColor: 'rgba(7,209,188, 0.75)',
+                        borderColor: 'rgba(7,209,188, 1)',
+                        stack: 1
+                    },
+                    {
+                        type: 'horizontalBar',
+                        label: 'Build - Initial',
+                        data: [9,1,2],
+                        backgroundColor: 'rgba(7,121,209, 0.75)',
+                        borderColor: 'rgba(7,121,209, 1)',
+                        stack: 1
+                    },
+                    {
+                        type: 'horizontalBar',
+                        label: 'Build - All',
+                        data: [4,7,0],
+                        backgroundColor: 'rgba(7,7,209, 0.75)',
+                        borderColor: 'rgba(7,7,209, 1)',
+                        stack: 1
+                    },
+                    {
+                        type: 'horizontalBar',
+                        label: 'Launch Prep',
+                        data: [3,0,0],
+                        backgroundColor: 'rgba(183,7,209, 0.75)',
+                        borderColor: 'rgba(183,7,209, 1)',
+                        stack: 1
+                    },
+                    {
+                        type: 'horizontalBar',
+                        label: 'Launched',
+                        data: [1,0,0],
+                        backgroundColor: 'rgba(209,7,88, 0.75)',
+                        borderColor: 'rgba(209,7,88, 1)',
+                        stack: 1
+                    },
+                  {
+                        type: 'horizontalBar',
+                        label: 'Weighted Project Count',
+                        data: [29.83,8.38,13.17],
+                        backgroundColor: 'rgba(209,64,7, 0.75)',
+                        borderColor: 'rgba(209,64,7,1)'
+                    },
+                ]
+            },
+            options: {
+                responsive: true,
+                legend: {
+                    position: 'top'
+                },
+                   scales: {
+                        xAxes: [{
+                            stacked: true,
+                        }],
+                        yAxes: [{
+                            stacked: true
+                        }]
+                    }
+            }
+        });
+
+</script>
+  <% include ../partials/footer.ejs %>
