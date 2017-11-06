@@ -1,7 +1,8 @@
 //get env vars
 require('dotenv').config();
-//require express for use of exports
-var express = require('express');
+
+var exports = module.exports = {}
+
 //add event emmitter 
 const EventEmitter = require('events');
 
@@ -25,8 +26,7 @@ exports.getPMWeightedData = function(req, res){
 
       //listen for the return results event
         myEmitter.once('returnresults', () => {
-        res.setHeader('Content-Type', 'application/json');
-        res.json(weightedResults)
+        return weightedResults
     })
 }
 

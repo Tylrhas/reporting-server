@@ -46,8 +46,8 @@ var apiRoute = require('./app/routes/api.js')(app,passport);
 
 
 //load passport strategies
-
 require('./app/config/passport.js')(passport, models.user);
+
 
 
 //Sync Database

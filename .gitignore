@@ -7,3 +7,4 @@ app/controllers/api/.DS_Store
 app/controllers/jobs/.DS_Store
 app/views/.DS_Store
 public/.DS_Store
+app/config/client_secret.json
