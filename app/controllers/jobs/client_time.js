@@ -1,24 +1,22 @@
 require('dotenv').config()
 const request = require("request");
-//require express for use of exports
-var express = require('express');
-const { Pool, Client } = require('pg')
-
+var exports = module.exports = {};
 //add event emmitter 
 const EventEmitter = require('events');
 class MyEmitter extends EventEmitter { }
 const myEmitter = new MyEmitter();
 
-//global vars for easier use of callbacks
-var pool
-var client
-const url = 'https://app.liquidplanner.com/api/workspaces/'+ process.env.LPWorkspaceId +'/tasks?include=dependencies&filter[]=owner_id='+ process.env.LPClientId +'&filter[]=is_done%20is%20false';
+//Models
+var db = require("../../models");
+
+const url = 'https://app.liquidplanner.com/api/workspaces/'+ process.env.LPWorkspaceId +'/tasks?filter[]=owner_id='+ process.env.LPClientId +'&filter[]=is_done%20is%20false&filter[]=all_dependencies_satisfied%20is%20true';
 const auth = "Basic " + new Buffer(process.env.LpUserName + ":" + process.env.LPPassword).toString("base64");
 
 var sendData;
 var upddateQueue;
 
 exports.logClientTime = function (req, res) {
+    
     myEmitter.once('sendresults', () => {
         res.setHeader('Content-Type', 'application/json');
         res.json(sendData)
@@ -46,8 +44,6 @@ exports.logClientTimeJob = function () {
 }
 
 function getallclienttasks() {
-    //create pool for the data to be logged to 
-    createPool();
     //set empty array for the queue
     upddateQueue = [];
     request.get({ url: url, headers: { "Authorization": auth } }, (error, response, body) => {
@@ -184,6 +180,10 @@ function updateClientTime(jsonPayload, estupdated, url, assignment) {
 }
 
 function buildClientTimeQuery(taskid, timeLogged, estUpdated, responseBody) {
+db.lp_client_time.create({lp_task:taskid, est_updated: estUpdated, time_logged:timeLogged, response: responseBody }).then(newTimeLog => {
+    console.log(newTimeLog);
+  });
+    
     //TODO CHANGE THE TABLE NAME FOR THE CLIENT TIME LOGGER
     var query = {
         // give the query a unique name
@@ -245,7 +245,7 @@ function processQueue() {
     console.log(upddateQueue.length);
     setInterval(function () {
         popArray()
-    }, 600)
+    }, 1000)
 }
 
 function popArray(){
