@@ -3,6 +3,7 @@ var exports = module.exports = {}
 pm = require('./apifunctions/pm_project_weight');
 qc = require('./apifunctions/qcscores');
 lp_projects = require('./apifunctions/lp_projects');
+lp_lbs = require('./apifunctions/lp_lbs');
 
 // exports.clienttime = function(req, res) {
 //         data = pm.getPMWeightedData();
@@ -19,6 +20,10 @@ exports.updatelpprojects = function(req,res){
     res.send(data);
 }
 
-exports.getPMProjectWeight = function(req, res){
+exports.getProjectWeight = function(req, res){
     pm.getPMProjectWeight(req, res);
+}
+
+exports.updatelpLbs = function(req, res){
+    lp_lbs.update(req,res);
 }
