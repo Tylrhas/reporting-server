@@ -39,7 +39,6 @@ exports.logClientTimeJob = function () {
         //run through queue now that is complete
         processQueue();
     })
-
     getallclienttasks();
 }
 

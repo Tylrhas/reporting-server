@@ -21,43 +21,6 @@ var queries
 var sendData;
 var updateStatus
 
-exports.getAllTasks = function (req, res) {
-	myEmitter.once('QCUpdatesDone', () => {
-        res.setHeader('Content-Type', 'application/json');
-        res.json(updateStatus)
-        console.log()
-    })
-  createPool();
-
-  pool.connect((err, client, release) => {
-    if (err) {
-      updateStatus = {
-        'Status': 'Failed',
-        'Error': 'Error acquiring client' + err.stack
-      }
-      console.error('Error acquiring client', err.stack)
-      myEmitter.emit('QCUpdatesDone');
-      return
-    }
-    client.query('SELECT * from lp_tasks', (err, result) => {
-      //release client back to the pool
-      release()
-      if (err) {
-        updateStatus = {
-          'Status': 'Failed',
-          'Error': 'Error executing query' + err.stack
-        }
-        console.error('Error executing query', err.stack)
-        myEmitter.emit('QCUpdatesDone');
-        return
-      }
-      updateStatus = result;
-
-      myEmitter.emit('QCUpdatesDone');
-})
-})
-
-}
 
 exports.updateLpTasksTable = function (req, res) {
 	queries = 0;
