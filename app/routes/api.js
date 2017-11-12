@@ -9,6 +9,8 @@ module.exports = function(app, passport) {
 
    app.get('/api/jobs/updatelpprojects', apiController.updatelpprojects);
 
+   app.get('/api/reports/pm/projectweight', apiController.getPMProjectWeight);
+
    function isAdmin(req, res, next){
     if (req.isAuthenticated() && req.user.group == 'admin')
     

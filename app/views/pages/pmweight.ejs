@@ -26,61 +26,61 @@
         var myChart = new Chart(ctx, {
             type: 'horizontalBar',
             data: {
-                labels: ['Alicia.Brewer', 'Alison.Nobis', 'April.Wolber'],
+                labels: [],
                 datasets: [{
                         type: 'horizontalBar',
                         label: 'Planning',
-                        data: [4,1,7],
-                        backgroundColor: 'rgba(7,209,59, 0.75)',
-                        borderColor: 'rgba(7,209,59,1)',
+                        data: [],
+                        backgroundColor: 'rgba(15,117,187, 1)',
+                        borderColor: 'rgba(15,117,187, 1)',
                         stack: 1
                     },
                     {
                         type: 'horizontalBar',
                         label: 'Creative',
-                        data: [1,0,1],
-                        backgroundColor: 'rgba(7,209,188, 0.75)',
-                        borderColor: 'rgba(7,209,188, 1)',
+                        data: [],
+                        backgroundColor: 'rgba(15,117,187, .85)',
+                        borderColor: 'rgba(15,117,187, .85)',
                         stack: 1
                     },
                     {
                         type: 'horizontalBar',
                         label: 'Build - Initial',
-                        data: [9,1,2],
-                        backgroundColor: 'rgba(7,121,209, 0.75)',
-                        borderColor: 'rgba(7,121,209, 1)',
+                        data: [],
+                        backgroundColor: 'rgba(15,117,187, .7)',
+                        borderColor: 'rgba(15,117,187, .7)',
                         stack: 1
                     },
                     {
                         type: 'horizontalBar',
                         label: 'Build - All',
-                        data: [4,7,0],
-                        backgroundColor: 'rgba(7,7,209, 0.75)',
-                        borderColor: 'rgba(7,7,209, 1)',
+                        data: [],
+                        backgroundColor: 'rgba(15,117,187, .55)',
+                        borderColor: 'rgba(15,117,187, .55)',
                         stack: 1
                     },
                     {
                         type: 'horizontalBar',
                         label: 'Launch Prep',
-                        data: [3,0,0],
-                        backgroundColor: 'rgba(183,7,209, 0.75)',
-                        borderColor: 'rgba(183,7,209, 1)',
+                        data: [],
+                        backgroundColor: 'rgba(15,117,187, .4)',
+                        borderColor: 'rgba(15,117,187, .4)',
                         stack: 1
                     },
                     {
                         type: 'horizontalBar',
                         label: 'Launched',
-                        data: [1,0,0],
-                        backgroundColor: 'rgba(209,7,88, 0.75)',
-                        borderColor: 'rgba(209,7,88, 1)',
+                        data: [],
+                        backgroundColor: 'rgba(15,117,187, .25)',
+                        borderColor: 'rgba(15,117,187, .25)',
                         stack: 1
                     },
                   {
                         type: 'horizontalBar',
                         label: 'Weighted Project Count',
-                        data: [29.83,8.38,13.17],
-                        backgroundColor: 'rgba(209,64,7, 0.75)',
-                        borderColor: 'rgba(209,64,7,1)'
+                        data: [],
+                        backgroundColor: 'rgba(15,117,187, 1)',
+                        borderColor: 'rgba(15,117,187, 1)'
                     },
                 ]
             },
@@ -98,6 +98,22 @@
                         }]
                     }
             }
+        });
+
+        $.getJSON( "/api/reports/pm/projectweight", function( data ) {
+            //console.log(data);
+            $.each(data, function(i, val){
+                console.log(data[i]);
+                myChart.data.labels.push(data[i]['project_manager']);
+                myChart.data.datasets[0].data.push(data[i]['ps_planning']);
+                myChart.data.datasets[1].data.push(data[i]['ps_creative']);
+                myChart.data.datasets[2].data.push(data[i]['ps_build_initial']);
+                myChart.data.datasets[3].data.push(data[i]['ps_build_all']);
+                myChart.data.datasets[4].data.push(data[i]['ps_launch_prep']);
+                myChart.data.datasets[5].data.push(data[i]['ps_launched']);
+                myChart.data.datasets[6].data.push(data[i]['weighted_project_count']);
+            });
+            myChart.update();
         });
 
 </script>
