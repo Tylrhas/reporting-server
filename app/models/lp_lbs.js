@@ -31,8 +31,6 @@ module.exports = function (sequelize, Sequelize) {
         {
             //use a sinular table name
             freezeTableName: true,
-            // don't add the timestamp attributes (updatedAt, createdAt)
-            timestamps: false
         });
     return LpLbs;
 }

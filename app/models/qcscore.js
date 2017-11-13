@@ -1,6 +1,6 @@
 module.exports = function (sequelize, Sequelize) {
 
-    var qcScore = sequelize.define('qcScore', {
+    var qcScore = sequelize.define('gd_qcscore', {
 
         id: {
             primaryKey: true,
@@ -27,6 +27,10 @@ module.exports = function (sequelize, Sequelize) {
             type: Sequelize.INTEGER,
             notEmpty: true
         }
+    },
+    {
+        //use a sinular table name
+        freezeTableName: true,
     });
 
     return qcScore;

@@ -22,6 +22,10 @@ module.exports = function (sequelize, Sequelize) {
                 type: Sequelize.TEXT
             }
 
+        },
+        {
+            //use a sinular table name
+            freezeTableName: true,
         });
     
         return PsWeight;
