@@ -38,7 +38,7 @@ module.exports = function (sequelize, Sequelize) {
         deadline: {
             type: Sequelize.DATE
         },
-        hours: {
+        hrs_logged: {
             type: Sequelize.REAL
         },
         started_on: {
@@ -52,6 +52,9 @@ module.exports = function (sequelize, Sequelize) {
         },
         in_tags: {
             type: Sequelize.TEXT
+        },
+        hrs_remaning: {
+            type: Sequelize.REAL
         }
 
     });

@@ -25,10 +25,10 @@ schedule.scheduleJob('30 21 * * *', function(){
   lpLBS.update();
 });
 
-schedule.scheduleJob('* 22 * * *', function(){
-  console.log('Updating LP Tasks');
-  lpTasks.updateLpTasksTableJob()
-});
+// schedule.scheduleJob('* 22 * * *', function(){
+//   console.log('Updating LP Tasks');
+//   lpTasks.updateLpTasksTableJob()
+// });
 
 schedule.scheduleJob('30 22 * * *', function(){
   console.log('Updating QC Scores');

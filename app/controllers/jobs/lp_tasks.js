@@ -128,7 +128,7 @@ function addLPTaskQuery(task) {
 	var query = {
 		// give the query a unique name
 		name: 'addLPTasks',
-		text: 'INSERT INTO lp_tasks (id, task_name, task_type, milestone, owners, e_start, e_finish, started_on, date_done, deadline, hours, project_id, in_tags, updated_on ) VALUES ($1::int, $2::text, $3::text, $4::text, $5::text, $6::date, $7::date, $8::date, $9::date, $10::date, $11::real, $12::int, $13::text, $14::date) ON CONFLICT (id) DO UPDATE SET task_name = $2::text , task_type = $3::text, milestone = $4::text, owners = $5::text, e_start = $6::date, e_finish = $7::date, started_on = $8::date, date_done = $9::date, deadline = $10::date, hours = $11::real, project_id = $12::int, in_tags = $13::text, updated_on = $14::date',
+		text: 'INSERT INTO lp_tasks (id, task_name, task_type, milestone, owners, e_start, e_finish, started_on, date_done, deadline, hrs_logged, project_id, in_tags, updated_on ) VALUES ($1::int, $2::text, $3::text, $4::text, $5::text, $6::date, $7::date, $8::date, $9::date, $10::date, $11::real, $12::int, $13::text, $14::date) ON CONFLICT (id) DO UPDATE SET task_name = $2::text , task_type = $3::text, milestone = $4::text, owners = $5::text, e_start = $6::date, e_finish = $7::date, started_on = $8::date, date_done = $9::date, deadline = $10::date, hours = $11::real, project_id = $12::int, in_tags = $13::text, updated_on = $14::date',
 		values: [task['key'], task['name'], task['pick_list_custom_field:102046'], task['pick_list_custom_field:102175'], task['owner'], task['expected_start'], task['expected_finish'], task['date_started'], task['date_done'], task['promise_date'], task['hours_logged'], task['project_id'], task['inherited_tags'], task['updated_at']]
 	}
 	return query
