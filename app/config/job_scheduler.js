@@ -7,7 +7,7 @@ clientTime = require('../controllers/jobs/client_time');
 lpTasks = require('../controllers/jobs/lp_tasks');
 lpProjects = require('../controllers/apifunctions/lp_projects');
 lpLBS = require('../controllers/apifunctions/lp_lbs');
-LPTime = require('../controllers/jobs/lp_time_logged');
+//LPTime = require('../controllers/jobs/lp_time_logged');
 
 //SCHEDULED JOBS
 schedule.scheduleJob('45 15 * * 1-5', function(){
