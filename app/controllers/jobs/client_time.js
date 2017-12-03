@@ -75,7 +75,6 @@ function checkTask(task) {
         getAssignment(task);
     }
     sendData = task;
-    myEmitter.emit('sendresults');
 }
 
 function checkParentFolder(task) {
