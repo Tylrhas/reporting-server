@@ -5,6 +5,7 @@ var exports = module.exports = {};
 const EventEmitter = require('events');
 class MyEmitter extends EventEmitter { }
 const myEmitter = new MyEmitter();
+var runStatus;
 
 //Models
 var db = require("../../models");
@@ -33,18 +34,21 @@ exports.logClientTime = function (req, res) {
 exports.logClientTimeJob = function () {
     myEmitter.once('sendresults', () => {
         return sendData
-    })
+    });
 
     myEmitter.once('queueComplete', () => {
         //run through queue now that is complete
         processQueue();
-    })
+    });
+
     getallclienttasks();
 }
 
 function getallclienttasks() {
-    //set empty array for the queue
+    //set global vars to empty
     upddateQueue = [];
+    runStatus = '';
+    
     request.get({ url: url, headers: { "Authorization": auth } }, (error, response, body) => {
         let json = JSON.parse(body);
         parseLPData(json);
@@ -59,6 +63,7 @@ function parseLPData(data) {
 }
 function checkTask(task) {
     if (checkParentFolder(task) && checkDependencies(task)) {
+        console.log('checking task');
         getAssignment(task);
     }
     sendData = task;
@@ -72,7 +77,7 @@ function checkParentFolder(task) {
 function checkDependencies(task) {
     //check that all Dependencies are met
     //set var to true and only change if it is false 
-    if (Object.keys(task.dependencies).length != 0) {
+    if (task.dependencies != null) {
         for (var i = 0; i < Object.keys(task.dependencies).length; i++) {
             if (task.dependencies[i]['prerequisite_item']['is_done'] === false) {
                 return false;
@@ -114,8 +119,10 @@ function getAssignment(task) {
 }
 function checkStartDate(assignment) {
     var startDate = assignment['expected_start'].split("T")[0];
-    var todaysDate = getTodaysDate();
-    console.log(startDate + ' ' + startDate);
+    //var todaysDate = getTodaysDate();
+    //remove for prod
+    todaysDate = '2017-12-04';
+    console.log(startDate + ' ' + todaysDate);
     if (startDate === todaysDate) {
         return true;
     }
@@ -141,16 +148,14 @@ function getTodaysDate() {
 }
 
 function logClientTime(assignment) {
-    var update_time_url = 'https://app.liquidplanner.com/api/workspaces/'+ process.env.LPWorkspaceId +'/tasks/' + assignment['treeitem_id'] + '/track_time';
-    console.log(update_time_url);
+    //var update_time_url = 'https://app.liquidplanner.com/api/workspaces/'+ process.env.LPWorkspaceId +'/tasks/' + assignment['treeitem_id'] + '/track_time';
+    var update_time_url = 'https://requestb.in/11yjckg1'
     var estupdated;
     var updateTime = {
         'work': parseInt(process.env.LPClientHoursPerDay),
         'activity_id': 224571,
         'member_id': process.env.LPClientId
     }
-
-
     var low_effort_remaining = parseInt(assignment['low_effort_remaining']);
     var new_effort_remaining = low_effort_remaining - parseInt(process.env.LPClientHoursPerDay);
     //update the updateTime var with the new info
@@ -167,73 +172,25 @@ function logClientTime(assignment) {
     else {
         estupdated = false;
     }
-    console.log('updateTime '+updateTime+ 'url '+update_time_url);
 
     updateClientTime(updateTime, estupdated, update_time_url, assignment);
 }
 function updateClientTime(jsonPayload, estupdated, url, assignment) {
     request.post({ url: url, json: jsonPayload, headers: { "Authorization": auth } }, (error, response, body) => {
-        console.log(body);
-        buildClientTimeQuery(assignment['treeitem_id'], true, estupdated, body);
+
+        if (typeof body.error !== 'undefined'){
+            //set the run status to 'error' as a post was not sucessful
+            runStatus = 'error';
+        }
+        insertClientTime(assignment['treeitem_id'], true, estupdated, body);
     })
 }
 
-function buildClientTimeQuery(taskid, timeLogged, estUpdated, responseBody) {
-db.lp_client_time.create({lp_task:taskid, est_updated: estUpdated, time_logged:timeLogged, response: responseBody }).then(newTimeLog => {
+function insertClientTime(taskid, timeLogged, estUpdated, responseBody) {
+    db.lp_client_time.create({lp_task:taskid, est_updated: estUpdated, time_logged:timeLogged, response: responseBody }).then(newTimeLog => {
     console.log(newTimeLog);
   });
-    
-    //TODO CHANGE THE TABLE NAME FOR THE CLIENT TIME LOGGER
-    var query = {
-        // give the query a unique name
-        name: 'addQCLPClientTime',
-        text: 'INSERT INTO lp_clienttime (lp_task, time_logged, est_updated, response) VALUES($1::int, $2::bool, $3::bool, $4::text) RETURNING *;',
-        values: [taskid, timeLogged, estUpdated, responseBody]
-    }
-    insertClientTime(query)
-}
 
-function insertClientTime(query) {
-
-    pool.connect((err, client, release) => {
-        if (err) {
-            sendData = {
-                'Status': 'Failed',
-                'Error': 'Error acquiring client' + err.stack
-            }
-            console.error('Error acquiring client', err.stack)
-            myEmitter.emit('sendresults');
-            return
-        }
-        client.query(query, (err, result) => {
-            //release client back to the pool
-            release()
-            if (err) {
-                sendData = {
-                    'Status': 'Failed',
-                    'Error': 'Error executing query' + err.stack
-                }
-                console.error('Error executing query', err.stack)
-                myEmitter.emit('sendresults');
-                return
-            }
-            else {
-                console.log('time loged')
-                return
-            }
-        })
-    })
-
-}
-function createPool() {
-    pool = new Pool({
-        user: process.env.localDbUSER,
-        host: process.env.localDbHOST,
-        database: process.env.localDbDATABASE,
-        password: process.env.localDbPASSWORD,
-        port: process.env.localDbPORT,
-        ssl: true
-    })
 }
 
 function addToQueue(assignment) {
@@ -253,7 +210,18 @@ function popArray(){
         logClientTime(assignment);
     }
     else {
+        updateJobStatus();
         //queue has processed and send results
         myEmitter.emit('sendresults');
     }
+}
+
+function updateJobStatus(){
+    if (runStatus === ''){
+        runStatus = 'complete';
+    }
+    var date = new Date();    
+    db.job.upsert({id:1,lastrun:date,lastrunstatus:runStatus}).then(jobstatus =>{
+        return
+    });
 }
