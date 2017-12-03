@@ -1,5 +1,6 @@
 require('dotenv').config()
-const request = require("request");
+const request = require("request"),
+    throttledRequest = require('throttled-request')(request);
 var exports = module.exports = {};
 //add event emmitter 
 const EventEmitter = require('events');
@@ -7,24 +8,31 @@ class MyEmitter extends EventEmitter { }
 const myEmitter = new MyEmitter();
 var runStatus;
 
+//This will throttle the requests so no more than 30 are made every 15 seconds 
+throttledRequest.configure({
+    requests: 30,
+    milliseconds: 15000
+});
+
 //Models
 var db = require("../../models");
 
-const url = 'https://app.liquidplanner.com/api/workspaces/'+ process.env.LPWorkspaceId +'/tasks?filter[]=owner_id='+ process.env.LPClientId +'&filter[]=is_done%20is%20false&filter[]=all_dependencies_satisfied%20is%20true';
+const url = 'https://app.liquidplanner.com/api/workspaces/' + process.env.LPWorkspaceId + '/tasks?filter[]=owner_id=' + process.env.LPClientId + '&filter[]=is_done%20is%20false&filter[]=all_dependencies_satisfied%20is%20true';
 const auth = "Basic " + new Buffer(process.env.LpUserName + ":" + process.env.LPPassword).toString("base64");
 
 var sendData;
 var upddateQueue;
 
 exports.logClientTime = function (req, res) {
-    
+
     myEmitter.once('sendresults', () => {
         res.setHeader('Content-Type', 'application/json');
         res.json(sendData)
     })
 
     myEmitter.once('queueComplete', () => {
-        console.log('queue complete')
+        console.log('queue complete');
+        console.log(upddateQueue.length);
         //run through queue now that is complete
         processQueue();
     })
@@ -48,7 +56,7 @@ function getallclienttasks() {
     //set global vars to empty
     upddateQueue = [];
     runStatus = '';
-    
+
     request.get({ url: url, headers: { "Authorization": auth } }, (error, response, body) => {
         let json = JSON.parse(body);
         parseLPData(json);
@@ -120,7 +128,7 @@ function getAssignment(task) {
 function checkStartDate(assignment) {
     var startDate = assignment['expected_start'].split("T")[0];
     //var todaysDate = getTodaysDate();
-    //remove for prod
+    //remove for production
     todaysDate = '2017-12-04';
     console.log(startDate + ' ' + todaysDate);
     if (startDate === todaysDate) {
@@ -135,19 +143,19 @@ function getTodaysDate() {
     // get todays date and format it 
     var dateObj = new Date();
     var month = dateObj.getMonth() + 1; //months from 1-12
-    if(month<10){
-        month='0'+month;
-    } 
+    if (month < 10) {
+        month = '0' + month;
+    }
     var day = dateObj.getDate();
-    if(day<10){
-        day = '0'+day
+    if (day < 10) {
+        day = '0' + day
     }
     var year = dateObj.getFullYear();
     newdate = year + "-" + month + "-" + day;
     return newdate;
 }
 
-function logClientTime(assignment) {
+function logClientTime(assignment, last_task) {
     //var update_time_url = 'https://app.liquidplanner.com/api/workspaces/'+ process.env.LPWorkspaceId +'/tasks/' + assignment['treeitem_id'] + '/track_time';
     var update_time_url = 'https://requestb.in/11yjckg1'
     var estupdated;
@@ -173,24 +181,32 @@ function logClientTime(assignment) {
         estupdated = false;
     }
 
-    updateClientTime(updateTime, estupdated, update_time_url, assignment);
+    updateClientTime(updateTime, estupdated, update_time_url, assignment, last_task);
 }
-function updateClientTime(jsonPayload, estupdated, url, assignment) {
-    request.post({ url: url, json: jsonPayload, headers: { "Authorization": auth } }, (error, response, body) => {
+function updateClientTime(jsonPayload, estupdated, url, assignment, last_task) {
 
-        if (typeof body.error !== 'undefined'){
-            //set the run status to 'error' as a post was not sucessful
-            runStatus = 'error';
+    throttledRequest({ url: url, method: 'POST', headers: { "Authorization": auth }, body: JSON.stringify(jsonPayload) }, function (error, response, body) {
+        if (error) {
+            //Handle request error 
+            console.log(error);
         }
-        insertClientTime(assignment['treeitem_id'], true, estupdated, body);
-    })
+        //Do what you need with `response` and `body` )
+        insertClientTime(assignment['treeitem_id'], true, estupdated, body, last_task);
+    });
+
 }
 
-function insertClientTime(taskid, timeLogged, estUpdated, responseBody) {
-    db.lp_client_time.create({lp_task:taskid, est_updated: estUpdated, time_logged:timeLogged, response: responseBody }).then(newTimeLog => {
-    console.log(newTimeLog);
-  });
+function insertClientTime(taskid, timeLogged, estUpdated, responseBody, last_task) {
+    db.lp_client_time.create({ lp_task: taskid, est_updated: estUpdated, time_logged: timeLogged, response: responseBody }).then(newTimeLog => {
 
+        console.log(last_task);
+        //last task insert so send results and update job status
+        if(last_task){
+            updateJobStatus();
+            //queue has processed and send results
+            myEmitter.emit('sendresults');
+        }
+    });
 }
 
 function addToQueue(assignment) {
@@ -198,30 +214,24 @@ function addToQueue(assignment) {
     upddateQueue.push(assignment);
 }
 function processQueue() {
-    console.log(upddateQueue.length);
-    setInterval(function () {
-        popArray()
-    }, 1000)
-}
-
-function popArray(){
-    if (upddateQueue.length != 0) {
-        assignment = upddateQueue.pop();
-        logClientTime(assignment);
-    }
-    else {
-        updateJobStatus();
-        //queue has processed and send results
-        myEmitter.emit('sendresults');
+    last_task = false;
+    for (var i = 0; i < upddateQueue.length; i++) {
+        console.log('i='+i);
+        assignment = upddateQueue[i];
+        if(i === upddateQueue.length - 1){
+            last_task = true;
+        }
+        console.log(last_task);
+        logClientTime(assignment,last_task);
     }
 }
 
-function updateJobStatus(){
-    if (runStatus === ''){
+function updateJobStatus() {
+    if (runStatus === '') {
         runStatus = 'complete';
     }
-    var date = new Date();    
-    db.job.upsert({id:1,lastrun:date,lastrunstatus:runStatus}).then(jobstatus =>{
+    var date = new Date();
+    db.job.upsert({ id: 1, lastrun: date, lastrunstatus: runStatus }).then(jobstatus => {
         return
     });
 }
