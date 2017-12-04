@@ -126,9 +126,7 @@ function getAssignment(task) {
 }
 function checkStartDate(assignment) {
     var startDate = assignment['expected_start'].split("T")[0];
-    //var todaysDate = getTodaysDate();
-    //remove for production
-    todaysDate = '2017-12-04';
+    var todaysDate = getTodaysDate();
     console.log(startDate + ' ' + todaysDate);
     if (startDate === todaysDate) {
         return true;
@@ -155,8 +153,7 @@ function getTodaysDate() {
 }
 
 function logClientTime(assignment, last_task) {
-    //var update_time_url = 'https://app.liquidplanner.com/api/workspaces/'+ process.env.LPWorkspaceId +'/tasks/' + assignment['treeitem_id'] + '/track_time';
-    var update_time_url = 'https://requestb.in/11yjckg1'
+    var update_time_url = 'https://app.liquidplanner.com/api/workspaces/'+ process.env.LPWorkspaceId +'/tasks/' + assignment['treeitem_id'] + '/track_time';
     var estupdated;
     var updateTime = {
         'work': parseInt(process.env.LPClientHoursPerDay),
