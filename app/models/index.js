@@ -1,4 +1,5 @@
 "use strict";
+var fs        = require("fs");
 var Sequelize = require("sequelize");
 var sequelize = new Sequelize(process.env.DATABASE_URL);
 var db        = {};
