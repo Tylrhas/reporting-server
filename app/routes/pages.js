@@ -6,4 +6,4 @@ module.exports = function (app, passport) {
     app.get('/reports/monthlygoals', function (req, res) {
         res.render('pages/monthlygoals', { user: req.user });
     });
-}
+} 
