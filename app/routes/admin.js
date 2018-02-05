@@ -1,6 +1,5 @@
 var adminController = require('../controllers/admincontroller.js');
 
-
 module.exports = function(app, passport) {
 
    app.get('/jobs', adminController.jobs);

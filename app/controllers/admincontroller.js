@@ -3,7 +3,7 @@ var sequelize = new Sequelize(process.env.DATABASE_URL);
 var exports = module.exports = {}
 
 exports.jobs = function (req, res) {
-    sequelize.query("SELECT jobname, lastrun, lastrunstatus FROM Jobs").then(results => {
+    sequelize.query("SELECT jobname, lastrun, lastrunstatus FROM jobs").then(results => {
         console.log(results[0]);
         res.render('pages/jobs', { user: req.user, jobs: formatresults(results[0]) });
     });
