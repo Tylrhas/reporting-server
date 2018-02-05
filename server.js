@@ -19,10 +19,11 @@ app.use(bodyParser.json());
 
 // For Passport
 app.use(session({
+    // change the secret before prod
     secret: 'keyboard cat',
     resave: true,
     saveUninitialized: true
-})); // session secret
+}));
 app.use(passport.initialize());
 app.use(passport.session()); // persistent login sessions
 
@@ -48,6 +49,9 @@ var pages = require('./app/routes/pages.js')(app,passport);
 
 //load passport strategies
 require('./app/config/passport.js')(passport, models.user);
+
+//load the jobs 
+require('./app/config/job_scheduler');
 
 
 

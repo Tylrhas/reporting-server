@@ -3,7 +3,7 @@ var adminController = require('../controllers/admincontroller.js');
 
 module.exports = function(app, passport) {
 
-   app.get('/jobs', isAdmin, adminController.jobs);
+   app.get('/jobs', adminController.jobs);
 
    function isAdmin(req, res, next){
     if (req.isAuthenticated() && req.user.group == 'admin'){

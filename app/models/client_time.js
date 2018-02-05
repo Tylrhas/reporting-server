@@ -1,6 +1,6 @@
 module.exports = function (sequelize, Sequelize) {
     
-        var LpProject = sequelize.define('lp_client_time', {
+        var lpClientTime = sequelize.define('lp_client_time', {
     
             id: {
                 autoIncrement: true,
@@ -38,6 +38,6 @@ module.exports = function (sequelize, Sequelize) {
         freezeTableName: true,
         });
     
-        return LpProject;
+        return lpClientTime;
     
     }

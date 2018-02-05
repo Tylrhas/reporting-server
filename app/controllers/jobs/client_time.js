@@ -1,29 +1,38 @@
 require('dotenv').config()
-const request = require("request");
+const request = require("request"),
+    throttledRequest = require('throttled-request')(request);
 var exports = module.exports = {};
 //add event emmitter 
 const EventEmitter = require('events');
 class MyEmitter extends EventEmitter { }
 const myEmitter = new MyEmitter();
+var runStatus;
+
+//This will throttle the requests so no more than 30 are made every 15 seconds 
+throttledRequest.configure({
+    requests: 30,
+    milliseconds: 15000
+});
 
 //Models
 var db = require("../../models");
 
-const url = 'https://app.liquidplanner.com/api/workspaces/'+ process.env.LPWorkspaceId +'/tasks?filter[]=owner_id='+ process.env.LPClientId +'&filter[]=is_done%20is%20false&filter[]=all_dependencies_satisfied%20is%20true';
+const url = 'https://app.liquidplanner.com/api/workspaces/' + process.env.LPWorkspaceId + '/tasks?filter[]=owner_id=' + process.env.LPClientId + '&filter[]=is_done%20is%20false&filter[]=all_dependencies_satisfied%20is%20true';
 const auth = "Basic " + new Buffer(process.env.LpUserName + ":" + process.env.LPPassword).toString("base64");
 
 var sendData;
 var upddateQueue;
 
 exports.logClientTime = function (req, res) {
-    
+
     myEmitter.once('sendresults', () => {
         res.setHeader('Content-Type', 'application/json');
         res.json(sendData)
     })
 
     myEmitter.once('queueComplete', () => {
-        console.log('queue complete')
+        console.log('queue complete');
+        console.log(upddateQueue.length);
         //run through queue now that is complete
         processQueue();
     })
@@ -33,18 +42,21 @@ exports.logClientTime = function (req, res) {
 exports.logClientTimeJob = function () {
     myEmitter.once('sendresults', () => {
         return sendData
-    })
+    });
 
     myEmitter.once('queueComplete', () => {
         //run through queue now that is complete
         processQueue();
-    })
+    });
+
     getallclienttasks();
 }
 
 function getallclienttasks() {
-    //set empty array for the queue
+    //set global vars to empty
     upddateQueue = [];
+    runStatus = '';
+
     request.get({ url: url, headers: { "Authorization": auth } }, (error, response, body) => {
         let json = JSON.parse(body);
         parseLPData(json);
@@ -59,10 +71,10 @@ function parseLPData(data) {
 }
 function checkTask(task) {
     if (checkParentFolder(task) && checkDependencies(task)) {
+        console.log('checking task');
         getAssignment(task);
     }
     sendData = task;
-    myEmitter.emit('sendresults');
 }
 
 function checkParentFolder(task) {
@@ -72,7 +84,7 @@ function checkParentFolder(task) {
 function checkDependencies(task) {
     //check that all Dependencies are met
     //set var to true and only change if it is false 
-    if (Object.keys(task.dependencies).length != 0) {
+    if (task.dependencies != null) {
         for (var i = 0; i < Object.keys(task.dependencies).length; i++) {
             if (task.dependencies[i]['prerequisite_item']['is_done'] === false) {
                 return false;
@@ -115,7 +127,7 @@ function getAssignment(task) {
 function checkStartDate(assignment) {
     var startDate = assignment['expected_start'].split("T")[0];
     var todaysDate = getTodaysDate();
-    console.log(startDate + ' ' + startDate);
+    console.log(startDate + ' ' + todaysDate);
     if (startDate === todaysDate) {
         return true;
     }
@@ -128,29 +140,26 @@ function getTodaysDate() {
     // get todays date and format it 
     var dateObj = new Date();
     var month = dateObj.getMonth() + 1; //months from 1-12
-    if(month<10){
-        month='0'+month;
-    } 
+    if (month < 10) {
+        month = '0' + month;
+    }
     var day = dateObj.getDate();
-    if(day<10){
-        day = '0'+day
+    if (day < 10) {
+        day = '0' + day
     }
     var year = dateObj.getFullYear();
     newdate = year + "-" + month + "-" + day;
     return newdate;
 }
 
-function logClientTime(assignment) {
+function logClientTime(assignment, last_task) {
     var update_time_url = 'https://app.liquidplanner.com/api/workspaces/'+ process.env.LPWorkspaceId +'/tasks/' + assignment['treeitem_id'] + '/track_time';
-    console.log(update_time_url);
     var estupdated;
     var updateTime = {
         'work': parseInt(process.env.LPClientHoursPerDay),
         'activity_id': 224571,
         'member_id': process.env.LPClientId
     }
-
-
     var low_effort_remaining = parseInt(assignment['low_effort_remaining']);
     var new_effort_remaining = low_effort_remaining - parseInt(process.env.LPClientHoursPerDay);
     //update the updateTime var with the new info
@@ -167,73 +176,34 @@ function logClientTime(assignment) {
     else {
         estupdated = false;
     }
-    console.log('updateTime '+updateTime+ 'url '+update_time_url);
 
-    updateClientTime(updateTime, estupdated, update_time_url, assignment);
+    updateClientTime(updateTime, estupdated, update_time_url, assignment, last_task);
 }
-function updateClientTime(jsonPayload, estupdated, url, assignment) {
-    request.post({ url: url, json: jsonPayload, headers: { "Authorization": auth } }, (error, response, body) => {
-        console.log(body);
-        buildClientTimeQuery(assignment['treeitem_id'], true, estupdated, body);
-    })
-}
+function updateClientTime(jsonPayload, estupdated, url, assignment, last_task) {
 
-function buildClientTimeQuery(taskid, timeLogged, estUpdated, responseBody) {
-db.lp_client_time.create({lp_task:taskid, est_updated: estUpdated, time_logged:timeLogged, response: responseBody }).then(newTimeLog => {
-    console.log(newTimeLog);
-  });
-    
-    //TODO CHANGE THE TABLE NAME FOR THE CLIENT TIME LOGGER
-    var query = {
-        // give the query a unique name
-        name: 'addQCLPClientTime',
-        text: 'INSERT INTO lp_clienttime (lp_task, time_logged, est_updated, response) VALUES($1::int, $2::bool, $3::bool, $4::text) RETURNING *;',
-        values: [taskid, timeLogged, estUpdated, responseBody]
-    }
-    insertClientTime(query)
-}
-
-function insertClientTime(query) {
-
-    pool.connect((err, client, release) => {
-        if (err) {
-            sendData = {
-                'Status': 'Failed',
-                'Error': 'Error acquiring client' + err.stack
-            }
-            console.error('Error acquiring client', err.stack)
-            myEmitter.emit('sendresults');
-            return
+    throttledRequest({ url: url, method: 'POST', headers: { "Authorization": auth }, json: jsonPayload }, function (error, response, body) {
+        if (error) {
+            //Handle request error 
+            console.log(error);
         }
-        client.query(query, (err, result) => {
-            //release client back to the pool
-            release()
-            if (err) {
-                sendData = {
-                    'Status': 'Failed',
-                    'Error': 'Error executing query' + err.stack
-                }
-                console.error('Error executing query', err.stack)
-                myEmitter.emit('sendresults');
-                return
-            }
-            else {
-                console.log('time loged')
-                return
-            }
-        })
-    })
+        jsonstring = JSON.stringify(body);
+        //Do what you need with `response` and `body` )
+        insertClientTime(assignment['treeitem_id'], true, estupdated, jsonstring, last_task);
+    });
 
 }
-function createPool() {
-    pool = new Pool({
-        user: process.env.localDbUSER,
-        host: process.env.localDbHOST,
-        database: process.env.localDbDATABASE,
-        password: process.env.localDbPASSWORD,
-        port: process.env.localDbPORT,
-        ssl: true
-    })
+
+function insertClientTime(taskid, timeLogged, estUpdated, responseBody, last_task) {
+    db.lp_client_time.create({ lp_task: taskid, est_updated: estUpdated, time_logged: timeLogged, response: responseBody }).then(newTimeLog => {
+
+        console.log(last_task);
+        //last task insert so send results and update job status
+        if(last_task){
+            updateJobStatus();
+            //queue has processed and send results
+            myEmitter.emit('sendresults');
+        }
+    });
 }
 
 function addToQueue(assignment) {
@@ -241,19 +211,24 @@ function addToQueue(assignment) {
     upddateQueue.push(assignment);
 }
 function processQueue() {
-    console.log(upddateQueue.length);
-    setInterval(function () {
-        popArray()
-    }, 1000)
+    last_task = false;
+    for (var i = 0; i < upddateQueue.length; i++) {
+        console.log('i='+i);
+        assignment = upddateQueue[i];
+        if(i === upddateQueue.length - 1){
+            last_task = true;
+        }
+        console.log(last_task);
+        logClientTime(assignment,last_task);
+    }
 }
 
-function popArray(){
-    if (upddateQueue.length != 0) {
-        assignment = upddateQueue.pop();
-        logClientTime(assignment);
+function updateJobStatus() {
+    if (runStatus === '') {
+        runStatus = 'complete';
     }
-    else {
-        //queue has processed and send results
-        myEmitter.emit('sendresults');
-    }
+    var date = new Date();
+    db.job.upsert({ id: 1, lastrun: date, lastrunstatus: runStatus }).then(jobstatus => {
+        return
+    });
 }
