@@ -181,13 +181,14 @@ function logClientTime(assignment, last_task) {
 }
 function updateClientTime(jsonPayload, estupdated, url, assignment, last_task) {
 
-    throttledRequest({ url: url, method: 'POST', headers: { "Authorization": auth }, body: JSON.stringify(jsonPayload) }, function (error, response, body) {
+    throttledRequest({ url: url, method: 'POST', headers: { "Authorization": auth }, json: jsonPayload }, function (error, response, body) {
         if (error) {
             //Handle request error 
             console.log(error);
         }
+        jsonstring = JSON.stringify(body);
         //Do what you need with `response` and `body` )
-        insertClientTime(assignment['treeitem_id'], true, estupdated, body, last_task);
+        insertClientTime(assignment['treeitem_id'], true, estupdated, jsonstring, last_task);
     });
 
 }

@@ -9,16 +9,16 @@ lpProjects = require('../controllers/apifunctions/lp_projects');
 lpLBS = require('../controllers/apifunctions/lp_lbs');
 //LPTime = require('../controllers/jobs/lp_time_logged');
 
-//SCHEDULED JOBS
+// SCHEDULED JOBS
 schedule.scheduleJob('45 15 * * 1-5', function(){
 	console.log('Updating Client Time');
   clientTime.logClientTimeJob();
 });
 
-schedule.scheduleJob('* 21 * * *', function(){
-  console.log('Updating LP Projects');
-  lpProjects.updateProjects();
-});
+// schedule.scheduleJob('* 21 * * *', function(){
+//   console.log('Updating LP Projects');
+//   lpProjects.updateProjects();
+// });
 /*
 schedule.scheduleJob('30 21 * * *', function(){
   console.log('Updating LP LBS');
