@@ -13,11 +13,6 @@ module.exports = function (sequelize, Sequelize) {
             notEmpty: true
         },
 
-        owners: {
-            type: Sequelize.TEXT,
-            notEmpty: true
-        },
-
         task_name: {
             type: Sequelize.TEXT
         },
