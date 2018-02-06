@@ -1,5 +1,5 @@
 var Sequelize = require("sequelize");
-var sequelize = new Sequelize(process.env.DATABASE_URL);
+var sequelize = new Sequelize(process.env.DATABASE_URL, {dialectOptions: {ssl: true}});
 var exports = module.exports = {}
 
 exports.jobs = function (req, res) {
@@ -8,6 +8,10 @@ exports.jobs = function (req, res) {
         res.render('pages/jobs', { user: req.user, jobs: formatresults(results[0]) });
     });
 }
+
+exports.add_user =  function(req, res) {
+    res.render('pages/add_user', { user: req.user});
+ }
 
 function formatresults(results) {
     formattedResults = {};

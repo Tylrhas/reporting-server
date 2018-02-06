@@ -1,30 +1,23 @@
 <nav class="navbar navbar-default navbar-static-top">
   <div class="container">
     <ul class="nav navbar-nav">
-      <li class="active">
-        <a href="/"><span class="glyphicon glyphicon-home"></span> Home</a>
-      </li>
-      <li class="dropdown">
-        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Reports<span class="caret"></span></a>
-          <ul class="dropdown-menu" role="menu">
-            <!-- <li><a href="/locations_launched">Locations Launched</a></li>
-             <li><a href="/wis/kpi/tyler">WIS KPI</a></li> -->
-             <li><a href="/reports/pmweightedprojects">PM Project Weight</a></li>
-             <li><a href="/reports/monthlygoals">Monthly Goals</a></li>
-
-             
-          </ul>
-      </li>
+      <% if (typeof user !== 'undefined') {%> 
+        <% if (user.group === "admin") { user.group%>
+          <li>
+            <a href="/jobs">Jobs</a>
+          </li>
+          <li class="">
+            <a href="/add_user">Add a User</a>
+          </li>
+          <% } %>
+      <%} else { %>
+      <% } %>
     </ul>
     <ul class="nav navbar-nav navbar-right">
     <li class="navbar-right">
         <% if (typeof user !== 'undefined') {%> 
-          <!-- <a href="/profile">Profile</a> -->
-          <% if (user.group === "admin") { %>
-            <a href="/jobs">Updatables</a>
-            <% } %>
+            <a href="/logout">Log Out</a>
         <%} else { %>
-          <a href="/signin">Sign In</a>
         <% } %>
       </li>
     </ul>
