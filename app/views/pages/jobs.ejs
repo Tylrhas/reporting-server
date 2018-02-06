@@ -32,10 +32,10 @@
                 <div class="col-md-3 job ">
                     <h3>LP Tasks</h3>
                     <div class="row">
-                        <p>Last Run: some date time</p>
+                        <p>Last Run: <%= jobs.lp_tasks.lastrun %></p>
                     </div>
                     <div class="row">
-                        <p>Status: Error</p>
+                        <p>Status: <%= jobs.lp_tasks.lastrunstatus %></p>
                     </div>
                     <div class="row">
                         <button class="btn btn-ghost" id="LPTasks">Update LP Tasks</button>
@@ -45,10 +45,10 @@
                 <div class="col-md-3 job middle">
                     <h3>Update LP LBS</h3>
                     <div class="row">
-                        <p>Last Run: some date time</p>
+                        <p>Last Run: <%= jobs.lp_lbs.lastrun %></p>
                     </div>
                     <div class="row">
-                        <p>Status: Successful</p>
+                        <p>Status: <%= jobs.lp_lbs.lastrunstatus %></p>
                     </div>
                     <div class="row">
                         <button class="btn btn-ghost" id="lpLbs">Update LP LBS</button>
@@ -58,10 +58,10 @@
                     <div class="col-md-3 job ">
                         <h3>Update LP Projects</h3>
                         <div class="row">
-                            <p>Last Run: some date time</p>
+                            <p>Last Run: <%= jobs.lp_projects.lastrun %></p>
                         </div>
                         <div class="row">
-                            <p>Status: Successful</p>
+                            <p>Status: <%= jobs.lp_projects.lastrunstatus %></p>
                         </div>
                         <div class="row">
                             <button class="btn btn-ghost" id="lpProjects">Update LP Projects</button>
