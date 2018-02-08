@@ -5,6 +5,8 @@ qc = require('./apifunctions/qcscores');
 lp_projects = require('./apifunctions/lp_projects');
 lp_lbs = require('./apifunctions/lp_lbs');
 client_time = require('./jobs/client_time')
+//Models
+var db = require("../models");
 
 // exports.clienttime = function(req, res) {
 //         data = pm.getPMWeightedData();
@@ -28,6 +30,14 @@ exports.getProjectWeight = function(req, res){
 exports.updatelpLbs = function(req, res){
     lp_lbs.update(req,res);
 }
+
 exports.updateClientTime = function(req, res){
     client_time.logClientTime(req,res);
+}
+
+exports.test_view =  function(req, res){
+    db.sequelize.query("SELECT * FROM test_view", { type:db.Sequelize.QueryTypes.SELECT})
+    .then(data => {
+        res.send (data);
+    })
 }

@@ -14,7 +14,10 @@ module.exports = function(app, passport) {
    app.get('/api/jobs/updatelplbs', apiController.updatelpLbs);
 
    app.get('/api/reports/pm/projectweight', apiController.getProjectWeight);
+
    app.get('/api/jobs/client/logtime', apiController.updateClientTime);
+
+   app.get('/api/views/testData', apiController.test_view);
 
    function isAdmin(req, res, next){
     if (req.isAuthenticated() && req.user.group == 'admin')
