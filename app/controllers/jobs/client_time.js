@@ -10,7 +10,7 @@ var runStatus;
 
 //This will throttle the requests so no more than 30 are made every 15 seconds 
 throttledRequest.configure({
-    requests: 30,
+    requests: 25,
     milliseconds: 15000
 });
 
