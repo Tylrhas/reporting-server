@@ -6,17 +6,11 @@ module.exports = function (sequelize, Sequelize) {
             primaryKey: true,
             type: Sequelize.INTEGER
         },
-        ns_id: {
-            type: Sequelize.INTEGER
-        },
-        in_tags: {
-            type: Sequelize.TEXT
-        },
         task_name: {
             type: Sequelize.TEXT
         },
-        project_id: {
-            type: Sequelize.INTEGER
+        in_tags: {
+            type: Sequelize.TEXT
         },
         website_type: {
             type: Sequelize.TEXT
@@ -24,8 +18,17 @@ module.exports = function (sequelize, Sequelize) {
         design_type: {
             type: Sequelize.TEXT
         },
-        updated_on: {
-            type: Sequelize.DATE
+        project_id: {
+            type: Sequelize.INTEGER
+        },
+        ns_id: {
+            type: Sequelize.INTEGER
+        },
+        billing_type: {
+            type: Sequelize.TEXT
+        },
+        billing_lost_reason: {
+            type: Sequelize.TEXT
         }
     },
         {

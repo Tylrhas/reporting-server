@@ -1,9 +1,9 @@
 var exports = module.exports = {}
 //require api functions
-pm = require('./apifunctions/pm_project_weight');
-qc = require('./apifunctions/qcscores');
-lp_projects = require('./apifunctions/lp_projects');
-lp_lbs = require('./apifunctions/lp_lbs');
+pm = require('./api/pm_project_weight');
+qc = require('./api/qcscores');
+lp_projects = require('./api/lp_projects');
+lp_lbs = require('./api/lp_lbs');
 client_time = require('./jobs/client_time')
 //Models
 var db = require("../models");

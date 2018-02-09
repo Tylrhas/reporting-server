@@ -11,7 +11,6 @@ module.exports = function(app, passport) {
 
    app.get('/api/jobs/updatelplbs', apiController.updatelpLbs);
 
-   app.get('/api/jobs/updatelplbs', apiController.updatelpLbs);
 
    app.get('/api/reports/pm/projectweight', apiController.getProjectWeight);
 
