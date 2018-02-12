@@ -10,7 +10,8 @@ module.exports = function (sequelize, Sequelize) {
     
             lp_task: {
                 type: Sequelize.INTEGER,
-                notEmpty: true
+                notEmpty: true, 
+                defaultValue: Sequelize.NOW
             },
     
             update_time: {
