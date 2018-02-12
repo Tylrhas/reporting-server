@@ -20,10 +20,10 @@ schedule.scheduleJob('45 15 * * 1-5', function(){
 //   lpProjects.updateProjects();
 // });
 
-schedule.scheduleJob('0 * * * *', function(){
-  console.log('Updating LP LBS');
-  lpLBS.update();
-});
+// schedule.scheduleJob('0 * * * *', function(){
+//   console.log('Updating LP LBS');
+//   lpLBS.update();
+// });
 
 // schedule.scheduleJob('* 22 * * *', function(){
 //   console.log('Updating LP Tasks');
