@@ -61,6 +61,7 @@ function getallclienttasks() {
         if(error){
             console.log(error)
             runStatus = "error"
+            updateJobStatus()
         }
         else{
             
@@ -194,6 +195,7 @@ function updateClientTime(jsonPayload, estupdated, url, assignment, last_task) {
             //Handle request error 
             console.log(error);
             runStatus = "error"
+            updateJobStatus()
         }
         jsonstring = JSON.stringify(body);
         //Do what you need with `response` and `body` )
