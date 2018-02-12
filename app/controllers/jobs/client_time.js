@@ -58,8 +58,16 @@ function getallclienttasks() {
     runStatus = '';
 
     request.get({ url: url, headers: { "Authorization": auth } }, (error, response, body) => {
+        if(error){
+            console.log(error)
+            runStatus = "error"
+        }
+        else{
+            
         let json = JSON.parse(body);
         parseLPData(json);
+
+    }
     })
 }
 function parseLPData(data) {
@@ -185,6 +193,7 @@ function updateClientTime(jsonPayload, estupdated, url, assignment, last_task) {
         if (error) {
             //Handle request error 
             console.log(error);
+            runStatus = "error"
         }
         jsonstring = JSON.stringify(body);
         //Do what you need with `response` and `body` )
