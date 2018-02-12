@@ -19,24 +19,23 @@ schedule.scheduleJob('45 15 * * 1-5', function(){
 //   console.log('Updating LP Projects');
 //   lpProjects.updateProjects();
 // });
-/*
-schedule.scheduleJob('30 21 * * *', function(){
+
+schedule.scheduleJob('0 * * * *', function(){
   console.log('Updating LP LBS');
   lpLBS.update();
 });
 
-schedule.scheduleJob('* 22 * * *', function(){
-  console.log('Updating LP Tasks');
-  lpTasks.updateLpTasksTableJob()
-});
+// schedule.scheduleJob('* 22 * * *', function(){
+//   console.log('Updating LP Tasks');
+//   lpTasks.updateLpTasksTableJob()
+// });
 
-schedule.scheduleJob('30 22 * * *', function(){
-  console.log('Updating QC Scores');
-  QCSheet.updateQCScoresNoAPI()
-});
+// schedule.scheduleJob('30 22 * * *', function(){
+//   console.log('Updating QC Scores');
+//   QCSheet.updateQCScoresNoAPI()
+// });
 
-schedule.scheduleJob('0 * * * *', function(){
-  console.log('Updating LP Times');
-  LPTime.update();
-});
-*/
+// schedule.scheduleJob('0 * * * *', function(){
+//   console.log('Updating LP Times');
+//   LPTime.update();
+// });

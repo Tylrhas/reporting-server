@@ -12,41 +12,48 @@ var db = require("../../models");
 const url = process.env.lbs_url;
 const auth = "Basic " + new Buffer(process.env.LpUserName + ":" + process.env.LPPassword).toString("base64");
 
-exports.update = function (req,res){
+exports.update = function (req, res) {
 
     get_all_Lbs();
 
     myEmitter.once('returnresults', () => {
+        if(res){
         res.send(runStatus);
+    }
+    else{
+        return runStatus
+    }
     });
 }
 
-function get_all_Lbs(){
+function get_all_Lbs() {
     request.get({ url: url, headers: { "Authorization": auth } }, (error, response, body) => {
-        if(error){
+        if (error) {
             returnresults = error;
+            updateJobStatus()
         }
+        else {
+            let json = JSON.parse(body);
 
-        let json = JSON.parse(body);
+            for (var i = 0; i < Object.keys(json.rows).length; i++) {
 
-        for (var i = 0; i < Object.keys(json.rows).length; i++) {
-            
-            finalLbs = false;
+                finalLbs = false;
 
-            if(i === Object.keys(data).length -1 ){
-                //set this only if this is the final LBS row
-                finalLbs  = true;
+                if (i === Object.keys(data).length - 1) {
+                    //set this only if this is the final LBS row
+                    finalLbs = true;
+                }
+                insertlbs(data[i], finalLbs);
             }
-            insertlbs(data[i], finalLbs);
         }
     });
 }
 
-function insertlbs(lbs, finalLbs){
-    db.lp_lbs.upsert({ id: lbs['key'], task_name:lbs['name'], in_tags: lbs['inherited_tags'], website_type: lbs['pick_list_custom_field:133069'], design_type:lbs['pick_list_custom_field:133070'], project_id:lbs['project_id'], ns_id:lbs['text_custom_field:135152'], billing_type: lbs['pick_list_custom_field:102670'], billing_lost_reason: lbs['pick_list_custom_field:109756']}).then(results => {
+function insertlbs(lbs, finalLbs) {
+    db.lp_lbs.upsert({ id: lbs['key'], task_name: lbs['name'], in_tags: lbs['inherited_tags'], website_type: lbs['pick_list_custom_field:133069'], design_type: lbs['pick_list_custom_field:133070'], project_id: lbs['project_id'], ns_id: lbs['text_custom_field:135152'], billing_type: lbs['pick_list_custom_field:102670'], billing_lost_reason: lbs['pick_list_custom_field:109756'] }).then(results => {
         console.log(results);
     });
-    if (finalLbs){
+    if (finalLbs) {
         console.log(finalLbs);
         runStatus = ""
         updateJobStatus()
@@ -57,7 +64,7 @@ function updateJobStatus() {
     if (runStatus === '') {
         runStatus = 'complete';
     }
-    else{
+    else {
         runStatus = 'error';
         //set error emailer here to get the error
     }
