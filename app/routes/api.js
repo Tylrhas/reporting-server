@@ -3,19 +3,19 @@ var apiController = require('../controllers/apicontroller.js');
 
 module.exports = function(app, passport) {
 
-   //app.get('/api/reports/pm/weightedprojects', isAdmin, apiController.jobs);
+//    app.get('/api/reports/pm/weightedprojects', isAdmin, apiController.jobs);
 
-//    app.get('/api/jobs/updateQcScores', apiController.updateQcScores);
+//    app.get('/api/jobs/updateQcScores', isAdmin, apiController.updateQcScores);
 
-//    app.get('/api/jobs/updatelpprojects',  apiController.updatelpprojects);
+//    app.get('/api/jobs/updatelpprojects',  isAdmin, apiController.updatelpprojects);
 
-   app.get('/api/jobs/updatelplbs', apiController.updatelpLbs);
+   app.get('/api/jobs/updatelplbs', isAdmin, apiController.updatelpLbs);
 
-//    app.get('/api/reports/pm/projectweight', apiController.getProjectWeight);
+//    app.get('/api/reports/pm/projectweight', isAdmin, apiController.getProjectWeight);
 
-//    app.get('/api/jobs/client/logtime', apiController.updateClientTime);
+//    app.get('/api/jobs/client/logtime', isAdmin, apiController.updateClientTime);
 
-//    app.get('/api/views/testData', apiController.test_view);
+//    app.get('/api/views/testData', isAdmin, apiController.test_view);
 
    function isAdmin(req, res, next){
     if (req.isAuthenticated() && req.user.group == 'admin')
