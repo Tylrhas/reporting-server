@@ -1,7 +1,7 @@
 var exports = module.exports = {}
 require('dotenv').config();
 const request = require("request"),
-    throttledRequest = require('throttled-request')(request);
+throttledRequest = require('throttled-request')(request);
 var runStatus
 //add event emmitter 
 const EventEmitter = require('events');
@@ -20,12 +20,23 @@ var db = require("../../models");
 const url = process.env.lbs_url;
 const auth = "Basic " + new Buffer(process.env.LpUserName + ":" + process.env.LPPassword).toString("base64");
 
-exports.update = function (req, res) {
+
+//for the api call
+exports.updateapi = function (req, res) {
 
     get_all_Lbs();
 
     myEmitter.once('returnresults', () => {
         res.send(runStatus);
+    });
+}
+//for the hourly job 
+exports.update = function (req, res) {
+
+    get_all_Lbs();
+
+    myEmitter.once('returnresults', () => {
+        return runStatus;
     });
 }
 
@@ -34,7 +45,6 @@ function get_all_Lbs() {
         if (error) {
             returnresults = error;
             console.log(error)
-            updateJobStatus()
         }
         else {
             let json = JSON.parse(body);
@@ -43,11 +53,11 @@ function get_all_Lbs() {
 
                 finalLbs = false;
 
-                if (i === Object.keys(data).length - 1) {
+                if (i === Object.keys(json.rows).length - 1) {
                     //set this only if this is the final LBS row
                     finalLbs = true;
                 }
-                insertlbs(data[i], finalLbs);
+                insertlbs(json.rows[i], finalLbs);
             }
         }
     });

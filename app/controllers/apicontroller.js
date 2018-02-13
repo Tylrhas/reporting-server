@@ -27,6 +27,9 @@ exports.getProjectWeight = function(req, res){
     pm.getPMProjectWeight(req, res);
 }
 
+exports.updatelpLbsapi = function(req, res){
+    lp_lbs.updateapi(req,res);
+}
 exports.updatelpLbs = function(req, res){
     lp_lbs.update(req,res);
 }
