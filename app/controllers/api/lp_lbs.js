@@ -1,11 +1,19 @@
 var exports = module.exports = {}
 require('dotenv').config();
-const request = require("request");
+const request = require("request"),
+    throttledRequest = require('throttled-request')(request);
 var runStatus
 //add event emmitter 
 const EventEmitter = require('events');
 class MyEmitter extends EventEmitter { }
 const myEmitter = new MyEmitter();
+
+//This will throttle the requests so no more than 30 are made every 15 seconds 
+throttledRequest.configure({
+    requests: 20,
+    milliseconds: 15000
+});
+
 
 //Models
 var db = require("../../models");
@@ -17,19 +25,15 @@ exports.update = function (req, res) {
     get_all_Lbs();
 
     myEmitter.once('returnresults', () => {
-        if(res){
         res.send(runStatus);
-    }
-    else{
-        return runStatus
-    }
     });
 }
 
 function get_all_Lbs() {
-    request.get({ url: url, headers: { "Authorization": auth } }, (error, response, body) => {
+    throttledRequest({ method: 'GET', url: url, headers: { "Authorization": auth } }, (error, response, body) => {
         if (error) {
             returnresults = error;
+            console.log(error)
             updateJobStatus()
         }
         else {
@@ -69,8 +73,10 @@ function updateJobStatus() {
         //set error emailer here to get the error
     }
     var date = new Date();
-    db.job.upsert({ id: 3, lastrun: date, lastrunstatus: runStatus }).then(jobstatus => {
-        return
+    db.job.upsert({ id: 2, lastrun: date, lastrunstatus: runStatus }).then(jobstatus => {
+        if (error){
+        console.log(error);
+    }
     });
     myEmitter.emit('returnresults');
 }

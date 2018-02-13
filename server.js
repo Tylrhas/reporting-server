@@ -6,6 +6,7 @@ var bodyParser = require('body-parser')
 var env = require('dotenv').load()
 var path = require('path')
 var favicon = require('serve-favicon')
+require('dotenv').config();
 app.set('views', './app/views');
 app.set('view engine', 'ejs');
 
@@ -19,8 +20,7 @@ app.use(bodyParser.json());
 
 // For Passport
 app.use(session({
-    // change the secret before prod
-    secret: 'keyboard cat',
+    secret: process.env.session_secret,
     resave: true,
     saveUninitialized: true
 }));
