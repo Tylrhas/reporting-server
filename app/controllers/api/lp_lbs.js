@@ -69,7 +69,6 @@ function insertlbs(lbs, finalLbs) {
     });
     if (finalLbs) {
         console.log(finalLbs);
-        runStatus = ""
         updateJobStatus()
     }
 }
