@@ -1,21 +1,33 @@
 "use strict";
-var fs        = require("fs");
-var path      = require("path");
+var fs = require("fs");
+var path = require("path");
 var Sequelize = require("sequelize");
-var sequelize = new Sequelize(process.env.DATABASE_URL, {dialectOptions: {ssl: true}});
-var db        = {};
-   
+var sequelize = new Sequelize(process.env.DATABASE_URL, {
+  pool: {
+    max: 15,
+    min: 0,
+    idle: 20000,
+    acquire: 40000,
+    evict: 20000,
+  },
+  dialectOptions: {
+    ssl: true
+  }
+}
+);
+var db = {};
+
 fs
   .readdirSync(__dirname)
-  .filter(function(file) {
+  .filter(function (file) {
     return (file.indexOf(".") !== 0) && (file !== "index.js");
   })
-  .forEach(function(file) {
+  .forEach(function (file) {
     var model = sequelize.import(path.join(__dirname, file));
     db[model.name] = model;
   });
 
-Object.keys(db).forEach(function(modelName) {
+Object.keys(db).forEach(function (modelName) {
   if ("associate" in db[modelName]) {
     db[modelName].associate(db);
   }
