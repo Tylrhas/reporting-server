@@ -5,8 +5,8 @@ var schedule = require('node-schedule')
 QCSheet = require('../controllers//jobs/qc_sheet_api')
 clientTime = require('../controllers/jobs/client_time');
 lpTasks = require('../controllers/jobs/lp_tasks');
-lpProjects = require('../controllers/apifunctions/lp_projects');
-lpLBS = require('../controllers/apifunctions/lp_lbs');
+lpProjects = require('../controllers/api/lp_projects');
+lpLBS = require('../controllers/api/lp_lbs');
 //LPTime = require('../controllers/jobs/lp_time_logged');
 
 // SCHEDULED JOBS
