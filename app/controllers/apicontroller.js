@@ -4,31 +4,19 @@ pm = require('./api/pm_project_weight');
 qc = require('./api/qcscores');
 lp_projects = require('./api/lp_projects');
 lp_lbs = require('./api/lp_lbs');
+lp_tasks = require('./api/lp_tasks');
 client_time = require('./jobs/client_time')
 //Models
 var db = require("../models");
 
-// exports.clienttime = function(req, res) {
-//         data = pm.getPMWeightedData();
-//        res.send(data);
-//     }
-
+//jobs
 exports.updateQcScores = function(req,res){
     data = qc.updateScores();
     res.send('stuff');
 }
 
-exports.updatelpprojects = function(req,res){
-    data = lp_projects.updateProjects();
-    res.send(data);
-}
-
-exports.getProjectWeight = function(req, res){
-    pm.getPMProjectWeight(req, res);
-}
-
-exports.updatelpLbsapi = function(req, res){
-    lp_lbs.updateapi(req,res);
+exports.updatelpprojects = function(){
+    lp_projects.updateProjects();
 }
 exports.updatelpLbs = function(req, res){
     lp_lbs.update(req,res);
@@ -36,6 +24,19 @@ exports.updatelpLbs = function(req, res){
 
 exports.updateClientTime = function(req, res){
     client_time.logClientTime(req,res);
+}
+
+
+//API Calls
+exports.updatelpLbsapi = function(req, res){
+    lp_lbs.updateapi(req,res);
+}
+exports.updatelpprojectsapi = function(req,res){
+    lp_projects.updateProjectsapi(req,res);
+    
+}
+exports.updatelptasksapi = function(req,res){
+    lp_tasks.updatelptasksapi(req,res);
 }
 
 exports.test_view =  function(req, res){

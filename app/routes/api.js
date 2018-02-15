@@ -7,11 +7,13 @@ module.exports = function (app, passport) {
 
     //    app.get('/api/jobs/updateQcScores', isAdmin, apiController.updateQcScores);
 
-    //    app.get('/api/jobs/updatelpprojects',  isAdmin, apiController.updatelpprojects);
+    app.get('/api/jobs/updatelpprojects',  isAdmin, apiController.updatelpprojectsapi);
 
-    app.get('/api/jobs/updatelplbs', apiController.updatelpLbsapi);
+    app.get('/api/jobs/updatelplbs', isAdmin, apiController.updatelpLbsapi);
 
-    //    app.get('/api/reports/pm/projectweight', isAdmin, apiController.getProjectWeight);
+    app.get('/api/jobs/updatetasks',  apiController.updatelptasksapi);
+
+    // app.get('/api/reports/pm/projectweight', isAdmin, apiController.getProjectWeight);
 
     //    app.get('/api/jobs/client/logtime', isAdmin, apiController.updateClientTime);
 

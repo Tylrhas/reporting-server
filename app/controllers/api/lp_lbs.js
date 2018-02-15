@@ -51,7 +51,7 @@ function get_all_Lbs() {
         else {
             let json = JSON.parse(body);
 
-            for (var i = 0; i < Object.keys(json.rows).length; i++) {
+            for (i = 0; i < Object.keys(json.rows).length; i++) {
 
                 insertlbs(json.rows[i],i,Object.keys(json.rows).length);
             }

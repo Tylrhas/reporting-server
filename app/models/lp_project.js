@@ -65,9 +65,19 @@ module.exports = function (sequelize, Sequelize) {
         ps_phase: {
             type: Sequelize.TEXT
         },
+        risk_level:{
+            type: Sequelize.TEXT
+        },
+        project_impact:{
+            type: Sequelize.TEXT
+        },
+        services_activated:{
+            type: Sequelize.BOOLEAN,
+            notEmpty: false
+        },
         otr_ps: {
             type: Sequelize.DECIMAL
-        }
+        },
 
     });
 

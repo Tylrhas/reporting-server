@@ -23,7 +23,7 @@ module.exports = function (sequelize, Sequelize) {
 
         e_start: {
             type: Sequelize.DATE,
-            allowNull: false
+            allowNull: true
         },
 
         e_finish: {
@@ -50,7 +50,14 @@ module.exports = function (sequelize, Sequelize) {
         },
         hrs_remaning: {
             type: Sequelize.REAL
-        }
+        },
+        cs_offering: {
+            type: Sequelize.TEXT,
+        },
+        ready_on:{
+            type: Sequelize.DATE
+        },
+
 
     });
 

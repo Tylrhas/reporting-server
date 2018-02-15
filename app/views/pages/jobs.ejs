@@ -109,7 +109,7 @@
             $('#LPTasks').click(function () {
                 $(".alert").addClass("alert-info").removeClass("hide");
                 $(".alert").html('Updating LP Table Scores <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>');
-                $.get("../jobs/lp_tasks", function (data) {
+                $.get("../api/jobs/updatetasks", function (data) {
                     if (data.Status === 'Sucess') {
                         console.log(data.Message)
                         $(".alert").html(data.Message + '<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>');
