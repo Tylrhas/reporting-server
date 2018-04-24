@@ -9,12 +9,17 @@ module.exports = function (app, passport) {
     console.log(req.body)
     if (req.body.change_type === 'update') {
       //if change_type is update then update the record
-      db.lp_task.findAll({
+      db.lp_task.update({
+        e_start: req.body.expected_start,
+        e_finish: req.body.expected_finish, 
+        deadline: req.body.promise_by,
+        hrs_logged: req.body.hours_logged,
+        date_done: req.body.done_on,
+        hrs_remaning: req.body.high_effort_remaining
+      },{
         where: {
           id: req.body.treeitem_id
         }
-      }).then(task => {
-        task.update({e_start: req.body.expected_start, e_finish: req.body.expected_finish, deadline:req.body.promise_by, hrs_logged:req.body.hours_logged, date_done:req.body.done_on, hrs_remaning:req.body.high_effort_remaining})
       })
     }
   });
