@@ -5,7 +5,8 @@ qc = require('./api/qcscores');
 lp_projects = require('./api/lp_projects');
 lp_lbs = require('./api/lp_lbs');
 lp_tasks = require('./api/lp_tasks');
-client_time = require('./jobs/client_time')
+client_time = require('./jobs/client_time');
+
 //Models
 var db = require("../models");
 
