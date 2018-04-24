@@ -1,5 +1,8 @@
-var Sequelize = require("sequelize");
+var Sequelize = require("sequelize")
 const Op = Sequelize.Op
+//Models
+var db = require("../models")
+
 module.exports = function (app, passport) {
     // app.get('/reports/pmweightedprojects', function (req, res) {
     //     res.render('pages/pmweight', { user: req.user });
@@ -10,8 +13,6 @@ module.exports = function (app, passport) {
     // });
 
     app.get('/reports/at-risk-projects', function (req, res) {
-        //Models
-        var db = require("../models");
         db.lp_project.findAll({
             attributes: ['project_name'],
             include: [{
@@ -29,7 +30,7 @@ module.exports = function (app, passport) {
 
         }).then(results => {
             console.log(results)
-            res.render('pages/at_risk_projects');
+            res.render('pages/at_risk_projects', {user: req.user, projects: results[0]});
         })
     });
 } 

@@ -1,42 +1,45 @@
 <% include ../partials/header.ejs %>
 
-<div id="homenav">
-<% include ../partials/nav.ejs %>
-</div>
-
-<div class="jumbotron text-center hero">
-  <div class="container">
-    <h1>At Risk Projects</h1>
+  <div id="homenav">
+    <% include ../partials/nav.ejs %>
   </div>
-</div>
 
-<div class="container">
-  <table class="table">
-    <thead>
-      <tr>
-        <th scope="col">Project Name</th>
-        <th scope="col">Estimated Finish</th>
-        <th scope="col">Deadline</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Project 1</td>
-        <td>12</td>
-        <td>23</td>
-      </tr>
-      <tr>
-        <td>Project 2</td>
-        <td>12</td>
-        <td>23</td>
-      </tr>
-      <tr>
-        <td>Project 3</td>
-        <td>24</td>
-        <td>25</td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+  <div class="jumbotron text-center hero">
+    <div class="container">
+      <h1>At Risk Projects</h1>
+    </div>
+  </div>
+  <script src="/js/ejs.min.js"></script>
+  <script>
+    ejs.render('<%= console.log(projects)%>')
+  </script>
+  <div class="container">
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">Project Name</th>
+          <th scope="col">Estimated Finish</th>
+          <th scope="col">Deadline</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Project 1</td>
+          <td>12</td>
+          <td>23</td>
+        </tr>
+        <tr>
+          <td>Project 2</td>
+          <td>12</td>
+          <td>23</td>
+        </tr>
+        <tr>
+          <td>Project 3</td>
+          <td>24</td>
+          <td>25</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
-<% include ../partials/footer.ejs %>
+  <% include ../partials/footer.ejs %>
