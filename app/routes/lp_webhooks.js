@@ -5,7 +5,7 @@ var db = require("../models")
 module.exports = function (app, passport) {
   app.post('/webhooks/tasks', function (req, res) {
     // LP Post to the webhood to update the task
-
+    console.log(req.body)
     if (req.body.change_type === 'update') {
       //if change_type is update then update the record
       db.lp_task.findAll({
