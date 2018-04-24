@@ -18,7 +18,7 @@ module.exports = function (app, passport) {
         hrs_remaning: req.body.high_effort_remaining
       },{
         where: {
-          id: req.body.treeitem_id
+          id: req.body.id
         }
       })
     }
