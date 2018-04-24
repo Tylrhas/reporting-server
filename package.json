@@ -12,8 +12,8 @@
     "bcrypt-nodejs": "0.0.3",
     "body-parser": "^1.18.2",
     "dotenv": "^4.0.0",
-    "ejs": "^2.5.7",
-    "express": "^4.16.2",
+    "ejs": "^2.5.9",
+    "express": "^4.16.3",
     "express-session": "^1.15.6",
     "googleapis": "^22.2.0",
     "moment": "^2.22.1",
@@ -22,8 +22,8 @@
     "passport-local": "^1.0.0",
     "pg": "^7.4.1",
     "request-throttle": "0.0.2",
-    "sequelize": "^4.35.2",
-    "serve-favicon": "^2.4.5",
+    "sequelize": "^4.37.6",
+    "serve-favicon": "^2.5.0",
     "throttled-request": "^0.1.1"
   }
 }
