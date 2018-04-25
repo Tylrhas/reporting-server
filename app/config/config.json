@@ -1,0 +1,53 @@
+{
+    
+       "development": {
+    
+           "username": "patyxnhoazmxly",
+    
+           "password": "54c1903a4566c07a59280ed38025ecd8a85d99c15a91d1b5afe3a176572fb428",
+    
+           "database": "d5gpus103g74kh",
+    
+           "host": "ec2-54-163-230-219.compute-1.amazonaws.com",
+    
+           "dialect": "postgres",
+
+           "operatorsAliases": false,
+
+           "dialectOptions":{
+            "ssl":{
+               "require":true
+            }
+         }
+    
+       },
+    
+       "test": {
+    
+           "username": "",
+    
+           "password": null,
+    
+           "database": "",
+    
+           "host": "",
+    
+           "dialect": "postgres"
+    
+       },
+    
+       "production": {
+    
+           "username": "",
+    
+           "password": null,
+    
+           "database": "",
+    
+           "host": "127.00.1",
+    
+           "dialect": "postgres"
+    
+       }
+    
+   }
