@@ -36,10 +36,11 @@ module.exports = function (app, passport) {
     }
     else if(req.body.change_type === 'delete'){
       // potentially delete this task from LP
-      // { id: 45204698,
-      //   change_type: 'delete',
-      //   type: 'Task',
-      //   space_id: 158330 }
+      db.lp_task.destroy({
+        where: {
+          id: req.body.id
+        }
+      })
     }
   });
 }
