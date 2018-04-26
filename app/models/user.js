@@ -1,56 +1,45 @@
-module.exports = function(sequelize, Sequelize) {
-    
-       var User = sequelize.define('user', {
-    
-           id: {
-               autoIncrement: true,
-               primaryKey: true,
-               type: Sequelize.INTEGER
-           },
-    
-           firstname: {
-               type: Sequelize.STRING,
-               notEmpty: true
-           },
-    
-           lastname: {
-               type: Sequelize.STRING,
-               notEmpty: true
-           },
-    
-           username: {
-               type: Sequelize.TEXT
-           },
-    
-           group: {
-            type: Sequelize.ENUM('user', 'admin'),
-            defaultValue: 'user'
-        },
-    
-           email: {
-               type: Sequelize.STRING,
-               validate: {
-                   isEmail: true
-               }
-           },
-    
-           password: {
-               type: Sequelize.STRING,
-               allowNull: false
-           },
-    
-           last_login: {
-               type: Sequelize.DATE
-           },
-    
-           status: {
-               type: Sequelize.ENUM('active', 'inactive'),
-               defaultValue: 'active'
-           }
-    
-    
-       });
-    
-       return User;
-    
-   }
+module.exports = function (sequelize, Sequelize) {
+    var User = sequelize.define('user', {
+  
+      id: {
+        autoIncrement: true,
+        primaryKey: true,
+        type: Sequelize.INTEGER
+      },
+  
+      first_name: {
+        type: Sequelize.STRING
+        // notEmpty: true
+      },
+  
+      last_name: {
+        type: Sequelize.STRING
+        // notEmpty: true
+      },
+  
+      title: {
+        type: Sequelize.STRING
+        // notEmpty: true
+      },
+  
+      role: {
+        type: Sequelize.STRING
+        // notEmpty: true
+      },
+      token: {
+        type: Sequelize.STRING
+        // notEmpty: true
+      },
+  
+      email: {
+        type: Sequelize.STRING
+        // notEmpty: true
+      },group: {
+        type: Sequelize.ENUM('user', 'admin'),
+        defaultValue: 'user'
+    }
+  
+    })
+  
+    return User
+  }
