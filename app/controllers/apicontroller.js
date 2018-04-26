@@ -37,7 +37,7 @@ exports.updatelpprojectsapi = function(req,res){
     
 }
 exports.updatelptasksapi = function(req,res){
-    lp_tasks.updatelptasksapi(req,res);
+    lp_tasks.updateAllTasks(req,res);
 }
 
 exports.test_view =  function(req, res){

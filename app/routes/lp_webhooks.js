@@ -14,7 +14,8 @@ module.exports = function (app, passport) {
         deadline: req.body.promise_by,
         hrs_logged: req.body.hours_logged,
         date_done: req.body.done_on,
-        hrs_remaning: req.body.high_effort_remaining
+        hrs_remaning: req.body.high_effort_remaining,
+        ready_on: req.body.custom_field_values['Ready To Start On']
       },{
         where: {
           id: req.body.id
@@ -30,7 +31,8 @@ module.exports = function (app, passport) {
         deadline: req.body.promise_by,
         hrs_logged: req.body.hours_logged,
         date_done: req.body.done_on,
-        hrs_remaning: req.body.high_effort_remaining
+        hrs_remaning: req.body.high_effort_remaining,
+        ready_on: req.body.custom_field_values['Ready To Start On']
       })
       // trigger update of the other fields that do not come in webhooks like inherited tags
     }

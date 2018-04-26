@@ -7,9 +7,9 @@ module.exports = function (app, passport) {
 
     //    app.get('/api/jobs/updateQcScores', isAdmin, apiController.updateQcScores);
 
-    app.get('/api/jobs/updatelpprojects',  isAdmin, apiController.updatelpprojectsapi);
+    // app.get('/api/jobs/updatelpprojects',  isAdmin, apiController.updatelpprojectsapi);
 
-    app.get('/api/jobs/updatelplbs', isAdmin, apiController.updatelpLbsapi);
+    // app.get('/api/jobs/updatelplbs', isAdmin, apiController.updatelpLbsapi);
 
     app.get('/api/jobs/updatetasks',  apiController.updatelptasksapi);
 

@@ -7,18 +7,17 @@ clientTime = require('../controllers/jobs/client_time');
 lpTasks = require('../controllers/api/lp_tasks');
 lpProjects = require('../controllers/api/lp_projects');
 lpLBS = require('../controllers/api/lp_lbs');
-//LPTime = require('../controllers/jobs/lp_time_logged');
 
 // SCHEDULED JOBS
-// schedule.scheduleJob('45 15 * * 1-5', function(){
-// 	console.log('Updating Client Time');
-//   clientTime.logClientTimeJob();
-// });
+schedule.scheduleJob('45 15 * * 1-5', function(){
+	console.log('Updating Client Time');
+  clientTime.logClientTimeJob();
+});
 
-// schedule.scheduleJob('0 * * * *', function(){
-//   console.log('Updating LP LBS');
-//   lpLBS.update();
-// });
+schedule.scheduleJob('0 * * * *', function(){
+  console.log('Updating LP LBS');
+  lpLBS.update();
+});
 
 // schedule.scheduleJob('20 * * * *', function(){
 //   console.log('Updating LP Projects');
