@@ -1,3 +1,4 @@
+'use strict'
 module.exports = function (sequelize, Sequelize) {
 
     var LpProject = sequelize.define('lp_project', {
@@ -65,11 +66,25 @@ module.exports = function (sequelize, Sequelize) {
         ps_phase: {
             type: Sequelize.TEXT
         },
+        risk_level:{
+            type: Sequelize.TEXT
+        },
+        project_impact:{
+            type: Sequelize.TEXT
+        },
+        services_activated:{
+            type: Sequelize.BOOLEAN,
+            notEmpty: false
+        },
         otr_ps: {
             type: Sequelize.DECIMAL
-        }
+        },
 
     });
+
+    LpProject.associate = function(models) {
+        models.lp_project.hasMany(models.lp_task, {foreignKey: 'project_id', sourceKey: 'id'});
+      };
 
     return LpProject;
 

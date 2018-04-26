@@ -1,33 +1,48 @@
 var exports = module.exports = {}
 //require api functions
-pm = require('./apifunctions/pm_project_weight');
-qc = require('./apifunctions/qcscores');
-lp_projects = require('./apifunctions/lp_projects');
-lp_lbs = require('./apifunctions/lp_lbs');
-client_time = require('./jobs/client_time')
+pm = require('./api/pm_project_weight');
+qc = require('./api/qcscores');
+lp_projects = require('./api/lp_projects');
+lp_lbs = require('./api/lp_lbs');
+lp_tasks = require('./api/lp_tasks');
+client_time = require('./jobs/client_time');
 
-// exports.clienttime = function(req, res) {
-//         data = pm.getPMWeightedData();
-//        res.send(data);
-//     }
+//Models
+var db = require("../models");
 
+//jobs
 exports.updateQcScores = function(req,res){
     data = qc.updateScores();
     res.send('stuff');
 }
 
-exports.updatelpprojects = function(req,res){
-    data = lp_projects.updateProjects();
-    res.send(data);
+exports.updatelpprojects = function(){
+    lp_projects.updateProjects();
 }
-
-exports.getProjectWeight = function(req, res){
-    pm.getPMProjectWeight(req, res);
-}
-
 exports.updatelpLbs = function(req, res){
     lp_lbs.update(req,res);
 }
+
 exports.updateClientTime = function(req, res){
     client_time.logClientTime(req,res);
+}
+
+
+//API Calls
+exports.updatelpLbsapi = function(req, res){
+    lp_lbs.updateapi(req,res);
+}
+exports.updatelpprojectsapi = function(req,res){
+    lp_projects.updateProjectsapi(req,res);
+    
+}
+exports.updatelptasksapi = function(req,res){
+    lp_tasks.updateAllTasks(req,res);
+}
+
+exports.test_view =  function(req, res){
+    db.sequelize.query("SELECT * FROM test_view", { type:db.Sequelize.QueryTypes.SELECT})
+    .then(data => {
+        res.send (data);
+    })
 }

@@ -10,7 +10,7 @@ var runStatus;
 
 //This will throttle the requests so no more than 30 are made every 15 seconds 
 throttledRequest.configure({
-    requests: 30,
+    requests: 20,
     milliseconds: 15000
 });
 
@@ -58,8 +58,17 @@ function getallclienttasks() {
     runStatus = '';
 
     request.get({ url: url, headers: { "Authorization": auth } }, (error, response, body) => {
+        if(error){
+            console.log(error)
+            runStatus = "error"
+            updateJobStatus()
+        }
+        else{
+            
         let json = JSON.parse(body);
         parseLPData(json);
+
+    }
     })
 }
 function parseLPData(data) {
@@ -185,6 +194,8 @@ function updateClientTime(jsonPayload, estupdated, url, assignment, last_task) {
         if (error) {
             //Handle request error 
             console.log(error);
+            runStatus = "error"
+            updateJobStatus()
         }
         jsonstring = JSON.stringify(body);
         //Do what you need with `response` and `body` )

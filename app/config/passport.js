@@ -27,7 +27,6 @@ module.exports = function (passport, user) {
 
 
     passport.use('local-signup', new LocalStrategy(
-
         {
             usernameField: 'email',
             passwordField: 'password',
@@ -35,9 +34,9 @@ module.exports = function (passport, user) {
         },
 
         function (req, email, password, done) {
+            console.log("we made it this far")
 
-
-            var generateHash = function (password) {
+            var generateHash = function (rpassword) {
                 return bCrypt.hashSync(password, bCrypt.genSaltSync(8), null);
             };
 
@@ -48,10 +47,10 @@ module.exports = function (passport, user) {
                 }
 
                 else {
-                    var userPassword = generateHash(password);
+                    var userPassword = generateHash(req.body.password);
                     var data =
                         {
-                            email: email,
+                            email: req.body.email,
                             password: userPassword,
                             firstname: req.body.firstname,
                             lastname: req.body.lastname
@@ -63,7 +62,7 @@ module.exports = function (passport, user) {
                             return done(null, false);
                         }
 
-                        if (newUser) {
+                        if (newUser) {  
                             return done(null, newUser);
 
                         }

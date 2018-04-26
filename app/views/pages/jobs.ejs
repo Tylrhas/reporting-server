@@ -13,10 +13,10 @@
             </div>
         </div>
         <div class="container">
-        <div class="row jobs-row">
+            <div class="row jobs-row">
                 <div class="alert fade in alert-dismissable hide" role="alert">
                 </div>
-                    <div class="col-md-3 job">
+                <!-- <div class="col-md-3 job">
                         <h3>QC Scores</h3>
                         <div class="row">
                             <p>Last Run: some date time</p>
@@ -27,63 +27,62 @@
                         <div class="row">
                             <button class="btn btn-ghost" id="QCScores">Update QC Scores</button>
                         </div>
-                    </div>
+                    </div> -->
 
-                    <div class="col-md-3 job middle">
-                        <h3>LP Tasks</h3>
-                        <div class="row">
-                            <p>Last Run: some date time</p>
-                        </div>
-                        <div class="row">
-                            <p>Status: Error</p>
-                        </div>
-                        <div class="row">
-                            <button class="btn btn-ghost" id="LPTasks">Update LP Tasks</button>
-                        </div>
+                <div class="col-md-3 job ">
+                    <h3>LP Tasks</h3>
+                    <div class="row">
+                        <p>Last Run: <%= jobs.lp_tasks.lastrun %></p>
                     </div>
+                    <div class="row">
+                        <p>Status: <%= jobs.lp_tasks.lastrunstatus %></p>
+                    </div>
+                    <div class="row">
+                        <button class="btn btn-ghost" id="LPTasks">Update LP Tasks</button>
+                    </div>
+                </div>
 
-                    <div class="col-md-3 job">
-                        <h3>Update LP LBS</h3>
-                        <div class="row">
-                            <p>Last Run: some date time</p>
-                        </div>
-                        <div class="row">
-                            <p>Status: Successful</p>
-                        </div>
-                        <div class="row">
-                            <button class="btn btn-ghost" id="lpLbs">Update LP LBS</button>
-                        </div>
+                <div class="col-md-3 job middle">
+                    <h3>Update LP LBS</h3>
+                    <div class="row">
+                        <p>Last Run: <%= jobs.lp_lbs.lastrun %></p>
+                    </div>
+                    <div class="row">
+                        <p>Status: <%= jobs.lp_lbs.lastrunstatus %></p>
+                    </div>
+                    <div class="row">
+                        <button class="btn btn-ghost" id="lpLbs">Update LP LBS</button>
                     </div>
                 </div>
                 <div class="row jobs-row">
                     <div class="col-md-3 job ">
                         <h3>Update LP Projects</h3>
                         <div class="row">
-                            <p>Last Run: some date time</p>
+                            <p>Last Run: <%= jobs.lp_projects.lastrun %></p>
                         </div>
                         <div class="row">
-                            <p>Status: Successful</p>
+                            <p>Status: <%= jobs.lp_projects.lastrunstatus %></p>
                         </div>
                         <div class="row">
                             <button class="btn btn-ghost" id="lpProjects">Update LP Projects</button>
                         </div>
                     </div>
-
-                    <div class="col-md-3 job middle">
-                        <h3> LP Client Time</h3>
-                        <div class="row">
-                            <p>Last Run:
-                                <%= jobs.client_time.lastrun %>
-                            </p>
-                        </div>
-                        <div class="row">
-                            <p>Status:
-                                <%= jobs.client_time.lastrunstatus %>
-                            </p>
-                        </div>
+                </div>
+                <div class="col-md-3 job ">
+                    <h3> LP Client Time</h3>
+                    <div class="row">
+                        <p>Last Run:
+                            <%= jobs.client_time.lastrun %>
+                        </p>
+                    </div>
+                    <div class="row">
+                        <p>Status:
+                            <%= jobs.client_time.lastrunstatus %>
+                        </p>
                     </div>
                 </div>
             </div>
+        </div>
         </div>
         </div>
 
@@ -110,24 +109,7 @@
             $('#LPTasks').click(function () {
                 $(".alert").addClass("alert-info").removeClass("hide");
                 $(".alert").html('Updating LP Table Scores <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>');
-                $.get("../jobs/lp_tasks", function (data) {
-                    if (data.Status === 'Sucess') {
-                        console.log(data.Message)
-                        $(".alert").html(data.Message + '<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>');
-                        $(".alert").removeClass("alert-info").addClass('alert-success');
-                    }
-                    else {
-                        $(".alert").html(data.message + '<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>');
-                        $(".alert").removeClass("alert-info").addClass('alert-danger');
-                    }
-                    alert("Load was performed.");
-                });
-            });
-
-            $('#clientTime').click(function () {
-                $(".alert").addClass("alert-info").removeClass("hide");
-                $(".alert").html('Updating clientTime <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>');
-                $.get("../jobs/client_time", function (data) {
+                $.get("../api/jobs/updatetasks", function (data) {
                     if (data.Status === 'Sucess') {
                         console.log(data.Message)
                         $(".alert").html(data.Message + '<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>');

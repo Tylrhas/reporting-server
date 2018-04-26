@@ -1,0 +1,48 @@
+<% include ../partials/header.ejs %>
+
+  <div id="homenav">
+    <% include ../partials/nav.ejs %>
+  </div>
+
+  <div class="jumbotron text-center hero">
+    <div class="container">
+      <h1>At Risk Projects</h1>
+    </div>
+  </div>
+
+  <div class="container">
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">Project Name</th>
+          <th scope="col">Task Name</th>
+          <th scope="col">Estimated Finish</th>
+          <th scope="col">Deadline</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% for(var i=0; i < projects.length; i++) { %>
+          <% for(var i2=0; i2 < projects[i].lp_tasks.length; i2++) { %>
+            <tr>
+              <td>
+                <a href="<%= 'https://app.liquidplanner.com/space/' + lp_space_id +'/projects/show/' + projects[i].lp_tasks[i2].dataValues.project_id %>" target="_blank">
+                  <%= projects[i].project_name %>
+                </a>
+              </td>
+              <td>
+                <%= projects[i].lp_tasks[i2].dataValues.task_name %>
+              </td>
+              <td>
+                <%= moment(projects[i].lp_tasks[i2].dataValues.e_finish).format( 'MMM-DD-YYYY') %>
+              </td>
+              <td>
+                <%= moment(projects[i].lp_tasks[i2].dataValues.deadline).format( 'MMM-DD-YYYY') %>
+              </td>
+            </tr>
+          <% } %>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+
+  <% include ../partials/footer.ejs %>

@@ -6,6 +6,7 @@ var bodyParser = require('body-parser')
 var env = require('dotenv').load()
 var path = require('path')
 var favicon = require('serve-favicon')
+require('dotenv').config();
 app.set('views', './app/views');
 app.set('view engine', 'ejs');
 
@@ -19,8 +20,7 @@ app.use(bodyParser.json());
 
 // For Passport
 app.use(session({
-    // change the secret before prod
-    secret: 'keyboard cat',
+    secret: process.env.session_secret,
     resave: true,
     saveUninitialized: true
 }));
@@ -32,11 +32,6 @@ app.set('port', (process.env.PORT || 5000))
 app.use(express.static(__dirname + '/public'))
 
 
-app.get('/', function (req, res) {
-    res.render('pages/index', { user : req.user} );
-
-});
-
 //Models
 var models = require("./app/models");
 
@@ -45,6 +40,7 @@ var authRoute = require('./app/routes/auth.js')(app,passport);
 var adminRoute = require('./app/routes/admin.js')(app,passport);
 var apiRoute = require('./app/routes/api.js')(app,passport);
 var pages = require('./app/routes/pages.js')(app,passport);
+var webhooks = require('./app/routes/lp_webhooks.js')(app,passport);
 
 
 //load passport strategies
