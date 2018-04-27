@@ -29,6 +29,7 @@ module.exports = function (app, passport) {
         id: req.body.id,
         task_name: req.body.name,
         e_start: req.body.expected_start,
+        project_id: req.body.project_id,
         e_finish: req.body.expected_finish, 
         deadline: req.body.promise_by,
         hrs_logged: req.body.hours_logged,
