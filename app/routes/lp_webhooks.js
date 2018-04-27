@@ -23,6 +23,7 @@ module.exports = function (app, passport) {
       })
     }
     else if(req.body.change_type === 'create'){
+      console.log(req.body)
       // add this task to the database
       db.lp_task.create({
         id: req.body.id,
