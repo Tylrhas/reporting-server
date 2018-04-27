@@ -26,6 +26,7 @@ module.exports = function (app, passport) {
       // add this task to the database
       db.lp_task.create({
         id: req.body.id,
+        task_name: req.body.name,
         e_start: req.body.expected_start,
         e_finish: req.body.expected_finish, 
         deadline: req.body.promise_by,
