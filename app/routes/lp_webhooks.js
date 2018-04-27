@@ -10,6 +10,7 @@ module.exports = function (app, passport) {
       //if change_type is update then update the record
       db.lp_task.update({
         e_start: req.body.expected_start,
+        task_name: req.body.name,
         e_finish: req.body.expected_finish, 
         deadline: req.body.promise_by,
         hrs_logged: req.body.hours_logged,
