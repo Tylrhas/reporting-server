@@ -6,6 +6,9 @@ module.exports = function (sequelize, Sequelize) {
           primaryKey: true,
           type: Sequelize.INTEGER
       },
+      task_id: {
+          type: Sequelize.INTEGER
+      },
       lp_parent_id: {
           type: Sequelize.INTEGER
       }

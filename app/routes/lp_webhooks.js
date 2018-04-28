@@ -48,7 +48,7 @@ module.exports = function (app, passport) {
       })
       // trigger update of the other fields that do not come in webhooks like inherited tags
 
-      for(let i = 0; i < reg.body.parent_ids; i++) {
+      for(let i = 0; i < req.body.parent_ids; i++) {
         db.lp_parent_id.create({
           id: req.body.id,
           lp_parent_id: req.body.parent_ids[i]
@@ -60,6 +60,12 @@ module.exports = function (app, passport) {
       db.lp_task.destroy({
         where: {
           id: req.body.id
+        }
+      })
+
+      db.lp_task.destroy({
+        where: {
+          task_id: req.body.id
         }
       })
     }
