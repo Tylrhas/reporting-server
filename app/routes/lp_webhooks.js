@@ -23,7 +23,7 @@ module.exports = function (app, passport) {
         }
       })
 
-      for(let i = 0; i < reg.body.parent_ids; i++) {
+      for(let i = 0; i < q.body.parent_ids; i++) {
         db.lp_parent_id.upsert({
           id: req.body.id,
           lp_parent_id: req.body.parent_ids[i]
