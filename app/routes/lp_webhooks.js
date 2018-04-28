@@ -22,6 +22,14 @@ module.exports = function (app, passport) {
           id: req.body.id
         }
       })
+
+      for(let i = 0; i < reg.body.parent_ids; i++) {
+        db.lp_parent_id.upsert({
+          id: req.body.id,
+          lp_parent_id: req.body.parent_ids[i]
+        })
+      }
+
     }
     else if(req.body.change_type === 'create'){
       console.log(req.body)
@@ -39,6 +47,13 @@ module.exports = function (app, passport) {
         ready_on: req.body.custom_field_values['Ready To Start On']
       })
       // trigger update of the other fields that do not come in webhooks like inherited tags
+
+      for(let i = 0; i < reg.body.parent_ids; i++) {
+        db.lp_parent_id.create({
+          id: req.body.id,
+          lp_parent_id: req.body.parent_ids[i]
+        })
+      }
     }
     else if(req.body.change_type === 'delete'){
       // potentially delete this task from LP
