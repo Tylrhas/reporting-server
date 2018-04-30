@@ -24,8 +24,9 @@ module.exports = function (app, passport) {
       })
 
       for(let i = 0; i < req.body.parent_ids; i++) {
+        console.log(req.body.parent_ids[i])
         db.lp_parent_id.upsert({
-          id: req.body.id,
+          task_id: req.body.id,
           lp_parent_id: req.body.parent_ids[i]
         })
       }
@@ -49,11 +50,13 @@ module.exports = function (app, passport) {
       // trigger update of the other fields that do not come in webhooks like inherited tags
 
       for(let i = 0; i < req.body.parent_ids; i++) {
-        db.lp_parent_id.create({
-          id: req.body.id,
+        console.log(req.body.parent_ids[i])
+        db.lp_parent_id.upsert({
+          task_id: req.body.id,
           lp_parent_id: req.body.parent_ids[i]
         })
       }
+
     }
     else if(req.body.change_type === 'delete'){
       // potentially delete this task from LP
