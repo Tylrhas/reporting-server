@@ -11,21 +11,26 @@ module.exports = function (app, passport) {
       db.lp_task.update({
         e_start: req.body.expected_start,
         task_name: req.body.name,
-        e_finish: req.body.expected_finish, 
+        e_finish: req.body.expected_finish,
         deadline: req.body.promise_by,
         hrs_logged: req.body.hours_logged,
         date_done: req.body.done_on,
         hrs_remaning: req.body.high_effort_remaining,
         ready_on: req.body.custom_field_values['Ready To Start On']
-      },{
+      }, {
+          where: {
+            id: req.body.id
+          }
+        })
+
+      // destroy the old partent ids from this task 
+      db.lp_parent_id.destroy({
         where: {
-          id: req.body.id
+          task_id: req.body.id,
         }
       })
-
-      for(let i = 0; i < req.body.parent_ids.length; i++) {
-        console.log(req.body.parent_ids[i])
-        console.log('req.body.parent_ids[i]')
+      // add new partent ids for this task
+      for (let i = 0; i < req.body.parent_ids.length; i++) {
         db.lp_parent_id.upsert({
           task_id: req.body.id,
           lp_parent_id: req.body.parent_ids[i]
@@ -33,7 +38,7 @@ module.exports = function (app, passport) {
       }
 
     }
-    else if(req.body.change_type === 'create'){
+    else if (req.body.change_type === 'create') {
 
       // add this task to the database
       db.lp_task.create({
@@ -41,7 +46,7 @@ module.exports = function (app, passport) {
         task_name: req.body.name,
         e_start: req.body.expected_start,
         project_id: req.body.project_id,
-        e_finish: req.body.expected_finish, 
+        e_finish: req.body.expected_finish,
         deadline: req.body.promise_by,
         hrs_logged: req.body.hours_logged,
         date_done: req.body.done_on,
@@ -50,10 +55,7 @@ module.exports = function (app, passport) {
       })
       // trigger update of the other fields that do not come in webhooks like inherited tags
 
-      for(let i = 0; i < req.body.parent_ids.length; i++) {
-        console.log(req.body.parent_ids[i])
-        console.log('req.body.parent_ids[i]')
-        console.log(req.body.parent_ids[i])
+      for (let i = 0; i < req.body.parent_ids.length; i++) {
         db.lp_parent_id.upsert({
           task_id: req.body.id,
           lp_parent_id: req.body.parent_ids[i]
@@ -61,17 +63,10 @@ module.exports = function (app, passport) {
       }
 
     }
-    else if(req.body.change_type === 'delete'){
-      // potentially delete this task from LP
+    else if (req.body.change_type === 'delete') {
       db.lp_task.destroy({
         where: {
           id: req.body.id
-        }
-      })
-
-      db.lp_task.destroy({
-        where: {
-          task_id: req.body.id
         }
       })
     }
