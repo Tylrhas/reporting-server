@@ -25,6 +25,7 @@ module.exports = function (app, passport) {
 
       for(let i = 0; i < req.body.parent_ids; i++) {
         console.log(req.body.parent_ids[i])
+        console.log('req.body.parent_ids[i]')
         db.lp_parent_id.upsert({
           task_id: req.body.id,
           lp_parent_id: req.body.parent_ids[i]
@@ -33,7 +34,8 @@ module.exports = function (app, passport) {
 
     }
     else if(req.body.change_type === 'create'){
-      console.log(req.body)
+      console.log(req.body.parent_ids[i])
+      console.log('req.body.parent_ids[i]')
       // add this task to the database
       db.lp_task.create({
         id: req.body.id,
