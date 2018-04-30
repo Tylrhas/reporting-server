@@ -23,7 +23,7 @@ module.exports = function (app, passport) {
         }
       })
 
-      for(let i = 0; i < req.body.parent_ids; i++) {
+      for(let i = 0; i < req.body.parent_ids.length; i++) {
         console.log(req.body.parent_ids[i])
         console.log('req.body.parent_ids[i]')
         db.lp_parent_id.upsert({
@@ -34,8 +34,7 @@ module.exports = function (app, passport) {
 
     }
     else if(req.body.change_type === 'create'){
-      console.log(req.body.parent_ids[i])
-      console.log('req.body.parent_ids[i]')
+
       // add this task to the database
       db.lp_task.create({
         id: req.body.id,
@@ -51,7 +50,9 @@ module.exports = function (app, passport) {
       })
       // trigger update of the other fields that do not come in webhooks like inherited tags
 
-      for(let i = 0; i < req.body.parent_ids; i++) {
+      for(let i = 0; i < req.body.parent_ids.length; i++) {
+        console.log(req.body.parent_ids[i])
+        console.log('req.body.parent_ids[i]')
         console.log(req.body.parent_ids[i])
         db.lp_parent_id.upsert({
           task_id: req.body.id,
