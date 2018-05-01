@@ -2,47 +2,33 @@ var authController = require('../controllers/authcontroller.js');
 
 module.exports = function (app, passport) {
 
-    app.get('/', authController.signin);
+    app.get('/g5_auth/users/auth/g5',
+        passport.authenticate('oauth2'))
 
-    app.post('/signup', isAdmin, function (req, res, next) {
-        console.log('we here')
-        passport.authenticate('local-signup', function (err, user) {
-            if (err) { return next(err) }
-            if (!user) {
-                res.send({ status: "Error", message : "The User NOT Has Been Added" });
-            }
-        })(req, res, next);
-        res.send({ status: "sucess", message : "The User Has Been Added" });
-    });
+    app.get('/g5_auth/users/auth/g5/callback',
+        passport.authenticate('oauth2', { failureRedirect: '/g5_auth/users/auth/g5' }),
+        function (req, res) {
+            // Successful authentication, redirect home.
+            res.redirect('/')
+        })
 
-    app.get('/logout', authController.logout);
+    app.get('/', checkAuthentication, function (req, res) {
+        // Successful authentication, render home.
+        res.render('pages/index', { user: req.user })
+    })
 
-
-    app.post('/signin', passport.authenticate('local-signin', {
-        successRedirect: '/jobs',
-
-        failureRedirect: '/'
+    function checkAuthentication (req, res, next) {
+        if (req.isAuthenticated()) {
+            // if user is looged in, req.isAuthenticated() will return true
+            next()
+        } else {
+            res.redirect('/g5_auth/users/auth/g5')
+        }
     }
 
-    ));
-
-
-    function isLoggedIn(req, res, next) {
-
-        if (req.isAuthenticated())
-
-            return next();
-
-        res.redirect('/jobs');
-
-    }
-
-    function isAdmin(req, res, next) {
+    function isAdmin (req, res, next) {
         if (req.isAuthenticated() && req.user.group == 'admin') {
             return next();
-        }
-        else if (req.isAuthenticated()) {
-            res.redirect('/jobs');
         }
         else {
             res.redirect('/');

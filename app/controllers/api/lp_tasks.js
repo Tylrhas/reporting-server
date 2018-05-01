@@ -10,8 +10,8 @@ const myEmitter = new MyEmitter();
 
 //This will throttle the requests so no more than 30 are made every 15 seconds 
 throttledRequest.configure({
-	requests: 20,
-	milliseconds: 15000
+	requests: 2,
+	milliseconds: 1000
 });
 
 
