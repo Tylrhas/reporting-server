@@ -28,14 +28,16 @@ module.exports = function (app, passport) {
         where: {
           task_id: req.body.id,
         }
-      })
-      // add new partent ids for this task
-      for (let i = 0; i < req.body.parent_ids.length; i++) {
-        db.lp_parent_id.upsert({
-          task_id: req.body.id,
-          lp_parent_id: req.body.parent_ids[i]
-        })
+      }).then(task => {
+        // add new partent ids for this task
+        for (let i = 0; i < req.body.parent_ids.length; i++) {
+          db.lp_parent_id.upsert({
+            task_id: req.body.id,
+            lp_parent_id: req.body.parent_ids[i]
+          })
+        }
       }
+      )
 
     }
     else if (req.body.change_type === 'create') {
@@ -120,16 +122,17 @@ module.exports = function (app, passport) {
         where: {
           project_id: req.body.id
         }
-      })
-
-      for(let i = 0; i < req.body.global_priority.length; i++) {
+      }).then(priorities => {
         //create the new priority for this project
-        db.lp_project_priority.create({
-          project_id: req.body.id,
-          priority: global_priority[i],
-          index: i,
-        })
+        for (let i = 0; i < req.body.global_priority.length; i++) {
+          db.lp_project_priority.create({
+            project_id: req.body.id,
+            priority: global_priority[i],
+            index: i,
+          })
+        }
       }
+      )
     }
     else if (req.body.change_type === 'create') {
       console.log('create')
@@ -168,14 +171,14 @@ module.exports = function (app, passport) {
       // FIND OR CREATE THE PROJECT 
       db.lp_project.create({ update_object })
 
-      for(let i = 0; i < req.body.global_priority.length; i++) {
-      //create the priority for this project
-      db.lp_project_priority.create({
-        project_id: req.body.id,
-        priority: global_priority[i],
-        index: i,
-      })
-    }
+      for (let i = 0; i < req.body.global_priority.length; i++) {
+        //create the priority for this project
+        db.lp_project_priority.create({
+          project_id: req.body.id,
+          priority: global_priority[i],
+          index: i,
+        })
+      }
 
 
     }
