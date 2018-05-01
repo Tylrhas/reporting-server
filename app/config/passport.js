@@ -34,7 +34,6 @@ module.exports = function (passport, user) {
             'bearer': accessToken
           }
         }, (error, response, body) => {
-          body = JSON.parse(body)
           if (response.statusCode === 200) {
             // the token is valid
             User.findOrCreate({ where: { email: body.email }, defaults: { token: accessToken, first_name: body.first_name, last_name: body.last_name, title: body.title, role: body.roles[0].name } })
