@@ -4,15 +4,10 @@ var exports = module.exports = {}
 
 exports.jobs = function (req, res) {
     sequelize.query("SELECT jobname, lastrun, lastrunstatus FROM jobs").then(results => {
-        console.log(results[0]);
+        console.log('we here')
         res.render('pages/jobs', { user: req.user, jobs: formatresults(results[0]) });
     });
 }
-
-exports.add_user =  function(req, res) {
-    res.render('pages/add_user', { user: req.user});
- }
-
 function formatresults(results) {
     formattedResults = {};
     for (var i = 0; i < Object.keys(results).length; i++) {
