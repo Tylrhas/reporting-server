@@ -116,6 +116,20 @@ module.exports = function (app, passport) {
       })
 
       // delete the old project priority
+      db.lp_project_priority.destroy({
+        where: {
+          project_id: req.body.id
+        }
+      })
+
+      for(let i = 0; i < req.body.global_priority.length; i++) {
+        //create the new priority for this project
+        db.lp_project_priority.create({
+          project_id: req.body.id,
+          priority: global_priority[i],
+          index: i,
+        })
+      }
     }
     else if (req.body.change_type === 'create') {
       console.log('create')
@@ -152,14 +166,55 @@ module.exports = function (app, passport) {
       }
 
       // FIND OR CREATE THE PROJECT 
-      db.lp_project.create({update_object})
+      db.lp_project.create({ update_object })
+
+      for(let i = 0; i < req.body.global_priority.length; i++) {
+      //create the priority for this project
+      db.lp_project_priority.create({
+        project_id: req.body.id,
+        priority: global_priority[i],
+        index: i,
+      })
+    }
+
+
     }
     else if (req.body.change_type === 'delete') {
-      // DELETE THE PROJECT AND ALL TASK ASSOCIATED WITH IT
-      // delete the partent ids that are associates with the tasks 
       // delete the project priorities associated with the project
       console.log('delete')
       console.log(req.body)
+
+      // DELETE THE PROJECT AND ALL TASK ASSOCIATED WITH IT
+      db.lp_project.destroy({
+        where: {
+          id: req.body.id
+        }
+      })
+      // find all tasks associated with a project
+      db.lp_task.findAll({
+        where: {
+          project_id: req.body.id
+        }
+      }).then(tasks => {
+        for (let i = 0; i < tasks.length; i++) {
+          let task = tasks[i].id
+
+          // delete the partent ids that are associates with the tasks 
+          db.lp_parent_id.destroy({
+            where: {
+              task_id: task.id,
+            }
+          })
+          //destroy the task
+          task.destroy();
+        }
+      })
+
+      db.lp_project_priority.destroy({
+        where: {
+          project_id: req.body.id
+        }
+      })
     }
 
   })
