@@ -127,7 +127,7 @@ module.exports = function (app, passport) {
         for (let i = 0; i < req.body.global_priority.length; i++) {
           db.lp_project_priority.create({
             project_id: req.body.id,
-            priority: global_priority[i],
+            priority: req.body.global_priority[i],
             index: i,
           })
         }
@@ -175,7 +175,7 @@ module.exports = function (app, passport) {
         //create the priority for this project
         db.lp_project_priority.create({
           project_id: req.body.id,
-          priority: global_priority[i],
+          priority: req.body.global_priority[i],
           index: i,
         })
       }
