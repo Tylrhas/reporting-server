@@ -26,15 +26,26 @@ module.exports = function (app, passport) {
                     'date_done': null,
                     'e_finish': {
                         [Op.gt]: Sequelize.col('deadline')
-                    }, 
-                        [Op.or]: [{'task_name': 'Activation Of Services'}, {'task_name': 'Launch Websites'}] 
+                    },
+                    [Op.or]: [{
+                        'task_name': {
+                            [Op.like]: '%Activation%'
+                        }
+                    },
+                    {
+                        'task_name': {
+                            [Op.like]: '%Launch%'
+                        }
+                    }
+                    ]
+
                 }
             }]
 
         }).then(results => {
             console.log(results)
             // send over the projects lp_space_id to create links on page and moment to change the date 
-            res.render('pages/at_risk_projects', {user: req.user, projects: results, lp_space_id: process.env.LPWorkspaceId, moment: moment});
+            res.render('pages/at_risk_projects', { user: req.user, projects: results, lp_space_id: process.env.LPWorkspaceId, moment: moment });
         })
     });
 } 
