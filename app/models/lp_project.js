@@ -64,7 +64,7 @@ module.exports = function (sequelize, Sequelize) {
         risk_level: {
             type: Sequelize.TEXT,
         },
-        phase: {
+        ps_phase: {
             type: Sequelize.TEXT,
         },
         vertical: {
@@ -82,8 +82,8 @@ module.exports = function (sequelize, Sequelize) {
         integration_type: {
             type: Sequelize.TEXT,
         },
-        client_type: {
-            type: Sequelize.TEXT,
+        client_id: {
+            type: Sequelize.INTEGER,
         }
     });
 
