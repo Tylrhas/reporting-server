@@ -71,4 +71,24 @@ module.exports = function (app, passport) {
       })
     }
   });
+
+  app.post('/webhooks/projects', function (req, res) {
+    // project webhook
+    // LP Post to the webhood to update the task
+    res.sendStatus(200)
+    if (req.body.change_type === 'update') {
+      console.log('update')
+      console.log(req.body)
+    }
+    else if(req.body.change_type === 'create') {
+      console.log('create')
+      console.log(req.body)
+    }
+    else if (req.body.change_type === 'delete') {
+        // DELETE THE PROJECT AND ALL TASK ASSOCIATED WITH IT
+        console.log('delete')
+        console.log(req.body)
+    }
+
+  })
 }
