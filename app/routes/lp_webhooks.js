@@ -114,7 +114,7 @@ module.exports = function (app, passport) {
 
       // FIND OR CREATE THE LOCATION THEN UPDATE IT WITH THE NEW DATA
       db.lp_project.findOrCreate({ where: { id: req.body.id }, defaults: { project_name: req.body.name } }).then(project => {
-        project.update(update_object)
+        project[0].update(update_object)
       })
 
       // delete the old project priority
