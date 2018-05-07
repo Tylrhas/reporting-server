@@ -223,7 +223,23 @@ module.exports = function (app, passport) {
   })
 
   app.post('/webhooks/clients', function (req, res) {
+    console.log('clients')
     res.sendStatus(200)
+    console.log(req.body)
+    if (req.body.change_type === 'update') {
+    }
+    else if (req.body.change_type === 'create') {
+
+    }
+    else if(req.body.change_type === 'delete') {
+
+    }
+
+  })
+
+  app.post('/webhooks/folders', function (req, res) {
+    res.sendStatus(200)
+    console.log('folders')
     console.log(req.body)
     if (req.body.change_type === 'update') {
     }
