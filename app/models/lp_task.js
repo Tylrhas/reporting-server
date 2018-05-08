@@ -57,6 +57,9 @@ module.exports = function (sequelize, Sequelize) {
         ready_on:{
             type: Sequelize.DATE
         },
+        parent_id:{
+            type: Sequelize.INTEGER
+        }
 
 
     });

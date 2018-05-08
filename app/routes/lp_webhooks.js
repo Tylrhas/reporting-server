@@ -4,8 +4,6 @@ var db = require("../models")
 
 module.exports = function (app, passport) {
   app.post('/webhooks/tasks', function (req, res) {
-    console.log('Tasks')
-    console.log(req.body)
     // LP Post to the webhood to update the task
     res.sendStatus(200)
     if (req.body.change_type === 'update') {
@@ -18,29 +16,14 @@ module.exports = function (app, passport) {
         hrs_logged: req.body.hours_logged,
         date_done: req.body.done_on,
         hrs_remaning: req.body.high_effort_remaining,
-        ready_on: req.body.custom_field_values['Ready To Start On']
+        ready_on: req.body.custom_field_values['Ready To Start On'],
+        parent_id: req.body.parent_id
+
       }, {
           where: {
             id: req.body.id
           }
         })
-
-      // // destroy the old partent ids from this task 
-      // db.lp_parent_id.destroy({
-      //   where: {
-      //     task_id: req.body.id,
-      //   }
-      // }).then(task => {
-      //   // add new partent ids for this task
-      //   for (let i = 0; i < req.body.parent_ids.length; i++) {
-      //     db.lp_parent_id.upsert({
-      //       task_id: req.body.id,
-      //       lp_parent_id: req.body.parent_ids[i],
-      //     })
-      //   }
-      // }
-      // )
-
     }
     else if (req.body.change_type === 'create') {
 
@@ -55,16 +38,9 @@ module.exports = function (app, passport) {
         hrs_logged: req.body.hours_logged,
         date_done: req.body.done_on,
         hrs_remaning: req.body.high_effort_remaining,
-        ready_on: req.body.custom_field_values['Ready To Start On']
+        ready_on: req.body.custom_field_values['Ready To Start On'],
+        parent_id: req.body.parent_id
       })
-      // trigger update of the other fields that do not come in webhooks like inherited tags
-
-      for (let i = 0; i < req.body.parent_ids.length; i++) {
-        db.lp_parent_id.upsert({
-          task_id: req.body.id,
-          lp_parent_id: req.body.parent_ids[i]
-        })
-      }
 
     }
     else if (req.body.change_type === 'delete') {
@@ -137,6 +113,9 @@ module.exports = function (app, passport) {
         }
       }
       )
+
+     // potentially delete the folders and update them with the new ones
+
     }
     else if (req.body.change_type === 'create') {
       console.log('create')
@@ -183,7 +162,7 @@ module.exports = function (app, passport) {
           index: i,
         })
       }
-
+// potentially delete the folders and update them with the new ones
 
     }
     else if (req.body.change_type === 'delete') {
@@ -235,7 +214,7 @@ module.exports = function (app, passport) {
     else if (req.body.change_type === 'create') {
 
     }
-    else if(req.body.change_type === 'delete') {
+    else if (req.body.change_type === 'delete') {
 
     }
 
@@ -253,7 +232,7 @@ module.exports = function (app, passport) {
     else if (req.body.change_type === 'create') {
 
     }
-    else if(req.body.change_type === 'delete') {
+    else if (req.body.change_type === 'delete') {
 
     }
 

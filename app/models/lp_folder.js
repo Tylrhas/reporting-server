@@ -17,12 +17,16 @@ module.exports = function (sequelize, Sequelize) {
       },
       date_done: {
         type: Sequelize.DATE
+      },
+      project_id: {
+        type: Sequelize.INTEGER
       }
+      
       
   });
   lp_folder.associate = function (models) {
     // associate project tasks
-    models.lp_folder.hasMany(models.lp_project, { foreignKey: 'client_id', sourceKey: 'id' });
+    models.lp_folder.hasMany(models.lp_task, { foreignKey: 'parent_id', sourceKey: 'id' });
 };
   return lp_folder;
 }
