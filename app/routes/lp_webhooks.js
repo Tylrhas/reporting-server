@@ -4,6 +4,8 @@ var db = require("../models")
 
 module.exports = function (app, passport) {
   app.post('/webhooks/tasks', function (req, res) {
+    console.log('Tasks')
+    console.log(req.body)
     // LP Post to the webhood to update the task
     res.sendStatus(200)
     if (req.body.change_type === 'update') {
@@ -23,21 +25,21 @@ module.exports = function (app, passport) {
           }
         })
 
-      // destroy the old partent ids from this task 
-      db.lp_parent_id.destroy({
-        where: {
-          task_id: req.body.id,
-        }
-      }).then(task => {
-        // add new partent ids for this task
-        for (let i = 0; i < req.body.parent_ids.length; i++) {
-          db.lp_parent_id.upsert({
-            task_id: req.body.id,
-            lp_parent_id: req.body.parent_ids[i]
-          })
-        }
-      }
-      )
+      // // destroy the old partent ids from this task 
+      // db.lp_parent_id.destroy({
+      //   where: {
+      //     task_id: req.body.id,
+      //   }
+      // }).then(task => {
+      //   // add new partent ids for this task
+      //   for (let i = 0; i < req.body.parent_ids.length; i++) {
+      //     db.lp_parent_id.upsert({
+      //       task_id: req.body.id,
+      //       lp_parent_id: req.body.parent_ids[i],
+      //     })
+      //   }
+      // }
+      // )
 
     }
     else if (req.body.change_type === 'create') {
@@ -75,6 +77,8 @@ module.exports = function (app, passport) {
   });
 
   app.post('/webhooks/projects', function (req, res) {
+    console.log('projects')
+    console.log(req.body)
     // project webhook
     // LP Post to the webhood to update the task
     res.sendStatus(200)
@@ -242,6 +246,9 @@ module.exports = function (app, passport) {
     console.log('folders')
     console.log(req.body)
     if (req.body.change_type === 'update') {
+      db.lp_folder.findOrCreate({ where: { id: req.body.id }, defaults: { project_name: req.body.name } }).then(project => {
+        project[0].update(update_object)
+      })
     }
     else if (req.body.change_type === 'create') {
 
