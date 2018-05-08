@@ -60,8 +60,6 @@ module.exports = function (app, passport) {
     res.sendStatus(200)
 
     if (req.body.change_type === 'update') {
-      console.log('update')
-      console.log(req.body)
 
       let update_object = {
         project_name: req.body.name,
@@ -114,7 +112,7 @@ module.exports = function (app, passport) {
       }
       )
 
-     // potentially delete the folders and update them with the new ones
+      // potentially delete the folders and update them with the new ones
 
     }
     else if (req.body.change_type === 'create') {
@@ -162,7 +160,7 @@ module.exports = function (app, passport) {
           index: i,
         })
       }
-// potentially delete the folders and update them with the new ones
+      // potentially delete the folders and update them with the new ones
 
     }
     else if (req.body.change_type === 'delete') {
@@ -210,15 +208,27 @@ module.exports = function (app, passport) {
     res.sendStatus(200)
     console.log(req.body)
     if (req.body.change_type === 'update') {
+      db.lp_client.findOrCreate({ where: { id: req.body.id }, defaults: { name: req.body.name } }).then(project => {
+        project[0].update({
+          id: req.body.id,
+        name: req.body.name
+        })
+      })
     }
     else if (req.body.change_type === 'create') {
-
+      db.lp_client.create({
+        id: req.body.id,
+        name: req.body.name
+      })
     }
     else if (req.body.change_type === 'delete') {
-
-    }
-
-  })
+      db.lp_client.destroy({
+        where: {
+          id: req.body.id
+        }
+    })
+  }
+})
 
   app.post('/webhooks/folders', function (req, res) {
     res.sendStatus(200)
