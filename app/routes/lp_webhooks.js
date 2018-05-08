@@ -182,13 +182,6 @@ module.exports = function (app, passport) {
       }).then(tasks => {
         for (let i = 0; i < tasks.length; i++) {
           let task = tasks[i].id
-
-          // delete the partent ids that are associates with the tasks 
-          db.lp_parent_id.destroy({
-            where: {
-              task_id: task.id,
-            }
-          })
           //destroy the task
           task.destroy();
         }
