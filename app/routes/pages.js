@@ -38,14 +38,14 @@ module.exports = function (app, passport) {
                 model: db.lp_project_priority,
                 where: {
                     [Op.or]: [
-                    { index: 3 },
-                    { index: null }
-                ]
+                        { index: 3 },
+                        { index: null }
+                    ]
                 }
             }],
             // //order by priority
             order: [
-                [ db.lp_project_priority, 'priority', 'ASC' ]
+                [db.lp_project_priority, 'priority', 'ASC']
             ]
         }).then(results => {
             console.log(results)
@@ -54,6 +54,37 @@ module.exports = function (app, passport) {
         })
     })
 
+    app.get('/reports/active-projects', checkAuthentication, function (req, res) {
+        db.lp_project.findAll({
+            attributes: ['project_name', 'expected_finish','id'],
+            where: {
+                is_done: false,
+                expected_finish: {
+                    [Op.not]: null
+                }
+
+            },
+            include: [
+                {
+                    attributes: ['project_id', 'priority', 'index'],
+                    model: db.lp_project_priority,
+                    where: {
+                        [Op.or]: [
+                            { index: 3 },
+                            { index: null }
+                        ]
+                    }
+                }],
+            // //order by priority
+            order: [
+                [db.lp_project_priority, 'priority', 'ASC']
+            ]
+        }).then(results => {
+            console.log(results)
+            // send over the projects lp_space_id to create links on page and moment to change the date 
+            res.render('pages/active_projects', { user: req.user, projects: results, lp_space_id: process.env.LPWorkspaceId, moment: moment });
+        })
+    })
     function checkAuthentication (req, res, next) {
         if (req.isAuthenticated()) {
             // if user is looged in, req.isAuthenticated() will return true

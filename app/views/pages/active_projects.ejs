@@ -1,0 +1,42 @@
+<% include ../partials/header.ejs %>
+
+  <div id="homenav">
+    <% include ../partials/nav.ejs %>
+  </div>
+
+  <div class="jumbotron text-center hero">
+    <div class="container">
+      <h1>Active Projects</h1>
+    </div>
+  </div>
+
+  <div class="container">
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">Project Name</th>
+          <th scope="col">Priority</th>
+          <th scope="col">Estimated Finish</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% for(var i=0; i < projects.length; i++) { %>
+            <tr>
+              <td>
+                <a href="<%= 'https://app.liquidplanner.com/space/' + lp_space_id +'/projects/show/' + projects[i].dataValues.id %>" target="_blank">
+                  <%= projects[i].project_name %>
+                </a>
+              </td>
+              <td>
+                <%= projects[i].dataValues.lp_project_priorities[0].priority %>
+              </td>
+              <td>
+                <%= moment(projects[i].dataValues.expected_finish).format( 'MMM-DD-YYYY') %>
+              </td>
+            </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+
+  <% include ../partials/footer.ejs %>

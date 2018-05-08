@@ -24,6 +24,23 @@ module.exports = function (app, passport) {
             id: req.body.id
           }
         })
+
+      // delete the old project priority
+      db.lp_project_priority.destroy({
+        where: {
+          project_id: req.body.project_id
+        }
+      }).then(priorities => {
+        //create the new priority for this project
+        for (let i = 0; i < req.body.global_priority.length; i++) {
+          db.lp_project_priority.create({
+            project_id: req.body.project_id,
+            priority: req.body.global_priority[i],
+            index: i,
+          })
+        }
+      })
+      
     }
     else if (req.body.change_type === 'create') {
 
@@ -41,6 +58,15 @@ module.exports = function (app, passport) {
         ready_on: req.body.custom_field_values['Ready To Start On'],
         parent_id: req.body.parent_id
       })
+
+      for (let i = 0; i < req.body.global_priority.length; i++) {
+        //create the priority for this project
+        db.lp_project_priority.create({
+          project_id: req.body.project_id,
+          priority: req.body.global_priority[i],
+          index: i,
+        })
+      }
 
     }
     else if (req.body.change_type === 'delete') {
@@ -204,7 +230,7 @@ module.exports = function (app, passport) {
       db.lp_client.findOrCreate({ where: { id: req.body.id }, defaults: { name: req.body.name } }).then(project => {
         project[0].update({
           id: req.body.id,
-        name: req.body.name
+          name: req.body.name
         })
       })
     }
@@ -219,9 +245,9 @@ module.exports = function (app, passport) {
         where: {
           id: req.body.id
         }
-    })
-  }
-})
+      })
+    }
+  })
 
   app.post('/webhooks/folders', function (req, res) {
     res.sendStatus(200)
