@@ -20,7 +20,7 @@ schedule.scheduleJob('0 * * * *', function(){
   lpLBS.update();
 });
 
-schedule.scheduleJob('38 * * * *', function(){
+schedule.scheduleJob('*/15 * * * *', function(){
   console.log('Updating Project Priorities');
   lpProjects.updatePriority(null,null);
 });
