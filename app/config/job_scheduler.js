@@ -2,9 +2,7 @@
 var schedule = require('node-schedule')
 
 //REQUIRED FILES
-QCSheet = require('../controllers//jobs/qc_sheet_api')
 clientTime = require('../controllers/jobs/client_time');
-lpTasks = require('../controllers/api/lp_tasks');
 lpProjects = require('../controllers/api/lp_projects');
 lpLBS = require('../controllers/api/lp_lbs');
 
@@ -24,23 +22,3 @@ schedule.scheduleJob('*/15 * * * *', function(){
   console.log('Updating Project Priorities');
   lpProjects.updatePriority(null,null);
 });
-
-// schedule.scheduleJob('20 * * * *', function(){
-//   console.log('Updating LP Projects');
-//   lpProjects.updateProjects();
-// });
-
-// schedule.scheduleJob('0 */3 * * *', function(){
-//   console.log('Updating LP Tasks');
-//   lpTasks.updateLpTasksTableJob()
-// });
-
-// schedule.scheduleJob('30 22 * * *', function(){
-//   console.log('Updating QC Scores');
-//   QCSheet.updateQCScoresNoAPI()
-// });
-
-// schedule.scheduleJob('0 * * * *', function(){
-//   console.log('Updating LP Times');
-//   LPTime.update();
-// });
