@@ -11,6 +11,9 @@
   </div>
 
   <div class="container">
+    <div class="row">
+      <button class="btn btn-primary" id="download_csv">Download CSV</button>
+    </div>
     <table class="table">
       <thead>
         <tr>
@@ -25,7 +28,8 @@
           <% for(var i2=0; i2 < projects[i].lp_tasks.length; i2++) { %>
             <tr>
               <td>
-                <a href="<%= 'https://app.liquidplanner.com/space/' + lp_space_id +'/projects/show/' + projects[i].lp_tasks[i2].dataValues.project_id %>" target="_blank">
+                <a href="<%= 'https://app.liquidplanner.com/space/' + lp_space_id +'/projects/show/' + projects[i].lp_tasks[i2].dataValues.project_id %>"
+                  target="_blank">
                   <%= projects[i].project_name %>
                 </a>
               </td>
@@ -39,10 +43,36 @@
                 <%= moment(projects[i].lp_tasks[i2].dataValues.deadline).format( 'MMM-DD-YYYY') %>
               </td>
             </tr>
-          <% } %>
-        <% } %>
+            <% } %>
+              <% } %>
       </tbody>
     </table>
   </div>
+  <script>
+    $('#download_csv').click(function () {
+      // download the CSV
+      $.ajax({
+        url: "/api/download/at-risk-projects",
+        type: 'GET',
+        success: function (res) {
+          //date time for the file download
+          var date = new Date();
+          var year = date.getFullYear()
+          var month = date.getMonth() + 1     // "+ 1" becouse the 1st month is 0
+          var day = date.getDate()
+          var hour = date.getHours()
+          var minutes = date.getMinutes();
+          var secconds = date.getSeconds()
+          console.log(res)
+          var file = new Blob([res], {type: "text/csv"});
+          var url = URL.createObjectURL(file);
+          link = document.createElement('a')
+          link.setAttribute('href', url)
+          link.setAttribute('download', 'at_risk_projects'+'_'+month+'_'+day+'_'+year+'_'+hour+'_'+minutes+'_'+secconds+'.csv')
+          link.click();
+        }
+      });
+    })
+  </script>
 
   <% include ../partials/footer.ejs %>

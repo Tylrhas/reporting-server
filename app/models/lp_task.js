@@ -63,6 +63,12 @@ module.exports = function (sequelize, Sequelize) {
 
 
     });
+    Task.associate = function (models) {
+        // associate project tasks
+        models.lp_task.belongsTo(models.lp_project, { foreignKey: 'project_id', sourceKey: 'id' });
+         // associate project tasks
+         models.lp_task.hasMany(models.lp_project_priority, { foreignKey: 'project_id', sourceKey: 'project_id' });
+    };
 
     return Task;
 

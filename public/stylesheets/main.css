@@ -170,3 +170,7 @@ li.navbar-right a {
 .jobs-row{
   margin-bottom:15px;
 }
+#download_csv {
+  float: right;
+  margin: 10px;
+}

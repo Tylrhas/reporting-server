@@ -77,7 +77,7 @@ exports.updatePriority = function (req, res) {
 
         for (let i = 0; i < json.rows.length; i++ ) {
             // update all priorities
-            db.lp_project_priority.findOrCreate({ where: { project_id: json.rows[i].key, index: i }, defaults: {project_id: json.rows[i].key, index: i, priority: json.rows[i].priority } }).then(lp_project_priority => {
+            db.lp_project_priority.findOrCreate({ where: { project_id: json.rows[i].key, index: 3 }, defaults: {project_id: json.rows[i].key, index: 3, priority: json.rows[i].priority } }).then(lp_project_priority => {
                 lp_project_priority[0].update({priority: json.rows[i].priority})
               })
         }
