@@ -9,6 +9,9 @@ function filterStartEndProjects() {
       console.log( $(el).parent())
       $(el).parent().hide()
     }
+    else {
+      $(el).parent().show()
+    }
   })
 }
 
@@ -22,6 +25,9 @@ function filterEndDate() {
       console.log($(el).parent())
       $(el).parent().hide()
     }
+    else {
+      $(el).parent().show()
+    }
   })
 }
 
@@ -34,6 +40,9 @@ function filterStartDate() {
       //if it is not inbetween the two dates hide it 
       console.log($(el).parent())
       $(el).parent().hide()
+    }
+    else {
+      $(el).parent().show()
     }
   })
 }
