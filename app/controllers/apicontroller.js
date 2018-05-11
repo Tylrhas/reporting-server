@@ -31,7 +31,8 @@ exports.test_view = function (req, res) {
         })
 }
 exports.at_risk_CSV = function (req, res) {
-    db.lp_task.findAll({
+
+    var queryObject = {
         attributes: ['task_name', 'e_finish', 'deadline', 'project_id'],
         where: {
             'deadline': {
@@ -72,31 +73,54 @@ exports.at_risk_CSV = function (req, res) {
         order: [
             [db.lp_project_priority, 'priority', 'ASC']
         ]
-    }).then(results => {
+    }
+
+    if (req.query) {
+        if (req.query.start_date && req.query.end_date) {
+            queryObject.where.deadline = {
+                [Op.not]: null,
+                [Op.between]: [decodeURIComponent(req.query.start_date), decodeURIComponent(req.query.end_date)]
+            }
+        }
+        else if (req.query.start_date) {
+            queryObject.where.deadline = {
+                [Op.not]: null,
+                [Op.gte]: decodeURIComponent(req.query.start_date)
+            }
+        }
+        else if (req.query.end_date) {
+            queryObject.where.deadline = {
+                [Op.not]: null,
+                [Op.lte]: decodeURIComponent(req.query.end_date)
+            }
+        }
+    }
+
+    db.lp_task.findAll(queryObject).then(results => {
         results = results
         var flattenedJSON = []
         for (i = 0; i < results.length; i++) {
-            if(results[i].lp_project != null){
+            if (results[i].lp_project != null) {
                 var project = {
-                    'task_name' : results[i].task_name,
-                    'e_finish' : moment(results[i].e_finish).format( 'MM-DD-YYYY'),
-                    'deadline' : moment(results[i].deadline).format( 'MM-DD-YYYY'),
-                    'project_id' : results[i].project_id,
-                    'project_name' : results[i].lp_project.project_name,
-                    'priority' : results[i].lp_project_priorities[0].priority
+                    'task_name': results[i].task_name,
+                    'e_finish': moment(results[i].e_finish).format('MM-DD-YYYY'),
+                    'deadline': moment(results[i].deadline).format('MM-DD-YYYY'),
+                    'project_id': results[i].project_id,
+                    'project_name': results[i].lp_project.project_name,
+                    'priority': results[i].lp_project_priorities[0].priority
                 }
             }
             else {
                 var project = {
-                    'task_name' : results[i].task_name,
-                    'e_finish' : moment(results[i].e_finish).format( 'MM-DD-YYYY'),
-                    'deadline' : moment(results[i].deadline).format( 'MM-DD-YYYY'),
-                    'project_id' : results[i].project_id,
-                    'project_name' : null,
-                    'priority' : results[i].lp_project_priorities[0].priority
+                    'task_name': results[i].task_name,
+                    'e_finish': moment(results[i].e_finish).format('MM-DD-YYYY'),
+                    'deadline': moment(results[i].deadline).format('MM-DD-YYYY'),
+                    'project_id': results[i].project_id,
+                    'project_name': null,
+                    'priority': results[i].lp_project_priorities[0].priority
                 }
             }
-        flattenedJSON.push(project) 
+            flattenedJSON.push(project)
         }
         //convert this to CSV 
         var CSV = Papa.unparse(flattenedJSON)
