@@ -85,6 +85,42 @@ module.exports = function (app, passport) {
             res.render('pages/active_projects', { user: req.user, projects: results, lp_space_id: process.env.LPWorkspaceId, moment: moment });
         })
     })
+    app.get('/reports/deadline-passed', function (req, res) {
+        db.lp_task.findAll({
+            attributes: ['id', 'task_name','deadline'],
+            where: {
+                date_done: {
+                    [Op.not]: null
+                },
+                e_finish: {
+                    [Op.not]: null
+                },
+                deadline: {
+                    [Op.lt]: moment().format('YYYY-MM-DD')
+
+                }
+            },
+            include: [
+                {
+                    attributes: ['project_name', 'id'],
+                    model: db.lp_project,
+                    where: {
+                        is_done: {
+                            [Op.not]: true
+                        }  
+                    }
+                }],
+            // order by deadline
+            order: [
+                ['deadline', 'ASC']
+            ]
+        }).then(results => {
+            console.log(results)
+            // send over the projects lp_space_id to create links on page and moment to change the date 
+            res.render('pages/deadline_passed', { user: req.user, tasks: results, lp_space_id: process.env.LPWorkspaceId, moment: moment });
+            // res.json(results)
+        })
+    })
     function checkAuthentication (req, res, next) {
         if (req.isAuthenticated()) {
             // if user is looged in, req.isAuthenticated() will return true

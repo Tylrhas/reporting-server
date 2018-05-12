@@ -18,12 +18,6 @@ module.exports = function (sequelize, Sequelize) {
         started_on: {
             type: Sequelize.DATE,
         },
-        earliest_finish: {
-            type: Sequelize.DATE,
-        },
-        earliest_start: {
-            type: Sequelize.DATE,
-        },
         expected_finish: {
             type: Sequelize.DATE,
         },
