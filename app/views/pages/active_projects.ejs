@@ -1,16 +1,20 @@
 <% include ../partials/header.ejs %>
+<% include ../partials/nav.ejs %>
+<main class="app-content">
 
-  <div id="homenav">
-    <% include ../partials/nav.ejs %>
-  </div>
-
-  <div class="jumbotron text-center hero">
-    <div class="container">
+  <div class="app-title">
+    <div>
       <h1>Active Projects</h1>
     </div>
+    <ul class="app-breadcrumb breadcrumb">
+      <li class="breadcrumb-item"><i class="fa fa-home fa-lg"></i></li>
+      <li class="breadcrumb-item">Project Status</li>
+      <li class="breadcrumb-item active"><a href="#">Active Projects</a></li>
+    </ul>
   </div>
-
-  <div class="container">
+<div class="row">
+  <div class="col">
+  <div class="tile">
     <table class="table">
       <thead>
         <tr>
@@ -38,5 +42,7 @@
       </tbody>
     </table>
   </div>
-
+</div>
+</div>
   <% include ../partials/footer.ejs %>
+</main>

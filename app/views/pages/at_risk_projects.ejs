@@ -1,149 +1,156 @@
 <% include ../partials/header.ejs %>
   <!-- Inclued extra css files -->
   <link rel="stylesheet" type="text/css" href="/stylesheets/bootstrap-datepicker3.css" />
-  <div id="homenav">
-    <% include ../partials/nav.ejs %>
-  </div>
+  <% include ../partials/nav.ejs %>
 
-  <div class="jumbotron text-center hero">
-    <div class="container">
-      <h1>At Risk Projects</h1>
-    </div>
-  </div>
+    <main class="app-content">
 
-    <div class="row filters">
-      <div class="container">
-        <div class="col-md-10 form-horizontal" id="filters">
-          <div class="control-group row-fluid form-inline">
-            <div class="date col-md-5">
-              <label for="start_date">Start Date</label>
-              <input name="start_date" id="start_date" type="text" class="form-control">
+      <div class="app-title">
+        <div>
+          <h1>At Risk Projects</h1>
+        </div>
+        <ul class="app-breadcrumb breadcrumb">
+          <li class="breadcrumb-item">
+            <i class="fa fa-home fa-lg"></i>
+          </li>
+          <li class="breadcrumb-item">Project Status</li>
+          <li class="breadcrumb-item active">
+            <a href="#">At Risk Projects</a>
+          </li>
+        </ul>
+      </div>
+      <div class="row">
+        <div class="col">
+          <div class="tile">
+            <div class="row filters">
+              <div class="col-md-10 form-horizontal form-group" id="filters">
+                <div class="row">
+                  <div class="date col-md-6 input-daterange">
+                    <label for="start_date">Deadlines</label>
+                    <input class="col-md-5" name="start_date" id="start_date" type="text" class="form-control">
+                    <span class="input-group-addon">to</span>
+                    <input class="col-md-5" name="end_date" id="end_date" type="text" class="form-control">
+                  </div>
+                  <div class="date col-md-3 float-right">
+                    <button class="btn btn-danger float-right" id="clear_filter">Clear Dates</button>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-2">
+                <button class="btn btn-primary float-left" id="download_csv">Download CSV</button>
+              </div>
             </div>
-            <div class="date col-md-5">
-              <label for="end_date">End Date</label>
-              <input name="end_date" id="end_date" type="text" class="form-control">
-            </div>
-            <div class="date col-md-2">
-              <button class="btn btn-danger float-right" id="clear_filter">Clear Dates</button>
-            </div>
+            <table id="projects_table" class="table">
+              <thead>
+                <tr>
+                  <th scope="col">Project Name</th>
+                  <th scope="col">Task Name</th>
+                  <th scope="col">Estimated Finish</th>
+                  <th scope="col">Deadline</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% for(var i=0; i < projects.length; i++) { %>
+                  <% for(var i2=0; i2 < projects[i].lp_tasks.length; i2++) { %>
+                    <tr>
+                      <td>
+                        <a href="<%= 'https://app.liquidplanner.com/space/' + lp_space_id +'/projects/show/' + projects[i].lp_tasks[i2].dataValues.project_id %>"
+                          target="_blank">
+                          <%= projects[i].project_name %>
+                        </a>
+                      </td>
+                      <td>
+                        <%= projects[i].lp_tasks[i2].dataValues.task_name %>
+                      </td>
+                      <td>
+                        <%= moment(projects[i].lp_tasks[i2].dataValues.e_finish).format( 'MMM-DD-YYYY') %>
+                      </td>
+                      <td>
+                        <%= moment(projects[i].lp_tasks[i2].dataValues.deadline).format( 'MMM-DD-YYYY') %>
+                      </td>
+                    </tr>
+                    <% } %>
+                      <% } %>
+              </tbody>
+            </table>
           </div>
         </div>
-        <div class="col-md-2">
-          <button class="btn btn-primary float-left" id="download_csv">Download CSV</button>
-        </div>
       </div>
-    </div>
-    <div class="container">
-    <table id="projects_table" class="table">
-      <thead>
-        <tr>
-          <th scope="col">Project Name</th>
-          <th scope="col">Task Name</th>
-          <th scope="col">Estimated Finish</th>
-          <th scope="col">Deadline</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% for(var i=0; i < projects.length; i++) { %>
-          <% for(var i2=0; i2 < projects[i].lp_tasks.length; i2++) { %>
-            <tr>
-              <td>
-                <a href="<%= 'https://app.liquidplanner.com/space/' + lp_space_id +'/projects/show/' + projects[i].lp_tasks[i2].dataValues.project_id %>"
-                  target="_blank">
-                  <%= projects[i].project_name %>
-                </a>
-              </td>
-              <td>
-                <%= projects[i].lp_tasks[i2].dataValues.task_name %>
-              </td>
-              <td>
-                <%= moment(projects[i].lp_tasks[i2].dataValues.e_finish).format( 'MMM-DD-YYYY') %>
-              </td>
-              <td>
-                <%= moment(projects[i].lp_tasks[i2].dataValues.deadline).format( 'MMM-DD-YYYY') %>
-              </td>
-            </tr>
-            <% } %>
-              <% } %>
-      </tbody>
-    </table>
-  </div>
-  <script type="text/javascript" src="/js/bootstrap-datepicker.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.1/moment.min.js"></script>
-  <script src="/js/at_risk_projects.js"></script>
-  <script>
-    //auto filter the table 
-    $('#filters .date input').datepicker()
-      .on('hide', function (e) {
-        // filter to dates that are greater than this 
-        if ($('#end_date').val() && $('#start_date').val()) {
-          // there is a start and end date selected
-          filterStartEndProjects()
-        }
-        else if ($('#start_date').val()) {
-          // only start date val
-          filterStartDate()
-        }
-        else if ($('#end_date').val()) {
-          // only end date val
-          filterEndDate()
-        }
-        else {
-          // display all data
+      <script type="text/javascript" src="/js/plugins/bootstrap-datepicker.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.1/moment.min.js"></script>
+      <script src="/js/at_risk_projects.js"></script>
+      <script>
+        //auto filter the table 
+        $('#filters .date input').datepicker({
+          todayHighlight: true,
+          toggleActive: true,
+          container: '#filters'
+        })
+          .on('hide', function (e) {
+            // filter to dates that are greater than this 
+            if ($('#end_date').val() && $('#start_date').val()) {
+              // there is a start and end date selected
+              filterStartEndProjects()
+            }
+            else if ($('#start_date').val()) {
+              // only start date val
+              filterStartDate()
+            }
+            else if ($('#end_date').val()) {
+              // only end date val
+              filterEndDate()
+            }
+            else {
+              // display all data
+              $('table#projects_table tbody tr').show()
+            }
+          });
+
+
+        $('#download_csv').click(function () {
+          // download the CSV
+
+          var url = "/api/download/at-risk-projects"
+
+          // if dates are selected then add a query string 
+          if ($('#start_date').val()) {
+            url = url + '?start_date=' + encodeURIComponent($('#start_date').val())
+            if ($('#end_date').val()) {
+              url = url + '&end_date=' + encodeURIComponent($('#end_date').val())
+            }
+          }
+          else if ($('#end_date').val()) {
+            url = url + '?end_date=' + encodeURIComponent($('#end_date').val())
+          }
+
+          $.ajax({
+            url: url,
+            type: 'GET',
+            success: function (res) {
+              //date time for the file download
+              var date = new Date();
+              var year = date.getFullYear()
+              var month = date.getMonth() + 1     // "+ 1" becouse the 1st month is 0
+              var day = date.getDate()
+              var hour = date.getHours()
+              var minutes = date.getMinutes();
+              var secconds = date.getSeconds()
+              console.log(res)
+              var file = new Blob([res], { type: "text/csv" });
+              var url = URL.createObjectURL(file);
+              link = document.createElement('a')
+              link.setAttribute('href', url)
+              link.setAttribute('download', 'at_risk_projects' + '_' + month + '_' + day + '_' + year + '_' + hour + '_' + minutes + '_' + secconds + '.csv')
+              link.click();
+            }
+          });
+        })
+
+        $('#clear_filter').click(function () {
+          $('#start_date').val(null)
+          $('#end_date').val(null)
           $('table#projects_table tbody tr').show()
-        }
-      });
-
-
-    $('#download_csv').click(function () {
-      // download the CSV
-
-      var url = "/api/download/at-risk-projects"
-
-      // if dates are selected then add a query string 
-      if ($('#start_date').val()) {
-        url = url + '?start_date=' + encodeURIComponent($('#start_date').val())
-        if ($('#end_date').val()) {
-          url = url + '&end_date=' + encodeURIComponent($('#end_date').val())
-        }
-      }
-      else if ($('#end_date').val()) {
-        url = url + '?end_date=' + encodeURIComponent($('#end_date').val())
-      }
-
-      $.ajax({
-        url: url,
-        type: 'GET',
-        success: function (res) {
-          //date time for the file download
-          var date = new Date();
-          var year = date.getFullYear()
-          var month = date.getMonth() + 1     // "+ 1" becouse the 1st month is 0
-          var day = date.getDate()
-          var hour = date.getHours()
-          var minutes = date.getMinutes();
-          var secconds = date.getSeconds()
-          console.log(res)
-          var file = new Blob([res], { type: "text/csv" });
-          var url = URL.createObjectURL(file);
-          link = document.createElement('a')
-          link.setAttribute('href', url)
-          link.setAttribute('download', 'at_risk_projects' + '_' + month + '_' + day + '_' + year + '_' + hour + '_' + minutes + '_' + secconds + '.csv')
-          link.click();
-        }
-      });
-    })
-
-    $('#filters .date input').datepicker({
-      todayHighlight: true,
-      toggleActive: true
-    });
-
-    $('#clear_filter').click(function () {
-      $('#start_date').val(null)
-      $('#end_date').val(null)
-      $('table#projects_table tbody tr').show()
-    })
-  </script>
-
-  <% include ../partials/footer.ejs %>
+        })
+      </script>
+    </main>
+    <% include ../partials/footer.ejs %>
