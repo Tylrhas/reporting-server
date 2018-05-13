@@ -1,0 +1,74 @@
+
+body, html {
+    height: 100%;
+    background-color: #e4e5e6;
+  }
+    /* Begin Nav */
+  #sidebar {
+    margin: 0px;
+    height: calc(100vh - 55px) !important;
+    position: fixed;
+    transition: 2s;
+    margin-top:55px;
+  }
+  #sidebar nav{
+    height: calc(100vh - 100px);
+  }
+  #sidebar .nav-item a, #sidebar .nav-item {
+      color: #fff;
+      text-transform: uppercase;
+      font-weight: bold;
+  }
+  #sidebar .dropdown-menu {
+       margin-left: 0px;
+       background-color: transparent;
+       border: none;
+       position: relative !important;
+       transform: none !important;
+       transition: 2s
+  }
+  #sidebar .dropdown-menu a.dropdown-item{
+      padding-left: 0px;
+}
+#sidebar .nav-item.title {
+    margin-bottom: 20px;
+}
+  /* End Nav */
+
+/* Begin Colors */
+
+.bg-faded {
+    background-color: #e9ecef;
+}
+.bg-navy{
+    background-color:rgba(13, 34, 64, 1)
+}
+.navy-text {
+    background-color:rgba(13, 34, 64, 1)
+}
+}
+/* End Colors */
+/* Begin SVG Logo */
+svg.logo {
+    height:100px;
+}
+.g5-logo-3{
+    fill:#fff;
+}
+.g5-logo-4 {
+    fill:#7a97ab;
+}
+
+/* End SVG Logo */
+.center {
+    text-align: center;
+}
+
+.brand {
+    font-size: 250%;
+    border: 2px solid #fff;
+    padding: 10px;
+    border-radius: 15px;
+    margin: 0 auto;
+    width:92px;
+}
