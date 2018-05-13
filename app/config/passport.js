@@ -39,6 +39,7 @@ module.exports = function (passport, user) {
             // the token is valid
             User.findOrCreate({ where: { email: body.email }, defaults: { token: accessToken, first_name: body.first_name, last_name: body.last_name, title: body.title, role: body.roles[0].name } })
               .spread((user, created, err) => {
+                user.update({token: accessToken})
                 console.log(user.get({
                   plain: true
                 }))
