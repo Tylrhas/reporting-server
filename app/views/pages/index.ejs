@@ -1,14 +1,18 @@
 <% include ../partials/header.ejs %>
 
-<div id="homenav">
-<% include ../partials/nav.ejs %>
-</div>
+  <% include ../partials/nav.ejs %>
+    <main class="app-content">
 
-<div class="jumbotron text-center hero">
-  <div class="container">
-    <h1>ProServices Reporting Dashboard</h1>
-    <p>A quick way to get up-to-date ProService Scorecards along with productivity and revenue reports.</p>
-  </div>
-</div>
-
-<% include ../partials/footer.ejs %>
+        <div class="app-title">
+          <div>
+            <h1>Professional Services Reporting Dashboard</h1>
+            <p>A quick way to get up-to-date on all things Liquid Planner</p>
+          </div>
+          <ul class="app-breadcrumb breadcrumb">
+            <li class="breadcrumb-item">
+              <i class="fa fa-home fa-lg"></i>
+            </li>
+          </ul>
+        </div>
+      </main>
+      <% include ../partials/footer.ejs %>
