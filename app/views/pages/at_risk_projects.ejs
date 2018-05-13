@@ -23,21 +23,19 @@
         <div class="col">
           <div class="tile">
             <div class="row filters">
-              <div class="col-md-10 form-horizontal form-group" id="filters">
+              <div class="col-md-8 form-horizontal form-group" id="filters">
                 <div class="row">
-                  <div class="date col-md-6 input-daterange">
+                  <div class="date input-daterange">
                     <label for="start_date">Deadlines</label>
                     <input class="col-md-5" name="start_date" id="start_date" type="text" class="form-control">
                     <span class="input-group-addon">to</span>
                     <input class="col-md-5" name="end_date" id="end_date" type="text" class="form-control">
                   </div>
-                  <div class="date col-md-3 float-right">
-                    <button class="btn btn-danger float-right" id="clear_filter">Clear Dates</button>
-                  </div>
                 </div>
               </div>
-              <div class="col-md-2">
-                <button class="btn btn-primary float-left" id="download_csv">Download CSV</button>
+              <div class="col-md-4">
+                  <button class="btn btn-danger" id="clear_filter">Clear Dates</button>
+                <button class="btn btn-primary" id="download_csv">Download CSV</button>
               </div>
             </div>
             <table id="projects_table" class="table">
