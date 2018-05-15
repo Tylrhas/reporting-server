@@ -6,86 +6,42 @@ module.exports = function (app, passport) {
   app.post('/webhooks/tasks', function (req, res) {
     // LP Post to the webhood to update the task
     res.sendStatus(200)
-    if (req.body.change_type === 'update') {
-      console.log(req.body)
-      db.lp_folder.upsert({ id: req.body.parent_id ,  project_name: req.body.project_name,  lp_folder_name: req.body.parent_crumbs[req.body.parent_crumbs.length -1] })
-
-      //if change_type is update then update the record
-      db.lp_task.upsert({
-        e_start: req.body.expected_start,
-        task_name: req.body.name,
-        e_finish: req.body.expected_finish,
-        deadline: req.body.promise_by,
-        hrs_logged: req.body.hours_logged,
-        date_done: req.body.done_on,
-        hrs_remaning: req.body.high_effort_remaining,
-        ready_on: req.body.custom_field_values['Ready To Start On'],
-        parent_id: req.body.parent_id
-
-      }, {
-          where: {
-            id: req.body.id
-          }
-        })
-
-      // delete the old project priority
-      db.lp_project_priority.destroy({
+    if (req.body.change_type === 'delete') {
+      db.lp_task.destroy({
         where: {
-          project_id: req.body.project_id
-        }
-      }).then(priorities => {
-        //create the new priority for this project
-        for (let i = 0; i < req.body.global_priority.length; i++) {
-          db.lp_project_priority.create({
-            project_id: req.body.project_id,
-            priority: req.body.global_priority[i],
-            index: i,
-          })
+          id: req.body.id
         }
       })
-      
     }
-    else if (req.body.change_type === 'create') {
+    else {
       console.log(req.body)
-      db.lp_folder.upsert({ id: req.body.parent_id ,  project_name: req.body.project_name })
-      // add this task to the database
-      db.lp_task.upsert({
-        id: req.body.id,
-        task_name: req.body.name,
-        e_start: req.body.expected_start,
-        project_id: req.body.project_id,
-        e_finish: req.body.expected_finish,
-        deadline: req.body.promise_by,
-        hrs_logged: req.body.hours_logged,
-        date_done: req.body.done_on,
-        hrs_remaning: req.body.high_effort_remaining,
-        ready_on: req.body.custom_field_values['Ready To Start On'],
-        parent_id: req.body.parent_id
-      })
-
-        // delete the old project priority
-        db.lp_project_priority.destroy({
-          where: {
-            project_id: req.body.project_id
-          }
-        }).then(priorities => {
+      db.lp_folder.upsert({ id: req.body.parent_id, project_name: req.body.project_name, lp_folder_name: req.body.parent_crumbs[req.body.parent_crumbs.length - 1] })
+        .then(results => {
           //create the new priority for this project
           for (let i = 0; i < req.body.global_priority.length; i++) {
-            db.lp_project_priority.create({
+            db.lp_project_priority.upsert({
               project_id: req.body.project_id,
               priority: req.body.global_priority[i],
               index: i,
             })
           }
         })
+        .then(results => {
+          //if change_type is update then update the record
+          db.lp_task.upsert({
+            id: req.body.id,
+            e_start: req.body.expected_start,
+            task_name: req.body.name,
+            e_finish: req.body.expected_finish,
+            deadline: req.body.promise_by,
+            hrs_logged: req.body.hours_logged,
+            date_done: req.body.done_on,
+            hrs_remaning: req.body.high_effort_remaining,
+            ready_on: req.body.custom_field_values['Ready To Start On'],
+            parent_id: req.body.parent_id
 
-    }
-    else if (req.body.change_type === 'delete') {
-      db.lp_task.destroy({
-        where: {
-          id: req.body.id
-        }
-      })
+          })
+        })
     }
   });
 
