@@ -20,23 +20,16 @@ var db = require("../../models");
 const url = process.env.lbs_url;
 const auth = "Basic " + new Buffer(process.env.LpUserName + ":" + process.env.LPPassword).toString("base64");
 
-
-//for the api call
-exports.updateapi = function (req, res) {
-
-    get_all_Lbs();
-
-    myEmitter.once('returnresults', () => {
-        res.send(runStatus);
-    });
-}
 //for the hourly job 
 exports.update = function (req, res) {
 
+    if(req){
+        res.status(200)
+    }
     get_all_Lbs();
 
     myEmitter.once('returnresults', () => {
-        return runStatus;
+        console.log(runStatus);
     });
 }
 

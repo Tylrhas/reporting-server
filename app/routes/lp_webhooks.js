@@ -7,6 +7,11 @@ module.exports = function (app, passport) {
     // LP Post to the webhood to update the task
     res.sendStatus(200)
     if (req.body.change_type === 'update') {
+
+      db.lp_folder.findOrCreate({ where: { id: req.body.parent_id }, defaults: { project_name: req.body.project_name } }).then(folder => {
+        folder[0].update({ project_name: req.body.project_name })
+      })
+
       //if change_type is update then update the record
       db.lp_task.update({
         e_start: req.body.expected_start,
@@ -255,7 +260,9 @@ module.exports = function (app, passport) {
       })
     }
     else if (req.body.change_type === 'create') {
-
+      db.lp_folder.findOrCreate({ where: { id: req.body.id }, defaults: { project_name: req.body.name } }).then(project => {
+        project[0].update(update_object)
+      })
     }
     else if (req.body.change_type === 'delete') {
 

@@ -50,7 +50,7 @@ module.exports = function (app, passport) {
         }).then(results => {
             console.log(results)
             // send over the projects lp_space_id to create links on page and moment to change the date 
-            res.render('pages/at_risk_projects', { user: req.user, projects: results, lp_space_id: process.env.LPWorkspaceId, moment: moment });
+            res.render('pages/at_risk_projects', { user: req.user, projects: results, lp_space_id: process.env.LPWorkspaceId, moment: moment, slug:'at-risk-projects' });
         })
     })
 
@@ -82,16 +82,14 @@ module.exports = function (app, passport) {
         }).then(results => {
             console.log(results)
             // send over the projects lp_space_id to create links on page and moment to change the date 
-            res.render('pages/active_projects', { user: req.user, projects: results, lp_space_id: process.env.LPWorkspaceId, moment: moment });
+            res.render('pages/active_projects', { user: req.user, projects: results, lp_space_id: process.env.LPWorkspaceId, moment: moment, slug:'active-projects' });
         })
     })
     app.get('/reports/deadline-passed', function (req, res) {
         db.lp_task.findAll({
             attributes: ['id', 'task_name','deadline'],
             where: {
-                date_done: {
-                    [Op.not]: null
-                },
+                date_done:  null,
                 e_finish: {
                     [Op.not]: null
                 },
@@ -103,7 +101,8 @@ module.exports = function (app, passport) {
             include: [
                 {
                     attributes: ['project_name', 'id'],
-                    model: db.lp_project,
+                    model: db.lp_project
+                    ,
                     where: {
                         is_done: {
                             [Op.not]: true
@@ -117,7 +116,7 @@ module.exports = function (app, passport) {
         }).then(results => {
             console.log(results)
             // send over the projects lp_space_id to create links on page and moment to change the date 
-            res.render('pages/deadline_passed', { user: req.user, tasks: results, lp_space_id: process.env.LPWorkspaceId, moment: moment });
+            res.render('pages/deadline_passed', { user: req.user, tasks: results, lp_space_id: process.env.LPWorkspaceId, moment: moment, slug:'deadline-passed' });
             // res.json(results)
         })
     })

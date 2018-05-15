@@ -13,9 +13,9 @@ schedule.scheduleJob('45 15 * * 1-5', function(){
   clientTime.logClientTimeJob();
 });
 
-schedule.scheduleJob('0 * * * *', function(){
+schedule.scheduleJob('10 * * * *', function(){
   console.log('Updating LP LBS');
-  lpLBS.update();
+  lpLBS.update(null,null);
 });
 
 schedule.scheduleJob('15 * * * *', function(){
