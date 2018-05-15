@@ -7,13 +7,11 @@ module.exports = function (app, passport) {
     // LP Post to the webhood to update the task
     res.sendStatus(200)
     if (req.body.change_type === 'update') {
-
-      db.lp_folder.findOrCreate({ where: { id: req.body.parent_id }, defaults: { project_name: req.body.project_name } }).then(folder => {
-        folder[0].update({ project_name: req.body.project_name })
-      })
+      console.log(req.body)
+      db.lp_folder.upsert({ id: req.body.parent_id ,  project_name: req.body.project_name })
 
       //if change_type is update then update the record
-      db.lp_task.update({
+      db.lp_task.upsert({
         e_start: req.body.expected_start,
         task_name: req.body.name,
         e_finish: req.body.expected_finish,
@@ -48,11 +46,10 @@ module.exports = function (app, passport) {
       
     }
     else if (req.body.change_type === 'create') {
-      db.lp_folder.findOrCreate({ where: { id: req.body.parent_id }, defaults: { project_name: req.body.project_name } }).then(folder => {
-        folder[0].update({ project_name: req.body.project_name })
-      })
+      console.log(req.body)
+      db.lp_folder.upsert({ id: req.body.parent_id ,  project_name: req.body.project_name })
       // add this task to the database
-      db.lp_task.create({
+      db.lp_task.upsert({
         id: req.body.id,
         task_name: req.body.name,
         e_start: req.body.expected_start,
