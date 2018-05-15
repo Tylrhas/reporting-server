@@ -48,7 +48,9 @@ module.exports = function (app, passport) {
       
     }
     else if (req.body.change_type === 'create') {
-
+      db.lp_folder.findOrCreate({ where: { id: req.body.parent_id }, defaults: { project_name: req.body.project_name } }).then(folder => {
+        folder[0].update({ project_name: req.body.project_name })
+      })
       // add this task to the database
       db.lp_task.create({
         id: req.body.id,
