@@ -8,7 +8,7 @@ module.exports = function (app, passport) {
     res.sendStatus(200)
     if (req.body.change_type === 'update') {
       console.log(req.body)
-      db.lp_folder.upsert({ id: req.body.parent_id ,  project_name: req.body.project_name })
+      db.lp_folder.upsert({ id: req.body.parent_id ,  project_name: req.body.project_name,  lp_folder_name: req.body.parent_crumbs[req.body.parent_crumbs.length -1] })
 
       //if change_type is update then update the record
       db.lp_task.upsert({
