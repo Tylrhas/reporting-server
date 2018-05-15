@@ -1,4 +1,4 @@
-var Sequelize = require("Sequelize")
+var Sequelize = require("sequelize")
 const Op = Sequelize.Op
 //Models
 var db = require("../models")
