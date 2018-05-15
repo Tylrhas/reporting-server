@@ -66,14 +66,21 @@ module.exports = function (app, passport) {
         parent_id: req.body.parent_id
       })
 
-      for (let i = 0; i < req.body.global_priority.length; i++) {
-        //create the priority for this project
-        db.lp_project_priority.create({
-          project_id: req.body.project_id,
-          priority: req.body.global_priority[i],
-          index: i,
+        // delete the old project priority
+        db.lp_project_priority.destroy({
+          where: {
+            project_id: req.body.project_id
+          }
+        }).then(priorities => {
+          //create the new priority for this project
+          for (let i = 0; i < req.body.global_priority.length; i++) {
+            db.lp_project_priority.create({
+              project_id: req.body.project_id,
+              priority: req.body.global_priority[i],
+              index: i,
+            })
+          }
         })
-      }
 
     }
     else if (req.body.change_type === 'delete') {
