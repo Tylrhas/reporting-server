@@ -52,107 +52,8 @@ module.exports = function (app, passport) {
     // LP Post to the webhood to update the task
     res.sendStatus(200)
 
-    if (req.body.change_type === 'update') {
+    if (req.body.change_type === 'delete') {
 
-      let update_object = {
-        project_name: req.body.name,
-        done_on: req.body.done_on,
-        started_on: req.body.started_on,
-        expected_finish: req.body.expected_finish,
-        expected_start: req.body.expected_start,
-        is_done: req.body.is_done,
-        is_on_hold: req.body.is_on_hold,
-        promise_by: req.body.promise_by,
-        // BEGIN CUSTOM FIELDS
-        launch_day: req.body.custom_field_values['Launch Day'],
-        launch_month: req.body.custom_field_values['Launch Month'],
-        project_impact: req.body.custom_field_values['Project Impact'],
-        launch_type: req.body.custom_field_values['Launch Type'],
-        project_type: req.body.custom_field_values['Project Type'],
-        package: req.body.custom_field_values['Package'],
-        services_activated: req.body.custom_field_values['Services Activated'],
-        risk_level: req.body.custom_field_values['Risk Level'],
-        ps_phasephase: req.body.custom_field_values['PS Phase'],
-        vertical: req.body.custom_field_values['Vertical'],
-        mrr: req.body.custom_field_values['MRR'],
-        otr_ps: req.body.custom_field_values['OTR - PS'],
-        otr_cs: req.body.custom_field_values['OTR - CS'],
-        integration_type: req.body.custom_field_values['Integration Type'],
-        client_type: req.body.custom_field_values['Client Type']
-      }
-
-      // FIND OR CREATE THE LOCATION THEN UPDATE IT WITH THE NEW DATA
-      db.lp_project.findOrCreate({ where: { id: req.body.id }, defaults: { project_name: req.body.name } }).then(project => {
-        project[0].update(update_object)
-      })
-
-      // delete the old project priority
-      db.lp_project_priority.destroy({
-        where: {
-          project_id: req.body.id
-        }
-      }).then(priorities => {
-        //create the new priority for this project
-        for (let i = 0; i < req.body.global_priority.length; i++) {
-          db.lp_project_priority.create({
-            project_id: req.body.id,
-            priority: req.body.global_priority[i],
-            index: i,
-          })
-        }
-      }
-      )
-
-      // potentially delete the folders and update them with the new ones
-
-    }
-    else if (req.body.change_type === 'create') {
-      console.log('create')
-      console.log(req.body)
-
-      let update_object = {
-        id: req.body.id,
-        project_name: req.body.name,
-        done_on: req.body.done_on,
-        started_on: req.body.started_on,
-        expected_finish: req.body.expected_finish,
-        expected_start: req.body.expected_start,
-        is_done: req.body.is_done,
-        is_on_hold: req.body.is_on_hold,
-        promise_by: req.body.promise_by,
-        // BEGIN CUSTOM FIELDS
-        launch_day: req.body.custom_field_values['Launch Day'],
-        launch_month: req.body.custom_field_values['Launch Month'],
-        project_impact: req.body.custom_field_values['Project Impact'],
-        launch_type: req.body.custom_field_values['Launch Type'],
-        project_type: req.body.custom_field_values['Project Type'],
-        package: req.body.custom_field_values['Package'],
-        services_activated: req.body.custom_field_values['Services Activated'],
-        risk_level: req.body.custom_field_values['Risk Level'],
-        ps_phase: req.body.custom_field_values['PS Phase'],
-        vertical: req.body.custom_field_values['Vertical'],
-        mrr: req.body.custom_field_values['MRR'],
-        otr_ps: req.body.custom_field_values['OTR - PS'],
-        otr_cs: req.body.custom_field_values['OTR - CS'],
-        integration_type: req.body.custom_field_values['Integration Type'],
-        client_type: req.body.custom_field_values['Client Type']
-      }
-
-      // FIND OR CREATE THE PROJECT 
-      db.lp_project.create({ update_object })
-
-      for (let i = 0; i < req.body.global_priority.length; i++) {
-        //create the priority for this project
-        db.lp_project_priority.create({
-          project_id: req.body.id,
-          priority: req.body.global_priority[i],
-          index: i,
-        })
-      }
-      // potentially delete the folders and update them with the new ones
-
-    }
-    else if (req.body.change_type === 'delete') {
       // delete the project priorities associated with the project
       console.log('delete')
       console.log(req.body)
@@ -181,6 +82,50 @@ module.exports = function (app, passport) {
           project_id: req.body.id
         }
       })
+    }
+    else {
+      //create the new priority for this project
+      var promises = []
+      for (let i = 0; i < req.body.global_priority.length; i++) {
+        promises.push(db.lp_project_priority.upsert({
+          project_id: req.body.id,
+          priority: req.body.global_priority[i],
+          index: i,
+        }))
+      }
+      Promise.all(promises)
+    .then(() => {
+      let update_object = {
+        project_name: req.body.name,
+        done_on: req.body.done_on,
+        started_on: req.body.started_on,
+        expected_finish: req.body.expected_finish,
+        expected_start: req.body.expected_start,
+        is_done: req.body.is_done,
+        is_on_hold: req.body.is_on_hold,
+        promise_by: req.body.promise_by,
+        // BEGIN CUSTOM FIELDS
+        launch_day: req.body.custom_field_values['Launch Day'],
+        launch_month: req.body.custom_field_values['Launch Month'],
+        project_impact: req.body.custom_field_values['Project Impact'],
+        launch_type: req.body.custom_field_values['Launch Type'],
+        project_type: req.body.custom_field_values['Project Type'],
+        package: req.body.custom_field_values['Package'],
+        services_activated: req.body.custom_field_values['Services Activated'],
+        risk_level: req.body.custom_field_values['Risk Level'],
+        ps_phasephase: req.body.custom_field_values['PS Phase'],
+        vertical: req.body.custom_field_values['Vertical'],
+        mrr: req.body.custom_field_values['MRR'],
+        otr_ps: req.body.custom_field_values['OTR - PS'],
+        otr_cs: req.body.custom_field_values['OTR - CS'],
+        integration_type: req.body.custom_field_values['Integration Type'],
+        client_type: req.body.custom_field_values['Client Type']
+      }
+
+      // FIND OR CREATE THE LOCATION THEN UPDATE IT WITH THE NEW DATA
+      db.lp_project.upsert(update_object)
+    })
+
     }
 
   })
