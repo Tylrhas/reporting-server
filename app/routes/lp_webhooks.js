@@ -96,6 +96,7 @@ module.exports = function (app, passport) {
       Promise.all(promises)
     .then(() => {
       let update_object = {
+        id: req.body.id,
         project_name: req.body.name,
         done_on: req.body.done_on,
         started_on: req.body.started_on,
