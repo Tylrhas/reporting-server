@@ -10,12 +10,12 @@
     <p class="app-sidebar__user-name center col">Professional Services<br>Reporting</p>
   </div>
   <ul class="app-menu">
-    <li><a class="app-menu__item active" href="/"><i class="app-menu__icon fa fa-home"></i><span class="app-menu__label">Home</span></a></li>
-    <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i class="app-menu__icon fa fa-tasks"></i><span class="app-menu__label">Project Status</span><i class="treeview-indicator fa fa-angle-right"></i></a>
+    <li><a class="app-menu__item <% if (slug == 'home') {%>active<%} %>" href="/"><i class="app-menu__icon fa fa-home"></i><span class="app-menu__label">Home</span></a></li>
+    <li class="treeview"><a class="app-menu__item <% if (slug == 'deadline-passed' || slug == 'at-risk-projects' || slug == 'active-projects') {%>active<%} %>" href="#" data-toggle="treeview"><i class="app-menu__icon fa fa-tasks"></i><span class="app-menu__label">Project Status</span><i class="treeview-indicator fa fa-angle-right"></i></a>
       <ul class="treeview-menu">
-        <li><a class="treeview-item" href="/reports/active-projects">Active Projects</a></li>
-        <li><a class="treeview-item" href="/reports/at-risk-projects">At Risk Projects</a></li>
-        <li><a class="treeview-item" href="/reports/deadline-passed">Deadline Passed</a></li>
+        <li><a class="treeview-item <% if (slug == 'active-projects') {%>active<%} %>" href="/reports/active-projects">Active Projects</a></li>
+        <li><a class="treeview-item <% if (slug == 'at-risk-projects') {%>active<%} %>" href="/reports/at-risk-projects">At Risk Projects</a></li>
+        <li><a class="treeview-item <% if (slug == 'deadline-passed') {%>active<%} %>" href="/reports/deadline-passed">Deadline Passed</a></li>
       </ul>
     </li>
     <!-- <li><a class=" app-menu__item" href="/reports/active-projects">Active Projects</a></li> -->
