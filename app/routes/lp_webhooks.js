@@ -69,18 +69,12 @@ module.exports = function (app, passport) {
         }
       })
       // find all tasks associated with a project
-      db.lp_task.findAll({
+      db.lp_task.destroy({
         where: {
           project_id: req.body.id
         }
-      }).then(tasks => {
-        for (let i = 0; i < tasks.length; i++) {
-          let task = tasks[i].id
-          //destroy the task
-          task.destroy();
-        }
       })
-
+      
       db.lp_project_priority.destroy({
         where: {
           project_id: req.body.id
@@ -92,6 +86,7 @@ module.exports = function (app, passport) {
       var promises = []
       for (let i = 0; i < req.body.global_priority.length; i++) {
         promises.push(db.lp_project_priority.upsert({
+          id: req.body.project_id + i,
           project_id: req.body.id,
           priority: req.body.global_priority[i],
           index: i,
