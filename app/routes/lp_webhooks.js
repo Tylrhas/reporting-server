@@ -14,34 +14,38 @@ module.exports = function (app, passport) {
       })
     }
     else {
-      console.log(req.body)
-      db.lp_folder.upsert({ id: req.body.parent_id, project_name: req.body.project_name, lp_folder_name: req.body.parent_crumbs[req.body.parent_crumbs.length - 1] })
-        .then(results => {
-          //create the new priority for this project
-          for (let i = 0; i < req.body.global_priority.length; i++) {
-            db.lp_project_priority.upsert({
-              project_id: req.body.project_id,
-              priority: req.body.global_priority[i],
-              index: i,
-            })
-          }
-        })
-        .then(results => {
-          //if change_type is update then update the record
-          db.lp_task.upsert({
-            id: req.body.id,
-            e_start: req.body.expected_start,
-            task_name: req.body.name,
-            e_finish: req.body.expected_finish,
-            deadline: req.body.promise_by,
-            hrs_logged: req.body.hours_logged,
-            date_done: req.body.done_on,
-            hrs_remaning: req.body.high_effort_remaining,
-            ready_on: req.body.custom_field_values['Ready To Start On'],
-            parent_id: req.body.parent_id
+      //create if the project doesnt exist
+      db.lp_project.findOrCreate({ where: { id: req.body.project_id }, defaults: { id: req.body.project_id } }).then(results => {
 
+        db.lp_folder.upsert({ id: req.body.parent_id, project_name: req.body.project_name, lp_folder_name: req.body.parent_crumbs[req.body.parent_crumbs.length - 1] })
+          .then(results => {
+            //create the new priority for this project
+            for (let i = 0; i < req.body.global_priority.length; i++) {
+              db.lp_project_priority.upsert({
+                id: req.body.project_id + i,
+                project_id: req.body.project_id,
+                priority: req.body.global_priority[i],
+                index: i,
+              })
+            }
           })
-        })
+          .then(results => {
+            //if change_type is update then update the record
+            db.lp_task.upsert({
+              id: req.body.id,
+              e_start: req.body.expected_start,
+              task_name: req.body.name,
+              e_finish: req.body.expected_finish,
+              deadline: req.body.promise_by,
+              hrs_logged: req.body.hours_logged,
+              date_done: req.body.done_on,
+              hrs_remaning: req.body.high_effort_remaining,
+              ready_on: req.body.custom_field_values['Ready To Start On'],
+              parent_id: req.body.parent_id
+
+            })
+          })
+      })
     }
   });
 
@@ -94,38 +98,38 @@ module.exports = function (app, passport) {
         }))
       }
       Promise.all(promises)
-    .then(() => {
-      let update_object = {
-        id: req.body.id,
-        project_name: req.body.name,
-        done_on: req.body.done_on,
-        started_on: req.body.started_on,
-        expected_finish: req.body.expected_finish,
-        expected_start: req.body.expected_start,
-        is_done: req.body.is_done,
-        is_on_hold: req.body.is_on_hold,
-        promise_by: req.body.promise_by,
-        // BEGIN CUSTOM FIELDS
-        launch_day: req.body.custom_field_values['Launch Day'],
-        launch_month: req.body.custom_field_values['Launch Month'],
-        project_impact: req.body.custom_field_values['Project Impact'],
-        launch_type: req.body.custom_field_values['Launch Type'],
-        project_type: req.body.custom_field_values['Project Type'],
-        package: req.body.custom_field_values['Package'],
-        services_activated: req.body.custom_field_values['Services Activated'],
-        risk_level: req.body.custom_field_values['Risk Level'],
-        ps_phasephase: req.body.custom_field_values['PS Phase'],
-        vertical: req.body.custom_field_values['Vertical'],
-        mrr: req.body.custom_field_values['MRR'],
-        otr_ps: req.body.custom_field_values['OTR - PS'],
-        otr_cs: req.body.custom_field_values['OTR - CS'],
-        integration_type: req.body.custom_field_values['Integration Type'],
-        client_type: req.body.custom_field_values['Client Type']
-      }
+        .then(() => {
+          let update_object = {
+            id: req.body.id,
+            project_name: req.body.name,
+            done_on: req.body.done_on,
+            started_on: req.body.started_on,
+            expected_finish: req.body.expected_finish,
+            expected_start: req.body.expected_start,
+            is_done: req.body.is_done,
+            is_on_hold: req.body.is_on_hold,
+            promise_by: req.body.promise_by,
+            // BEGIN CUSTOM FIELDS
+            launch_day: req.body.custom_field_values['Launch Day'],
+            launch_month: req.body.custom_field_values['Launch Month'],
+            project_impact: req.body.custom_field_values['Project Impact'],
+            launch_type: req.body.custom_field_values['Launch Type'],
+            project_type: req.body.custom_field_values['Project Type'],
+            package: req.body.custom_field_values['Package'],
+            services_activated: req.body.custom_field_values['Services Activated'],
+            risk_level: req.body.custom_field_values['Risk Level'],
+            ps_phasephase: req.body.custom_field_values['PS Phase'],
+            vertical: req.body.custom_field_values['Vertical'],
+            mrr: req.body.custom_field_values['MRR'],
+            otr_ps: req.body.custom_field_values['OTR - PS'],
+            otr_cs: req.body.custom_field_values['OTR - CS'],
+            integration_type: req.body.custom_field_values['Integration Type'],
+            client_type: req.body.custom_field_values['Client Type']
+          }
 
-      // FIND OR CREATE THE LOCATION THEN UPDATE IT WITH THE NEW DATA
-      db.lp_project.upsert(update_object)
-    })
+          // FIND OR CREATE THE LOCATION THEN UPDATE IT WITH THE NEW DATA
+          db.lp_project.upsert(update_object)
+        })
 
     }
 
