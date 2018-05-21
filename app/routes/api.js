@@ -6,17 +6,19 @@ module.exports = function (app, passport) {
     app.get('/api/jobs/updatetasks', checkAuthentication, apiController.updatelptasksapi);
     app.get('/api/download/at-risk-projects',checkAuthentication,  apiController.at_risk_CSV);
 
+    app.post('/api/admin/user/update',isAdmin, apiController.updateUser  );
+
     //    app.get('/api/views/testData', isAdmin, apiController.test_view);
 
     function isAdmin(req, res, next) {
-        if (req.isAuthenticated() && req.user.group == 'admin') {
+        if (req.isAuthenticated() && req.user.user_group == 'admin') {
             return next();
         }
         else if (req.isAuthenticated()) {
-            res.redirect('/jobs');
+            res.redirect('/');
         }
         else {
-            res.redirect('/');
+            res.redirect('/g5_auth/users/auth/g5')
         }
     }
 }

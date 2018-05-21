@@ -1,0 +1,74 @@
+<% include ../partials/header.ejs %>
+  <% include ../partials/nav.ejs %>
+    <main class="app-content">
+      <div class="app-title">
+        <div>
+          <h1>Users</h1>
+        </div>
+        <ul class="app-breadcrumb breadcrumb">
+          <li class="breadcrumb-item">
+            <i class="fa fa-home fa-lg"></i>
+            <li class="breadcrumb-item active">
+              <a href="#">Users</a>
+            </li>
+          </li>
+        </ul>
+      </div>
+
+      <div class="row">
+        <div class="col">
+          <div class="tile">
+            <table id="projects_table" class="table">
+              <thead>
+                <tr>
+                  <th scope="col">User</th>
+                  <th scope="col">Group</th>
+                  <th scope="col">Last Login</th>
+                  <th scope="col"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <% for(var i=0; i < users.length; i++) { %>
+                  <tr>
+                    <td>
+                      <%= users[i].email %>
+                    </td>
+                    <td>
+                      <select>
+                        <option <% if (users[i].user_group=='user' ) {%>selected="selected"
+                          <%} %> >user</option>
+                        <option <% if (users[i].user_group=='admin' ) {%>selected="selected"
+                          <%} %> >admin</option>
+                      </select>
+                    </td>
+                    <td>
+                      <%= moment(users[i].updatedAt).format( 'MMM-DD-YYYY') %>
+                    </td>
+                    <td>
+                      <button class="btn btn-primary update_user" userID="<%= users[i].id  %>">Update User</button>
+                    </td>
+                  </tr>
+                  <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script>
+      $('.update_user').click(function () {
+        var data = {
+          group: $(this).parents("tr").find(":selected").text(),
+          id: $(this).attr('userID')
+        }
+        $.ajax({
+          type: 'POST',
+          url: '/api/admin/user/update',
+          data: data,
+          success: function () {
+          },
+          dataType: 'JSON'
+        })
+      })
+    </script>
+    <% include ../partials/footer.ejs %>

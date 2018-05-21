@@ -34,7 +34,8 @@ module.exports = function (sequelize, Sequelize) {
       email: {
         type: Sequelize.STRING
         // notEmpty: true
-      },group: {
+      },
+      user_group: {
         type: Sequelize.ENUM('user', 'admin'),
         defaultValue: 'user'
     }

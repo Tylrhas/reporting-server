@@ -129,3 +129,14 @@ exports.at_risk_CSV = function (req, res) {
     })
 
 }
+
+exports.updateUser = function (req, res) {
+    console.log(req.body)
+    db.user.update({user_group: req.body.group },{
+        where: {
+            id: req.body.id,
+        }   
+    }).then(results => {
+        res.status(200)
+    })
+}
