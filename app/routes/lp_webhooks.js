@@ -26,8 +26,6 @@ module.exports = function (app, passport) {
       checkParent(body,subFolders)
     }
   });
-}
-
   app.post('/webhooks/clients', function (req, res) {
     console.log('clients')
     res.sendStatus(200)
@@ -55,6 +53,7 @@ module.exports = function (app, passport) {
     }
   })
 
+}
 async function checkParent (body, subFolders) {
   console.log(body.type.toLowerCase())
   if (body.type === 'Project') {

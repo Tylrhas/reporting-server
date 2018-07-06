@@ -120,23 +120,6 @@ module.exports = function (app, passport) {
             // res.json(results)
         })
     })
-    app.get('/reports/projects/:project_id', function (req, res) {
-        // db.project_folders.findAll({ hierarchy: true }).then(function (results) {
-        //     res.send(results)
-        // })
-
-        // get all the descendents of a particular item
-        db.project_folders.find({
-            where: { id: req.params.project_id },
-            include: {
-                model: db.project_folders,
-                as: 'descendents',
-                hierarchy: true
-            }
-        }).then(function (result) {
-            res.send(result)
-        });
-    })
     function checkAuthentication (req, res, next) {
         if (req.isAuthenticated()) {
             // if user is looged in, req.isAuthenticated() will return true

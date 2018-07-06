@@ -140,3 +140,15 @@ exports.updateUser = function (req, res) {
         res.status(200)
     })
 }
+exports.getProject = function (req, res) {
+    db.project_folders.find({
+        where: { id: req.params.project_id },
+        include: {
+            model: db.project_folders,
+            as: 'descendents',
+            hierarchy: true
+        }
+    }).then(function (result) {
+        res.send(result)
+    })
+}
