@@ -50,13 +50,13 @@ module.exports = function (app, passport) {
         }).then(results => {
             console.log(results)
             // send over the projects lp_space_id to create links on page and moment to change the date 
-            res.render('pages/at_risk_projects', { user: req.user, projects: results, lp_space_id: process.env.LPWorkspaceId, moment: moment, slug:'at-risk-projects' });
+            res.render('pages/at_risk_projects', { user: req.user, projects: results, lp_space_id: process.env.LPWorkspaceId, moment: moment, slug: 'at-risk-projects' });
         })
     })
 
     app.get('/reports/active-projects', checkAuthentication, function (req, res) {
         db.lp_project.findAll({
-            attributes: ['project_name', 'expected_finish','id'],
+            attributes: ['project_name', 'expected_finish', 'id'],
             where: {
                 is_done: false,
                 expected_finish: {
@@ -82,14 +82,14 @@ module.exports = function (app, passport) {
         }).then(results => {
             console.log(results)
             // send over the projects lp_space_id to create links on page and moment to change the date 
-            res.render('pages/active_projects', { user: req.user, projects: results, lp_space_id: process.env.LPWorkspaceId, moment: moment, slug:'active-projects' });
+            res.render('pages/active_projects', { user: req.user, projects: results, lp_space_id: process.env.LPWorkspaceId, moment: moment, slug: 'active-projects' });
         })
     })
     app.get('/reports/deadline-passed', function (req, res) {
         db.lp_task.findAll({
-            attributes: ['id', 'task_name','deadline'],
+            attributes: ['id', 'task_name', 'deadline'],
             where: {
-                date_done:  null,
+                date_done: null,
                 e_finish: {
                     [Op.not]: null
                 },
@@ -106,7 +106,7 @@ module.exports = function (app, passport) {
                     where: {
                         is_done: {
                             [Op.not]: true
-                        }  
+                        }
                     }
                 }],
             // order by deadline
@@ -116,9 +116,26 @@ module.exports = function (app, passport) {
         }).then(results => {
             console.log(results)
             // send over the projects lp_space_id to create links on page and moment to change the date 
-            res.render('pages/deadline_passed', { user: req.user, tasks: results, lp_space_id: process.env.LPWorkspaceId, moment: moment, slug:'deadline-passed' });
+            res.render('pages/deadline_passed', { user: req.user, tasks: results, lp_space_id: process.env.LPWorkspaceId, moment: moment, slug: 'deadline-passed' });
             // res.json(results)
         })
+    })
+    app.get('/reports/projects/:project_id', function (req, res) {
+        // db.project_folders.findAll({ hierarchy: true }).then(function (results) {
+        //     res.send(results)
+        // })
+
+        // get all the descendents of a particular item
+        db.project_folders.find({
+            where: { id: req.params.project_id },
+            include: {
+                model: db.project_folders,
+                as: 'descendents',
+                hierarchy: true
+            }
+        }).then(function (result) {
+            res.send(result)
+        });
     })
     function checkAuthentication (req, res, next) {
         if (req.isAuthenticated()) {
