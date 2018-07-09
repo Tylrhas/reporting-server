@@ -19,7 +19,7 @@ module.exports = function (sequelize, Sequelize) {
   });
   lp_assignment.associate = function (models) {
     // associate project tasks
-    models.lp_assignment.belongsTo(models.project_folders, { foreignKey: 'id', sourceKey: 'task_id' });
+    models.lp_assignment.belongsTo(models.project_folders, { foreignKey: 'task_id', sourceKey: 'id' });
   };
 
   return lp_assignment;

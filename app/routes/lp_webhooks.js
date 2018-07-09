@@ -23,7 +23,8 @@ module.exports = function (app, passport) {
     else {
       let body = req.body
       let subFolders = []
-      checkParent(body,subFolders)
+      // check if this is a LBS task
+      checkParent(body, subFolders)
     }
   });
   app.post('/webhooks/clients', function (req, res) {
@@ -58,27 +59,44 @@ async function checkParent (body, subFolders) {
   console.log(body.type.toLowerCase())
   if (body.type === 'Project') {
     // this is the top level folder and doesnt need a partent
-      await createProject(body)
+    await createProject(body)
     if (subFolders.length > 0) {
       // create all of the sub items
-      for (let i = 0; i < subFolders.length; i++){
+      for (let i = 0; i < subFolders.length; i++) {
         await createSubItem(subFolders[i])
+        console.log(subFolders[i])
+        if (subFolders[i].task_type === 'Location Service Billing' && subFolders[i].type === 'Task') {
+          let splitName = subFolders[i].name.split(/\s(.+)/, 2)
+          let LBSId = splitName[0]
+          let locationName = splitName[1]
+          let lbsTask = await db.lbs.findOrCreate({ where: { id: LBSId }, defaults: { location_name: locationName, task_id: subFolders[i].id } })
+          lbsTask[0].update({ location_name: locationName, task_id: subFolders[i].id })
+        }
       }
     }
 
   } else {
-  let projectCount = await db.project_folders.count({ where: { id: body.parent_id } })
+    let projectCount = await db.project_folders.count({ where: { id: body.parent_id } })
     if (projectCount > 0) {
       // parent exists
-      createSubItem(body)
+      await createSubItem(body)
       if (subFolders.length > 0) {
         // create all of the sub items
-        for (let i = 0; i < subFolders.length; i++){
+        for (let i = 0; i < subFolders.length; i++) {
           await createSubItem(subFolders[i])
+          console.log(subFolders[i].task_type)
+          console.log(subFolders[i].type)
+          if (subFolders[i].task_type === 'Location Service Billing' && subFolders[i].type === 'type') {
+            let splitName = subFolders[i].name.split(/\s(.+)/, 2)
+            let LBSId = splitName[0]
+            let locationName = splitName[1]
+            let lbsTask = await db.lbs.findOrCreate({ where: { id: LBSId }, defaults: { location_name: locationName, task_id: body.id } })
+            lbsTask[0].update({ location_name: locationName, task_id: subFolders[i].id })
+          }
         }
       }
     } else {
-      subFolders.push({
+      let subFolderUpdate = {
         id: body.id,
         e_start: body.expected_start,
         name: body.name,
@@ -88,8 +106,13 @@ async function checkParent (body, subFolders) {
         date_done: body.done_on,
         hrs_remaning: body.high_effort_remaining,
         parent_id: body.parent_id,
-        type: body.type
-      })
+        type: body.type,
+        task_type: null
+      }
+      if (body.type === 'Task') {
+        subFolderUpdate.task_type = body.custom_field_values['Task Type']
+      }
+      subFolders.unshift(subFolderUpdate)
       // go get the parent item info
       let url = 'https://app.liquidplanner.com/api/workspaces/' + process.env.LPWorkspaceId + '/treeitems/' + body.parent_id + '?depth=-1&leaves=true'
       const auth = "Basic " + new Buffer(process.env.LpUserName + ":" + process.env.LPPassword).toString("base64");
@@ -100,29 +123,45 @@ async function checkParent (body, subFolders) {
         }
         let parentBody = JSON.parse(body)
         // create the project if it is missing
-        return checkParent(parentBody,subFolders)
+        return checkParent(parentBody, subFolders)
       })
     }
   }
 }
 async function createSubItem (body) {
-  body.type.toLowerCase()
-  return db.project_folders.create({
-    id: body.id,
-    e_start: body.expected_start,
-    name: body.name,
-    e_finish: body.expected_finish,
-    deadline: body.promise_by,
-    hrs_logged: body.hours_logged,
-    date_done: body.done_on,
-    hrs_remaning: body.high_effort_remaining,
-    parent_id: body.parent_id,
-    child_type: body.type.toLowerCase()
+  return db.project_folders.findOrCreate({
+    where: {
+      id: body.id
+    },
+    defaults: {
+      e_start: body.expected_start,
+      name: body.name,
+      e_finish: body.expected_finish,
+      deadline: body.promise_by,
+      hrs_logged: body.hours_logged,
+      date_done: body.done_on,
+      hrs_remaning: body.high_effort_remaining,
+      parent_id: body.parent_id,
+      child_type: body.type.toLowerCase(),
+      task_type: body.task_type
+    }
+  }).then(item => {
+    item[0].update({    
+      e_start: body.expected_start,
+      name: body.name,
+      e_finish: body.expected_finish,
+      deadline: body.promise_by,
+      hrs_logged: body.hours_logged,
+      date_done: body.done_on,
+      hrs_remaning: body.high_effort_remaining,
+      parent_id: body.parent_id,
+      child_type: body.type.toLowerCase(),
+      task_type: body.task_type})
   })
 }
 
 async function createProject (body) {
-console.log(body.type.toLowerCase())
+  console.log(body.type.toLowerCase())
   //create the new priority for this project
   let update_object = {
     id: body.id,

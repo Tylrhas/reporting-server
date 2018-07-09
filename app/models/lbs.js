@@ -7,6 +7,9 @@ module.exports = function (sequelize, Sequelize) {
       primaryKey: true,
       type: Sequelize.INTEGER
     },
+    location_name: {
+      type: Sequelize.TEXT
+    },
     task_id: {
       type: Sequelize.INTEGER
     },
@@ -38,7 +41,7 @@ module.exports = function (sequelize, Sequelize) {
     })
     lbs.associate = function (models) {
       // associate project tasks
-      models.lbs.belongsTo(models.project_folders, { foreignKey: 'id', sourceKey: 'task_id' });
+      models.lbs.belongsTo(models.project_folders, {foreignKey: 'task_id', sourceKey: 'id'});
     }
   return lbs
 
