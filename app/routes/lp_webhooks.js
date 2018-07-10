@@ -14,7 +14,7 @@ module.exports = function (app, passport) {
     // LP Post to the webhood to update the task
     res.sendStatus(200)
     if (req.body.change_type === 'delete') {
-      db.lp_task.destroy({
+      db.project_folders.destroy({
         where: {
           id: req.body.id
         }
@@ -64,14 +64,7 @@ async function checkParent (body, subFolders) {
       // create all of the sub items
       for (let i = 0; i < subFolders.length; i++) {
         await createSubItem(subFolders[i])
-        console.log(subFolders[i])
-        if (subFolders[i].task_type === 'Location Service Billing' && subFolders[i].type === 'Task') {
-          let splitName = subFolders[i].name.split(/\s(.+)/, 2)
-          let LBSId = splitName[0]
-          let locationName = splitName[1]
-          let lbsTask = await db.lbs.findOrCreate({ where: { id: LBSId }, defaults: { location_name: locationName, task_id: subFolders[i].id } })
-          lbsTask[0].update({ location_name: locationName, task_id: subFolders[i].id })
-        }
+        createLBS(subFolders[i])
       }
     }
 
@@ -84,15 +77,7 @@ async function checkParent (body, subFolders) {
         // create all of the sub items
         for (let i = 0; i < subFolders.length; i++) {
           await createSubItem(subFolders[i])
-          console.log(subFolders[i].task_type)
-          console.log(subFolders[i].type)
-          if (subFolders[i].task_type === 'Location Service Billing' && subFolders[i].type === 'type') {
-            let splitName = subFolders[i].name.split(/\s(.+)/, 2)
-            let LBSId = splitName[0]
-            let locationName = splitName[1]
-            let lbsTask = await db.lbs.findOrCreate({ where: { id: LBSId }, defaults: { location_name: locationName, task_id: body.id } })
-            lbsTask[0].update({ location_name: locationName, task_id: subFolders[i].id })
-          }
+          createLBS(subFolders[i])
         }
       }
     } else {
@@ -129,34 +114,18 @@ async function checkParent (body, subFolders) {
   }
 }
 async function createSubItem (body) {
-  return db.project_folders.findOrCreate({
-    where: {
-      id: body.id
-    },
-    defaults: {
-      e_start: body.expected_start,
-      name: body.name,
-      e_finish: body.expected_finish,
-      deadline: body.promise_by,
-      hrs_logged: body.hours_logged,
-      date_done: body.done_on,
-      hrs_remaning: body.high_effort_remaining,
-      parent_id: body.parent_id,
-      child_type: body.type.toLowerCase(),
-      task_type: body.task_type
-    }
-  }).then(item => {
-    item[0].update({    
-      e_start: body.expected_start,
-      name: body.name,
-      e_finish: body.expected_finish,
-      deadline: body.promise_by,
-      hrs_logged: body.hours_logged,
-      date_done: body.done_on,
-      hrs_remaning: body.high_effort_remaining,
-      parent_id: body.parent_id,
-      child_type: body.type.toLowerCase(),
-      task_type: body.task_type})
+  return db.project_folders.upsert({
+    id: body.id,
+    e_start: body.expected_start,
+    name: body.name,
+    e_finish: body.expected_finish,
+    deadline: body.promise_by,
+    hrs_logged: body.hours_logged,
+    date_done: body.done_on,
+    hrs_remaning: body.high_effort_remaining,
+    parent_id: body.parent_id,
+    child_type: body.type.toLowerCase(),
+    task_type: body.task_type
   })
 }
 
@@ -194,7 +163,7 @@ async function createProject (body) {
   }
   // FIND OR CREATE THE LOCATION THEN UPDATE IT WITH THE NEW DATA
   return db.lp_project.upsert(update_object).then(() => {
-    db.project_folders.create({
+    db.project_folders.upsert({
       id: body.id,
       e_start: body.expected_start,
       name: body.name,
@@ -206,4 +175,22 @@ async function createProject (body) {
       child_type: body.type.toLowerCase()
     })
   })
+}
+
+function createLBS (item) {
+  if (item.task_type === 'Location Service Billing' && item.type === 'Task') {
+    let splitName = item.name.split(/\s(.+)/, 2)
+    let LBSId = splitName[0]
+    let locationName = splitName[1]
+    await db.lbs.upsert(
+      {
+        id: LBSId,
+        location_name: locationName,
+        task_id: item.id
+      })
+    return
+  } else {
+    // not a LBS task
+    return
+  }
 }
