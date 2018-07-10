@@ -175,18 +175,36 @@ console.log(body.type.toLowerCase())
       update_object[key.replace(/ /g, "_").toLowerCase()] = body.custom_field_values[key]
     }
   }
+
+  
   // FIND OR CREATE THE LOCATION THEN UPDATE IT WITH THE NEW DATA
   return db.lp_project.upsert(update_object).then(() => {
-    db.treeitem.create({
-      id: body.id,
-      e_start: body.expected_start,
-      name: body.name,
-      e_finish: body.expected_finish,
-      deadline: body.promise_by,
-      hrs_logged: body.hours_logged,
-      date_done: body.done_on,
-      hrs_remaning: body.high_effort_remaining,
-      child_type: body.type.toLowerCase()
-    })
+    db.treeitem.findOrCreate(
+      {
+        where: {
+          id: body.id
+        }, 
+        defaults: {
+          e_start: body.expected_start,
+          name: body.name,
+          e_finish: body.expected_finish,
+          deadline: body.promise_by,
+          hrs_logged: body.hours_logged,
+          date_done: body.done_on,
+          hrs_remaning: body.high_effort_remaining,
+          child_type: body.type.toLowerCase()
+        }
+      }).then(treeitem => {
+        treeitem[0].update({
+          e_start: body.expected_start,
+          name: body.name,
+          e_finish: body.expected_finish,
+          deadline: body.promise_by,
+          hrs_logged: body.hours_logged,
+          date_done: body.done_on,
+          hrs_remaning: body.high_effort_remaining,
+          child_type: body.type.toLowerCase()
+        })
+      })
   })
 }
