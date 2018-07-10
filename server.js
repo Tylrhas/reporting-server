@@ -63,7 +63,6 @@ require('./app/config/job_scheduler');
 
 
 //Sync Database
-
 models.sequelize.sync().then(function () {
 
     console.log('Nice! Database looks fine')
