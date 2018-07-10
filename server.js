@@ -12,10 +12,17 @@ app.set('view engine', 'ejs');
 
 
 //For BodyParser
-app.use(bodyParser.urlencoded({
-    extended: true
-}));
-app.use(bodyParser.json());
+// app.use(bodyParser.urlencoded({
+//     extended: true,
+//     limit: '50mb'
+// }));
+// app.use(bodyParser.json());
+
+app.use(bodyParser({
+        extended: true,
+        limit: '2mb',
+        parameterLimit: 10000
+    }));
 
 
 // For Passport

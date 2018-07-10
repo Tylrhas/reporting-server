@@ -18,73 +18,74 @@ module.exports = function (app, passport) {
 
     app.get('/', checkAuthentication, function (req, res) {
         // Successful authentication, render home.
-       var active_projects = db.lp_project.count({
-            where: {
-                is_done: false,
-                expected_finish: {
-                    [Op.not]: null
-                },
-                is_on_hold: {
-                    [Op.not]: true
-                }
-            }
-          }).then(results => {
-              return results;
-          });
+    //    var active_projects = db.lp_project.count({
+    //         where: {
+    //             is_done: false,
+    //             expected_finish: {
+    //                 [Op.not]: null
+    //             },
+    //             is_on_hold: {
+    //                 [Op.not]: true
+    //             }
+    //         }
+    //       }).then(results => {
+    //           return results;
+    //       });
 
-        var at_risk_projects  = db.lp_project.count({
-            distinct: true,
-            include: [{
-                model: db.lp_task,
-                where: {
-                    'deadline': {
-                        [Op.not]: null
-                    },
-                    'date_done': null,
-                    'e_finish': {
-                        [Op.gt]: Sequelize.col('deadline')
-                    },
-                    [Op.or]: [{
-                        'task_name': {
-                            [Op.like]: '%Activation%'
-                        }
-                    },
-                    {
-                        'task_name': {
-                            [Op.like]: '%Launch%'
-                        }
-                    }
-                    ]
+    //     var at_risk_projects  = db.lp_project.count({
+    //         distinct: true,
+    //         include: [{
+    //             model: db.lp_task,
+    //             where: {
+    //                 'deadline': {
+    //                     [Op.not]: null
+    //                 },
+    //                 'date_done': null,
+    //                 'e_finish': {
+    //                     [Op.gt]: Sequelize.col('deadline')
+    //                 },
+    //                 [Op.or]: [{
+    //                     'task_name': {
+    //                         [Op.like]: '%Activation%'
+    //                     }
+    //                 },
+    //                 {
+    //                     'task_name': {
+    //                         [Op.like]: '%Launch%'
+    //                     }
+    //                 }
+    //                 ]
 
-                }
-            }]
-          }).then(results => {
-            return results;
-        });
+    //             }
+    //         }]
+    //       }).then(results => {
+    //         return results;
+    //     });
 
-          var deadline_passed  = db.lp_project.count({
-            include: [{
-                model: db.lp_task,
-                where: {
-                date_done:  null,
-                e_finish: {
-                    [Op.not]: null
-                },
-                deadline: {
-                    [Op.lt]: moment().format('YYYY-MM-DD')
+    //       var deadline_passed  = db.lp_project.count({
+    //         include: [{
+    //             model: db.lp_task,
+    //             where: {
+    //             date_done:  null,
+    //             e_finish: {
+    //                 [Op.not]: null
+    //             },
+    //             deadline: {
+    //                 [Op.lt]: moment().format('YYYY-MM-DD')
 
-                }
-            }
-        }]
-          }).then(results => {
-            return results;
-        });
+    //             }
+    //         }
+    //     }]
+    //       }).then(results => {
+    //         return results;
+    //     });
 
 
-        Promise.all([active_projects, at_risk_projects, deadline_passed]).then(function (values) {
-            console.log(values)
-            res.render('pages/index', { user: req.user, slug:'home', active_projects: values[0], at_risk_projects: values[1], deadline_passed: values[2]})
-          })
+    //     Promise.all([active_projects, at_risk_projects, deadline_passed]).then(function (values) {
+    //         console.log(values)
+    //         res.render('pages/index', { user: req.user, slug:'home', active_projects: values[0], at_risk_projects: values[1], deadline_passed: values[2]})
+    //       })
+    res.render('pages/index', { user: req.user, slug:'home', active_projects: 1, at_risk_projects: 2, deadline_passed: 3})
     })
 
     function checkAuthentication (req, res, next) {

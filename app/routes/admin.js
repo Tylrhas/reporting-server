@@ -15,8 +15,12 @@ module.exports = function(app, passport) {
    app.get('/admin/users',isAdmin, function (req, res) {
     models.user.findAll().then(results => {
         res.render('pages/users', { user: req.user, users: results, slug: "users", moment:moment });
-    });
-   });
+    })
+   })
+
+   app.get('/admin/upload',isAdmin, function (req, res) {
+        res.render('pages/csv_upload', {slug: "upload", user: req.user});
+   })
 
 
    function isAdmin(req, res, next){

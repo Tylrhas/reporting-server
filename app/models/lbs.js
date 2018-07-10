@@ -14,10 +14,10 @@ module.exports = function (sequelize, Sequelize) {
       type: Sequelize.INTEGER
     },
     total_mrr: {
-      type: Sequelize.INTEGER
+      type: Sequelize.REAL
     },
     gross_ps: {
-      type: Sequelize.INTEGER
+      type: Sequelize.REAL
     },
     net_ps: {
       type: Sequelize.REAL
@@ -26,7 +26,7 @@ module.exports = function (sequelize, Sequelize) {
       type: Sequelize.REAL
     },
     gross_cs: {
-      type: Sequelize.INTEGER
+      type: Sequelize.REAL
     },
     net_cs: {
       type: Sequelize.REAL

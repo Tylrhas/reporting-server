@@ -132,10 +132,10 @@ exports.at_risk_CSV = function (req, res) {
 
 exports.updateUser = function (req, res) {
     console.log(req.body)
-    db.user.update({user_group: req.body.group },{
+    db.user.update({ user_group: req.body.group }, {
         where: {
             id: req.body.id,
-        }   
+        }
     }).then(results => {
         res.status(200)
     })
@@ -150,5 +150,43 @@ exports.getProject = function (req, res) {
         }
     }).then(function (result) {
         res.send(result)
+    })
+}
+
+exports.updateNsBacklog = function (req, res) {
+    res.status(200)
+    var updates = []
+    var data = req.body.data
+    for (i = 0; i < data.length; i++) {
+        if (data[i]['Internal ID'] !== undefined) {
+        let row = {
+            id: data[i]['Internal ID'],
+            location_name: null,
+            total_mrr: data[i]['Total MRR'],
+            gross_ps: data[i]['Gross Professional Services'],
+            net_ps: data[i]['Net Professional Services'],
+            total_ps_discount: data[i]['Total Professional Services Discount'],
+            gross_cs: data[i]['Gross Creative Services'],
+            net_cs: data[i]['Net Creative Services'],
+            total_cs_discount: data[i]['Total Creative Services Discount']
+        }
+        if (data[i]['Location'].split(/\s(.+)/).length > 1) {
+            row.location_name = data[i]['Location'].split(/\s(.+)/)[1]
+        } else {
+            row.location_name = data[i]['Location'].split(/\s(.+)/)[0]
+        }
+        
+        updates.push(db.lbs.upsert(row).then(results =>{
+            console.log(results)
+        }))
+    }
+    }
+    // db.lbs.bulkCreate(update)
+    // .then(results => {
+    //     console.log(results)
+    //     res.status(200)
+    // })
+    Promise.all(updates).then(() =>{
+        res.status(200)
     })
 }

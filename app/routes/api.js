@@ -3,9 +3,10 @@ var apiController = require('../controllers/apicontroller.js')
 
 module.exports = function (app, passport) {
 
-    app.get('/api/jobs/updatetasks', checkAuthentication, apiController.updatelptasksapi);
-    app.get('/api/download/at-risk-projects',checkAuthentication,  apiController.at_risk_CSV);
+    app.get('/api/jobs/updatetasks', checkAuthentication, apiController.updatelptasksapi)
+    app.get('/api/download/at-risk-projects',checkAuthentication,  apiController.at_risk_CSV)
     app.get('/api/projects/:project_id', apiController.getProject)
+    app.post('/api/csv/netsuitebacklog/update',isAdmin, apiController.updateNsBacklog)
 
     app.post('/api/admin/user/update',isAdmin, apiController.updateUser  );
 
