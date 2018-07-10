@@ -133,6 +133,7 @@ async function createSubItem (body) {
       id: body.id
     }, 
     defaults: {
+      parent_id: body.parent_id,
       e_start: body.expected_start,
       name: body.name,
       e_finish: body.expected_finish,
@@ -144,6 +145,7 @@ async function createSubItem (body) {
     }
   }).then(treeitem => {
     treeitem[0].update({
+      parent_id: body.parent_id,
       e_start: body.expected_start,
       name: body.name,
       e_finish: body.expected_finish,
