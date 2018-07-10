@@ -77,7 +77,7 @@ async function checkParent (body, subFolders) {
         // create all of the sub items
         for (let i = 0; i < subFolders.length; i++) {
           await createSubItem(subFolders[i])
-          createLBS(subFolders[i])
+          await createLBS(subFolders[i])
         }
       }
     } else {
@@ -177,7 +177,7 @@ async function createProject (body) {
   })
 }
 
-function createLBS (item) {
+async function createLBS (item) {
   if (item.task_type === 'Location Service Billing' && item.type === 'Task') {
     let splitName = item.name.split(/\s(.+)/, 2)
     let LBSId = splitName[0]

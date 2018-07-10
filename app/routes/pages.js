@@ -120,6 +120,62 @@ module.exports = function (app, passport) {
             // res.json(results)
         })
     })
+    app.get('/reports/activations/:month/:year', function (req, res) {
+        //  get the first and last day of the month
+        var first = new Date(req.params.year, req.params.month, 1);
+        var last  = new Date(req.params.year, req.params.month + 1, 0);
+        // get all locations that have been launched in the month and year
+        // db.lbs.findAll({
+        //     attributes: ['location_name', 'total_mrr', 'gross_ps', 'net_ps', 'total_ps_discount', 'gross_cs', 'net_cs',  'total_cs_discount'],
+        //     include: [{
+        //         attributes: ['task_name', 'e_finish', 'deadline', 'project_id'],
+        //         model: db.project_folders,
+        //         where: {
+        //             'date_done': null,
+        //             'e_finish': {
+        //                 [Op.gt]: Sequelize.col('deadline')
+        //             },
+        //             [Op.or]: [{
+        //                 'task_name': {
+        //                     [Op.like]: '%Activation%'
+        //                 }
+        //             },
+        //             {
+        //                 'task_name': {
+        //                     [Op.like]: '%Launch%'
+        //                 }
+        //             }
+        //             ]
+
+        //         }
+        //     },
+        //     {
+        //         attributes: ['project_id', 'priority', 'index'],
+        //         model: db.lp_project_priority,
+        //         where: {
+        //             [Op.or]: [
+        //                 { index: 3 },
+        //                 { index: null }
+        //             ]
+        //         }
+        //     }],
+        //     // //order by priority
+        //     order: [
+        //         [db.lp_project_priority, 'priority', 'ASC']
+        //     ]
+        // })
+    })
+
+    function isAdmin(req, res, next){
+        if (req.isAuthenticated() && req.user.user_group == 'admin'){
+        
+                   return next();
+    
+            }
+            else{
+                res.redirect('/');
+            }
+       }
     function checkAuthentication (req, res, next) {
         if (req.isAuthenticated()) {
             // if user is looged in, req.isAuthenticated() will return true
