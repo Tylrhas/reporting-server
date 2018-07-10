@@ -181,11 +181,6 @@ exports.updateNsBacklog = function (req, res) {
         }))
     }
     }
-    // db.lbs.bulkCreate(update)
-    // .then(results => {
-    //     console.log(results)
-    //     res.status(200)
-    // })
     Promise.all(updates).then(() =>{
         res.status(200)
     })
