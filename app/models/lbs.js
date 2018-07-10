@@ -35,7 +35,7 @@ module.exports = function (sequelize, Sequelize) {
       type: Sequelize.REAL
     },
     opportunity_close_date: {
-      type: Sequelize.Date
+      type: Sequelize.timestamp
     }
   },
     {
