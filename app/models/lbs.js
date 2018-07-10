@@ -33,6 +33,9 @@ module.exports = function (sequelize, Sequelize) {
     },
     total_cs_discount: {
       type: Sequelize.REAL
+    },
+    opportunity_close_date: {
+      type: Sequelize.Date
     }
   },
     {
