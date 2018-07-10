@@ -91,7 +91,7 @@ module.exports = function (sequelize, Sequelize) {
         // associate project with priority
         models.lp_project.hasMany(models.lp_project_priority, { foreignKey: 'project_id', sourceKey: 'id' });
         // associate project with children
-        models.lp_project.hasMany(models.project_folders, { foreignKey: 'parent_id', sourceKey: 'id' });
+        models.lp_project.hasMany(models.treeitem, { foreignKey: 'parent_id', sourceKey: 'id' });
     }
 
     return LpProject;

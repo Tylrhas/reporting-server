@@ -141,10 +141,10 @@ exports.updateUser = function (req, res) {
     })
 }
 exports.getProject = function (req, res) {
-    db.project_folders.find({
+    db.treeitem.find({
         where: { id: req.params.project_id },
         include: {
-            model: db.project_folders,
+            model: db.treeitem,
             as: 'descendents',
             hierarchy: true
         }

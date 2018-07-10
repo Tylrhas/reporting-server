@@ -41,7 +41,7 @@ module.exports = function (sequelize, Sequelize) {
     })
     lbs.associate = function (models) {
       // associate project tasks
-      models.lbs.belongsTo(models.project_folders, {foreignKey: 'task_id', sourceKey: 'id'});
+      models.lbs.belongsTo(models.treeitem, {foreignKey: 'task_id', sourceKey: 'id'});
     }
   return lbs
 

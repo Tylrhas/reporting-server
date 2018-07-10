@@ -1,5 +1,5 @@
 module.exports = function (sequelize, Sequelize) {
-  var project_folders = sequelize.define('project_folders', {
+  var treeitem = sequelize.define('treeitem', {
 
     id: {
       autoIncrement: true,
@@ -74,5 +74,5 @@ module.exports = function (sequelize, Sequelize) {
       //use a sinular table name
       freezeTableName: true,
     })
-  return project_folders
+  return treeitem
 }

@@ -131,7 +131,7 @@ module.exports = function (app, passport) {
             attributes: ['location_name', 'total_mrr', 'gross_ps', 'net_ps', 'total_ps_discount', 'gross_cs', 'net_cs', 'total_cs_discount'],
             include: [{
                 attributes: ['date_done'],
-                model: db.project_folders,
+                model: db.treeitem,
                 where: {
                     'date_done': {
                         between: [first, last]
@@ -150,33 +150,33 @@ module.exports = function (app, passport) {
         var lastMonth = null
         switch (quarter) {
             case 1:
-            firstMonth = 0
-            lastMonth = 3
+                firstMonth = 0
+                lastMonth = 3
                 break;
             case 2:
-            firstMonth = 3
-            lastMonth = 6
+                firstMonth = 3
+                lastMonth = 6
                 break;
             case 3:
-            firstMonth = 6
-            lastMonth = 9
+                firstMonth = 6
+                lastMonth = 9
                 break;
             case 4:
-            firstMonth = 9
-            lastMonth = 12
+                firstMonth = 9
+                lastMonth = 12
                 break;
             default:
-            firstMonth = null
-            lastMonth = null
+                firstMonth = null
+                lastMonth = null
         }
-        var first = new Date(req.params.year, firstMonth, 1);
-        var last = new Date(req.params.year, lastMonth, 0);
+        var first = new Date(year, firstMonth, 1);
+        var last = new Date(year, lastMonth, 0);
         // get all locations that have been launched in the month and year
         db.lbs.findAll({
             attributes: ['location_name', 'total_mrr', 'gross_ps', 'net_ps', 'total_ps_discount', 'gross_cs', 'net_cs', 'total_cs_discount'],
             include: [{
                 attributes: ['date_done'],
-                model: db.project_folders,
+                model: db.treeitem,
                 where: {
                     'date_done': {
                         between: [first, last]
@@ -184,7 +184,7 @@ module.exports = function (app, passport) {
                 }
             }]
         }).then(results => {
-            res.send({results, first, last})
+            res.send(results)
         })
     })
 

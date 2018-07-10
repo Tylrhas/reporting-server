@@ -14,7 +14,7 @@ module.exports = function (app, passport) {
     // LP Post to the webhood to update the task
     res.sendStatus(200)
     if (req.body.change_type === 'delete') {
-      db.project_folders.destroy({
+      db.treeitem.destroy({
         where: {
           id: req.body.id
         }
@@ -69,7 +69,7 @@ async function checkParent (body, subFolders) {
     }
 
   } else {
-    let projectCount = await db.project_folders.count({ where: { id: body.parent_id } })
+    let projectCount = await db.treeitem.count({ where: { id: body.parent_id } })
     if (projectCount > 0) {
       // parent exists
       await createSubItem(body)
@@ -114,7 +114,7 @@ async function checkParent (body, subFolders) {
   }
 }
 async function createSubItem (body) {
-  return db.project_folders.upsert({
+  return db.treeitem.upsert({
     id: body.id,
     e_start: body.expected_start,
     name: body.name,
@@ -163,7 +163,7 @@ async function createProject (body) {
   }
   // FIND OR CREATE THE LOCATION THEN UPDATE IT WITH THE NEW DATA
   return db.lp_project.upsert(update_object).then(() => {
-    db.project_folders.upsert({
+    db.treeitem.upsert({
       id: body.id,
       e_start: body.expected_start,
       name: body.name,
