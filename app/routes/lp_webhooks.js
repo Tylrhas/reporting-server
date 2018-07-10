@@ -128,19 +128,32 @@ async function checkParent (body, subFolders) {
   }
 }
 async function createSubItem (body) {
-  return db.treeitem.create({
-    id: body.id,
-    e_start: body.expected_start,
-    name: body.name,
-    e_finish: body.expected_finish,
-    deadline: body.promise_by,
-    hrs_logged: body.hours_logged,
-    date_done: body.done_on,
-    hrs_remaning: body.high_effort_remaining,
-    parent_id: body.parent_id,
-    child_type: body.type.toLowerCase(),
-    task_type: body.task_type
-  })
+  return db.treeitem.findOrCreate({
+    where: {
+      id: body.id
+    }, 
+    defaults: {
+      e_start: body.expected_start,
+      name: body.name,
+      e_finish: body.expected_finish,
+      deadline: body.promise_by,
+      hrs_logged: body.hours_logged,
+      date_done: body.done_on,
+      hrs_remaning: body.high_effort_remaining,
+      child_type: body.type.toLowerCase()
+    }
+  }).then(treeitem => {
+    treeitem[0].update({
+      e_start: body.expected_start,
+      name: body.name,
+      e_finish: body.expected_finish,
+      deadline: body.promise_by,
+      hrs_logged: body.hours_logged,
+      date_done: body.done_on,
+      hrs_remaning: body.high_effort_remaining,
+      child_type: body.type.toLowerCase()
+    })
+  }) 
 }
 
 async function createProject (body) {
