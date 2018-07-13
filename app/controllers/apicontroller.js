@@ -204,18 +204,34 @@ exports.getAllProjects = function (req, res) {
 }
 
 exports.updateProjects = function (req, res) {
-    if (process.env.production === false) {
+    console.log(process.env.production)
+    if (process.env.production === "false") {
         let url = process.env.PRODUCTION_URL + '/api/projects'
-        request.get({ url: url }, (error, response, body) => {
+        request.get({ url: url, headers: { 'x-access-token': process.env.API_KEY } }, (error, response, insertbody) => {
             if (error) {
                 console.log(error)
                 res.send(error)
             } else {
                 console.log(body)
                 // delete everything in the database
-                db.treeitem.destroy().then(() => {
+                db.treeitem.destroy({
+                    where: {
+                        id:{
+                            [Op.not]: null
+                        }
+                    }
+                }).then(() => {
                     // dump all new data
-                    db.treeitem.bulkCreate([]).then(() => {
+                    body = JSON.parse(body)
+                    var inserts = []
+                    while(body.length) {
+                        // create bulk inserts of 500 rows at a time
+                        let insert = body.splice(0,500)
+                        // Push the inserts into the promise all array
+                        inserts.push(db.treeitem.bulkCreate(insert))
+                    }
+                    // wait for all inserts to be complete
+                    Promise.all(inserts).then(()=> {
                         res.send("Complete")
                     })
                 })
