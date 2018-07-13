@@ -202,60 +202,49 @@ exports.getAllProjects = function (req, res) {
         })
     }
 }
-exports.getAllItemsHeirachy = function (req, res) {
-    // var token = req.headers['x-access-token']
-    var token = ""
-    if (token === "") {
-        let hierarchyLevel = req.params.hierarchyLevel
-        db.treeitem.findAll({
-            where: {
-                hierarchyLevel: hierarchyLevel
-            }
-        }).then(results => {
-            res.send(results)
-        })
-    }
-}
 
 exports.updateProjects = async function (req, res) {
-    var hierarchyLevel = 0
-    getUpdates(hierarchyLevel)
-}
-function getUpdates (hierarchyLevel) {
-    // increment the heirachyLevel
-    hierarchyLevel++
+    console.log(process.env.production)
     if (process.env.production === "false") {
-        let url = process.env.PRODUCTION_URL + '/api/treeitems/' + hierarchyLevel
+        let url = process.env.PRODUCTION_URL + '/api/projects'
         request.get({ url: url, headers: { 'x-access-token': process.env.API_KEY } }, (error, response, body) => {
             if (error) {
                 console.log(error)
                 res.send(error)
             } else {
                 console.log(body)
-                // dump all new data
-                body = JSON.parse(body)
-                // Check if there are any items at this level
-                if (body.length > 0) {
-                    // delete everything in the database
-                    db.treeitem.destroy({
-                        where: {
-                            hierarchyLevel: hierarchyLevel
+                // delete everything in the database
+                db.treeitem.destroy({
+                    where: {
+                        id: {
+                            [Op.not]: null
                         }
-                    }).then(() => {
-                        db.treeitem.bulkCreate(insert)
-                            .error(error => {
-                                console.log(error)
-                            })
-                            .then(result => {
-                                return getUpdates (hierarchyLevel)
-                            })
+                    }
+                }).then(() => {
+                    // dump all new data
+                    body = JSON.parse(body)
+                    checkLength (body, res).then(() => {
+                        console.log("does this work")
                     })
-                } else {
-                    res.send("done")
-                }
+                })
             }
         })
     } else {
         res.send("only available on non-production Enviornments")
+    }
+}
+
+function checkLength (body, res){
+    if (body.length) {
+        let insert = body.splice(0, 100)
+        db.treeitem.bulkCreate(insert)
+        .error(error => {
+            console.log(error)
+        })
+        .then(result => {
+            return checkLength(body, res)
+        })
+    } else {
+        res.send("Complete")
     }
 }
