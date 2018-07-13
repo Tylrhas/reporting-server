@@ -195,44 +195,43 @@ exports.updateNsBacklog = function (req, res) {
 }
 
 exports.getAllProjects = function (req, res) {
-    var token = req.headers['x-access-token']
-    if (token === process.env.API_KEY) {
-        db.treeitem.findAll().then(results => {
+        db.treeitem.findAll({
+            order: Sequelize.col('hierarchyLevel')
+        }).then(results => {
             res.send(results)
         })
-    }
 }
 
-exports.updateProjects = async function (req, res) {
-    console.log(process.env.production)
-    if (process.env.production === "false") {
-        let url = process.env.PRODUCTION_URL + '/api/projects'
-        request.get({ url: url, headers: { 'x-access-token': process.env.API_KEY } }, (error, response, body) => {
-            if (error) {
-                console.log(error)
-                res.send(error)
-            } else {
-                console.log(body)
-                // delete everything in the database
-                db.treeitem.destroy({
-                    where: {
-                        id: {
-                            [Op.not]: null
-                        }
-                    }
-                }).then(() => {
-                    // dump all new data
-                    body = JSON.parse(body)
-                    checkLength (body, res).then(() => {
-                        console.log("does this work")
-                    })
-                })
-            }
-        })
-    } else {
-        res.send("only available on non-production Enviornments")
-    }
-}
+// exports.updateProjects = async function (req, res) {
+//     console.log(process.env.production)
+//     if (process.env.production === "false") {
+//         let url = process.env.PRODUCTION_URL + '/api/projects'
+//         request.get({ url: url, headers: { 'x-access-token': process.env.API_KEY } }, (error, response, body) => {
+//             if (error) {
+//                 console.log(error)
+//                 res.send(error)
+//             } else {
+//                 console.log(body)
+//                 // delete everything in the database
+//                 db.treeitem.destroy({
+//                     where: {
+//                         id: {
+//                             [Op.not]: null
+//                         }
+//                     }
+//                 }).then(() => {
+//                     // dump all new data
+//                     body = JSON.parse(body)
+//                     checkLength (body, res).then(() => {
+//                         console.log("does this work")
+//                     })
+//                 })
+//             }
+//         })
+//     } else {
+//         res.send("only available on non-production Enviornments")
+//     }
+// }
 
 function checkLength (body, res){
     if (body.length) {
