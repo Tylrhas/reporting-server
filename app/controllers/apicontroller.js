@@ -202,39 +202,57 @@ exports.getAllProjects = function (req, res) {
         })
     }
 }
+exports.getAllItemsHeirachy = function (req, res) {
+    // var token = req.headers['x-access-token']
+    var token = ""
+    if (token === "") {
+        let hierarchyLevel = req.params.hierarchyLevel
+        db.treeitem.findAll({
+            where: {
+                hierarchyLevel: hierarchyLevel
+            }
+        }).then(results => {
+            res.send(results)
+        })
+    }
+}
 
-exports.updateProjects = function (req, res) {
-    console.log(process.env.production)
+exports.updateProjects = async function (req, res) {
+    var hierarchyLevel = 0
+    getUpdates(hierarchyLevel)
+}
+function getUpdates (hierarchyLevel) {
+    // increment the heirachyLevel
+    hierarchyLevel++
     if (process.env.production === "false") {
-        let url = process.env.PRODUCTION_URL + '/api/projects'
-        request.get({ url: url, headers: { 'x-access-token': process.env.API_KEY } }, (error, response, insertbody) => {
+        let url = process.env.PRODUCTION_URL + '/api/treeitems/' + hierarchyLevel
+        request.get({ url: url, headers: { 'x-access-token': process.env.API_KEY } }, (error, response, body) => {
             if (error) {
                 console.log(error)
                 res.send(error)
             } else {
                 console.log(body)
-                // delete everything in the database
-                db.treeitem.destroy({
-                    where: {
-                        id:{
-                            [Op.not]: null
+                // dump all new data
+                body = JSON.parse(body)
+                // Check if there are any items at this level
+                if (body.length > 0) {
+                    // delete everything in the database
+                    db.treeitem.destroy({
+                        where: {
+                            hierarchyLevel: hierarchyLevel
                         }
-                    }
-                }).then(() => {
-                    // dump all new data
-                    body = JSON.parse(body)
-                    var inserts = []
-                    while(body.length) {
-                        // create bulk inserts of 500 rows at a time
-                        let insert = body.splice(0,500)
-                        // Push the inserts into the promise all array
-                        inserts.push(db.treeitem.bulkCreate(insert))
-                    }
-                    // wait for all inserts to be complete
-                    Promise.all(inserts).then(()=> {
-                        res.send("Complete")
+                    }).then(() => {
+                        db.treeitem.bulkCreate(insert)
+                            .error(error => {
+                                console.log(error)
+                            })
+                            .then(result => {
+                                return getUpdates (hierarchyLevel)
+                            })
                     })
-                })
+                } else {
+                    res.send("done")
+                }
             }
         })
     } else {
