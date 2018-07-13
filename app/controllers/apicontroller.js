@@ -202,48 +202,37 @@ exports.getAllProjects = function (req, res) {
         })
 }
 
-// exports.updateProjects = async function (req, res) {
-//     console.log(process.env.production)
-//     if (process.env.production === "false") {
-//         let url = process.env.PRODUCTION_URL + '/api/projects'
-//         request.get({ url: url, headers: { 'x-access-token': process.env.API_KEY } }, (error, response, body) => {
-//             if (error) {
-//                 console.log(error)
-//                 res.send(error)
-//             } else {
-//                 console.log(body)
-//                 // delete everything in the database
-//                 db.treeitem.destroy({
-//                     where: {
-//                         id: {
-//                             [Op.not]: null
-//                         }
-//                     }
-//                 }).then(() => {
-//                     // dump all new data
-//                     body = JSON.parse(body)
-//                     checkLength (body, res).then(() => {
-//                         console.log("does this work")
-//                     })
-//                 })
-//             }
-//         })
-//     } else {
-//         res.send("only available on non-production Enviornments")
-//     }
-// }
-
-function checkLength (body, res){
-    if (body.length) {
-        let insert = body.splice(0, 100)
-        db.treeitem.bulkCreate(insert)
-        .error(error => {
-            console.log(error)
-        })
-        .then(result => {
-            return checkLength(body, res)
+exports.updateProjects = async function (req, res) {
+    console.log(process.env.production)
+    if (process.env.production === "false") {
+        let url = process.env.PRODUCTION_URL + '/api/projects'
+        request.get({ url: url}, (error, response, body) => {
+            if (error) {
+                console.log(error)
+                res.send(error)
+            } else {
+                console.log(body)
+                // delete everything in the database
+                db.treeitem.destroy({
+                    where: {
+                        id: {
+                            [Op.not]: null
+                        }
+                    }
+                }).then(() => {
+                    // dump all new data
+                    body = JSON.parse(body)
+                    db.treeitem.bulkCreate(body)
+                    .error(error => {
+                        console.log(error)
+                    })
+                    .then(result => {
+                        res.send("yay")
+                    })
+                })
+            }
         })
     } else {
-        res.send("Complete")
+        res.send("only available on non-production Enviornments")
     }
 }
