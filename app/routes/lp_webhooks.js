@@ -151,6 +151,10 @@ async function checkParent (body, subFolders) {
           console.log(e)
           console.log(body)
         }
+        if (parentBody !== null) {
+        // create the project if it is missing
+        return checkParent(parentBody,subFolders)
+      }
       })
     }
   }
