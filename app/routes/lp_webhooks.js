@@ -80,7 +80,23 @@ async function checkParent (body, subFolders) {
   let projectCount = await db.treeitem.count({ where: { id: body.parent_id } })
     if (projectCount > 0) {
       // parent exists
-      await createSubItem(body)
+      let updateBody = {
+        id: body.id,
+        e_start: body.expected_start,
+        name: body.name,
+        e_finish: body.expected_finish,
+        deadline: body.promise_by,
+        hrs_logged: body.hours_logged,
+        date_done: body.done_on,
+        hrs_remaning: body.high_effort_remaining,
+        parent_id: body.parent_id,
+        type: body.type,
+        task_type: null
+      }
+      if (body.type === 'Task') {
+        updateBody.task_type = body.custom_field_values['Task Type']
+      }
+      await createSubItem(updateBody)
       if (subFolders.length > 0) {
         // create all of the sub items
         for (let i = 0; i < subFolders.length; i++){
@@ -125,7 +141,7 @@ async function checkParent (body, subFolders) {
           let parentBody = JSON.parse(body)
         } catch(e) {
           console.log(e)
-          console.log(body)
+          console.log()
         }
 
         // create the project if it is missing
@@ -149,7 +165,8 @@ async function createSubItem (body) {
       hrs_logged: body.hours_logged,
       date_done: body.done_on,
       hrs_remaning: body.high_effort_remaining,
-      child_type: body.type.toLowerCase()
+      child_type: body.type.toLowerCase(),
+      task_type: body.custom_field_values
     }
   }).then(treeitem => {
     treeitem[0].update({
