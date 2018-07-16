@@ -192,6 +192,16 @@ exports.updateNsBacklog = function (req, res) {
     }
     Promise.all(updates).then(() => {
         res.status(200)
+        db.job.findAll({
+            where: {
+                jobname: 'ns_backlog'
+            }
+        }).then(results => {
+            results[0].update({
+                lastrun: new Date(),
+                lastrunstatus: 'complete'
+            })
+        })
     })
 }
 
@@ -216,10 +226,30 @@ exports.updateProjects = async function (req, res) {
                     // create promise all
                     await createTreeItem(result[i])
                 }
-                res.send('done')
+                res.send('200')
+                db.job.findAll({
+                    where: {
+                        jobname: 'external_update'
+                    }
+                }).then(results => {
+                    results[0].update({
+                        lastrun: new Date(),
+                        lastrunstatus: 'complete'
+                    })
+                })
             }
     } else {
         res.send("only available on non-production Enviornments")
+        db.job.findAll({
+            where: {
+                jobname: 'external_update'
+            }
+        }).then(results => {
+            results[0].update({
+                lastrun: new Date(),
+                lastrunstatus: 'error'
+            })
+        })
     }
 }
 

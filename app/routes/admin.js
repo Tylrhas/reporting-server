@@ -18,8 +18,10 @@ module.exports = function(app, passport) {
     })
    })
 
-   app.get('/admin/upload',isAdmin, function (req, res) {
-        res.render('pages/csv_upload', {slug: "upload", user: req.user});
+   app.get('/admin/update',isAdmin, function (req, res) {
+    models.job.findAll().then(results => {
+        res.render('pages/csv_upload', {slug: "update", user: req.user, jobs: results, moment:moment})
+    })
    })
 
 
