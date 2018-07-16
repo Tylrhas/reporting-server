@@ -13,6 +13,7 @@ var Papa = require("papaparse")
 var moment = require('moment')
 const request = require("request"),
     throttledRequest = require('throttled-request')(request);
+var rp = require('request-promise');
 //This will throttle the requests so no more than 20 are made every 15 seconds 
 throttledRequest.configure({
     requests: 20,
@@ -32,7 +33,7 @@ exports.updatelptasksapi = function (req, res) {
 }
 
 exports.test_view = function (req, res) {
-    db.sequelize.query("SELECT * FROM test_view", { type: db.Sequelize.QueryTypes.SELECT })
+    db.Sequelize.query("SELECT * FROM test_view", { type: db.Sequelize.QueryTypes.SELECT })
         .then(data => {
             res.send(data);
         })
@@ -205,48 +206,60 @@ exports.getAllProjects = function (req, res) {
 exports.updateProjects = async function (req, res) {
     console.log(process.env.production)
     if (process.env.production === "false") {
-        let hierarchyLevel = 0
-        get_tree_items (res, hierarchyLevel)
+        let url = process.env.PRODUCTION_URL + '/api/treeitems'
+        let result = await rp.get({ url: url })
+            console.log(result)
+            // dump all new data
+            result = JSON.parse(result)
+            if (result.length) {
+                for (let i = 0; i < result.length; i++) {
+                    // create promise all
+                    await createTreeItem(result[i])
+                }
+                res.send('done')
+            }
     } else {
         res.send("only available on non-production Enviornments")
     }
 }
 
-exports.getTreeItemsByHierarchyLevel = function (req, res) {
-    let hierarchyLevel = req.params.hierarchyLevel
+exports.getTreeItems = function (req, res) {
     db.treeitem.findAll({
-        where: {
-            hierarchyLevel: hierarchyLevel
-        }
+        // Will order ascending assuming ascending is the default order when direction is omitted
+        order: Sequelize.col('hierarchyLevel')
     })
-    .then(results => {
-        res.send(results)
-    })
+        .then(results => {
+            res.send(results)
+        })
 }
 
-function get_tree_items (res, hierarchyLevel) {
-    hierarchyLevel++
-    let url = process.env.PRODUCTION_URL + '/api/treeitems/'+ hierarchyLevel
-    request.get({ url: url }, (error, response, body) => {
-        if (error) {
-            console.log(error)
-            res.send(error)
-        } else {
-            console.log(body)
-            // dump all new data
-            body = JSON.parse(body)
-            if (body.length) {
-                db.treeitem.bulkCreate(body)
-                    .error(error => {
-                        console.log(error)
-                    })
-                    .then(result => {
-                        return get_tree_items(res, hierarchyLevel)
-                    })
-            } else {
-                // there are no items left
-                res.send("yay")
-            }
+async function createTreeItem (body) {
+    return db.treeitem.findOrCreate({
+        where: {
+            id: body.id
+        },
+        defaults: {
+            parent_id: body.parent_id,
+            e_start: body.e_start,
+            name: body.name,
+            e_finish: body.e_finish,
+            deadline: body.deadline,
+            hrs_logged: body.hrs_logged,
+            date_done: body.date_done,
+            hrs_remaning: body.hrs_remaning,
+            child_type: body.child_type
         }
+    }).then(treeitem => {
+        treeitem[0].update({
+            parent_id: body.parent_id,
+            e_start: body.e_start,
+            name: body.name,
+            e_finish: body.e_finish,
+            deadline: body.deadline,
+            hrs_logged: body.hrs_logged,
+            date_done: body.date_done,
+            hrs_remaning: body.hrs_remaning,
+            child_type: body.child_type
+        })
     })
 }
