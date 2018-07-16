@@ -147,7 +147,7 @@ async function checkParent (body, subFolders) {
           let parentBody = JSON.parse(body)
         } catch(e) {
           console.log(e)
-          console.log()
+          console.log(body)
         }
 
         // create the project if it is missing
