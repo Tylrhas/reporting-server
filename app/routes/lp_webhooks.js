@@ -145,13 +145,12 @@ async function checkParent (body, subFolders) {
         }
         try {
           let parentBody = JSON.parse(body)
+                  // create the project if it is missing
+        return checkParent(parentBody,subFolders)
         } catch(e) {
           console.log(e)
           console.log(body)
         }
-
-        // create the project if it is missing
-        return checkParent(parentBody,subFolders)
       })
     }
   }
