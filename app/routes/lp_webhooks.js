@@ -97,6 +97,12 @@ async function checkParent (body, subFolders) {
         updateBody.task_type = body.custom_field_values['Task Type']
       }
       await createSubItem(updateBody)
+      if (updateBody.task_type === 'Location Service Billing' && updateBody.type ==='Task') {
+        let splitName = subFolders[i].name.split(/\s(.+)/,2)
+        let LBSId = splitName[0]
+        let locationName = splitName[1]
+        let lbsTask = await db.lbs.findOrCreate({where: {id: LBSId}, defaults: {location_name: locationName, task_id: body.id}})
+      }
       if (subFolders.length > 0) {
         // create all of the sub items
         for (let i = 0; i < subFolders.length; i++){
