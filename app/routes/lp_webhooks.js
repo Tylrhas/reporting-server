@@ -121,7 +121,13 @@ async function checkParent (body, subFolders) {
           //Handle request error 
           console.log(error);
         }
-        let parentBody = JSON.parse(body)
+        try {
+          let parentBody = JSON.parse(body)
+        } catch(e) {
+          console.log(e)
+          console.log(body)
+        }
+
         // create the project if it is missing
         return checkParent(parentBody,subFolders)
       })
