@@ -2,6 +2,7 @@
 var fs = require("fs");
 var path = require("path");
 var Sequelize = require("sequelize");
+require('sequelize-hierarchy')(Sequelize);
 var sequelize = new Sequelize(process.env.DATABASE_URL, {
   pool: {
     max: 15,
@@ -11,7 +12,7 @@ var sequelize = new Sequelize(process.env.DATABASE_URL, {
     evict: 20000,
   },
   dialectOptions: {
-    ssl: true
+    // ssl: true
   }
 }
 );

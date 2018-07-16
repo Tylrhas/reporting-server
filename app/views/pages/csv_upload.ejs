@@ -1,0 +1,79 @@
+<% include ../partials/header.ejs %>
+  <% include ../partials/nav.ejs %>
+    <main class="app-content">
+
+      <div class="app-title">
+        <div>
+          <h1>CSV Upload</h1>
+          <p>A quick way to Update the Databases</p>
+        </div>
+        <ul class="app-breadcrumb breadcrumb">
+          <li class="breadcrumb-item">
+            <i class="fa fa-home fa-lg"></i>
+          </li>
+        </ul>
+      </div>
+      <div class="row">
+        <div class="col-md-4">
+          <div class="tile">
+            <a href="#">
+              <h4 class="center">Add NetSuite Backlog</h4>
+              <input type="file" id="files" class="form-control" accept=".csv" required />
+              <button id="backlogUpload">upload</button>
+            </a>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="tile">
+            <a href="/reports/at-risk-projects">
+              <h4 class="center">Add Netsuite Launched Locations</h4>
+              <p class="center">Upload</p>
+            </a>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="tile">
+            <a href="/reports/deadline-passed">
+              <h4 class="center">Update Liquid Planner</h4>
+              <p class="center">Upload</p>
+            </a>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script src="/js/plugins/papaparse.min.js"></script>
+    <script>
+      $('#backlogUpload').on("click", function (e) {
+        e.preventDefault();
+        $('#files').parse({
+          config: {
+            delimiter: ",",
+            header: true,
+            complete: submitUpdates,
+          },
+          before: function (file, inputElem) {
+            //console.log("Parsing file...", file);
+          },
+          error: function (err, file) {
+            console.log("ERROR:", err, file);
+          },
+          complete: function () {
+            console.log("Done with all files");
+          }
+        })
+      })
+      function submitUpdates(results, file) {
+        $.ajax({
+          type: "POST",
+          url: '/api/csv/netsuitebacklog/update',
+          data: results,
+          success: success,
+          dataType: 'JSON'
+        })
+        console.log(results)
+      }
+      function success(data) {
+        console.log(data)
+      }
+    </script>
+    <% include ../partials/footer.ejs %>

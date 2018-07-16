@@ -11,6 +11,13 @@ const Op = Sequelize.Op
 
 var Papa = require("papaparse")
 var moment = require('moment')
+const request = require("request"),
+    throttledRequest = require('throttled-request')(request);
+//This will throttle the requests so no more than 20 are made every 15 seconds 
+throttledRequest.configure({
+    requests: 20,
+    milliseconds: 15000
+});
 
 //API Calls
 exports.updatelpLbsapi = function (req, res) {
@@ -132,11 +139,100 @@ exports.at_risk_CSV = function (req, res) {
 
 exports.updateUser = function (req, res) {
     console.log(req.body)
-    db.user.update({user_group: req.body.group },{
+    db.user.update({ user_group: req.body.group }, {
         where: {
             id: req.body.id,
-        }   
+        }
     }).then(results => {
         res.status(200)
     })
+}
+exports.getProject = function (req, res) {
+    db.treeitem.find({
+        where: { id: req.params.project_id },
+        include: {
+            model: db.treeitem,
+            as: 'descendents',
+            hierarchy: true
+        }
+    }).then(function (result) {
+        res.send(result)
+    })
+}
+
+exports.updateNsBacklog = function (req, res) {
+    res.status(200)
+    var updates = []
+    var data = req.body.data
+    for (i = 0; i < data.length; i++) {
+        if (data[i]['Internal ID'] !== undefined) {
+            let row = {
+                id: data[i]['Internal ID'],
+                location_name: null,
+                total_mrr: data[i]['Total MRR'],
+                gross_ps: data[i]['Gross Professional Services'],
+                net_ps: data[i]['Net Professional Services'],
+                total_ps_discount: data[i]['Total Professional Services Discount'],
+                gross_cs: data[i]['Gross Creative Services'],
+                net_cs: data[i]['Net Creative Services'],
+                total_cs_discount: data[i]['Total Creative Services Discount'],
+                opportunity_close_date: data[i]['Opportunity Close Date']
+            }
+            if (data[i]['Location'].split(/\s(.+)/).length > 1) {
+                row.location_name = data[i]['Location'].split(/\s(.+)/)[1]
+            } else {
+                row.location_name = data[i]['Location'].split(/\s(.+)/)[0]
+            }
+
+            updates.push(db.lbs.upsert(row).then(results => {
+                console.log(results)
+            }))
+        }
+    }
+    Promise.all(updates).then(() => {
+        res.status(200)
+    })
+}
+
+exports.getAllProjects = function (req, res) {
+        db.treeitem.findAll({
+            order: Sequelize.col('hierarchyLevel')
+        }).then(results => {
+            res.send(results)
+        })
+}
+
+exports.updateProjects = async function (req, res) {
+    console.log(process.env.production)
+    if (process.env.production === "false") {
+        let url = process.env.PRODUCTION_URL + '/api/projects'
+        request.get({ url: url}, (error, response, body) => {
+            if (error) {
+                console.log(error)
+                res.send(error)
+            } else {
+                console.log(body)
+                // delete everything in the database
+                db.treeitem.destroy({
+                    where: {
+                        id: {
+                            [Op.not]: null
+                        }
+                    }
+                }).then(() => {
+                    // dump all new data
+                    body = JSON.parse(body)
+                    db.treeitem.bulkCreate(body)
+                    .error(error => {
+                        console.log(error)
+                    })
+                    .then(result => {
+                        res.send("yay")
+                    })
+                })
+            }
+        })
+    } else {
+        res.send("only available on non-production Enviornments")
+    }
 }

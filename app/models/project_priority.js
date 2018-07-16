@@ -15,6 +15,6 @@ module.exports = function (sequelize, Sequelize) {
       index: {
           type: Sequelize.INTEGER
       }
-  });
+  })
   return lp_project_priority;
 }

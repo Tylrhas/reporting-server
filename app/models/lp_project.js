@@ -8,10 +8,10 @@ module.exports = function (sequelize, Sequelize) {
             primaryKey: true,
             type: Sequelize.INTEGER
         },
-        project_name: {
-            type: Sequelize.TEXT,
-            notEmpty: true
+        client_id: {
+            type: Sequelize.INTEGER,
         },
+        // Dates
         done_on: {
             type: Sequelize.DATE,
         },
@@ -34,62 +34,65 @@ module.exports = function (sequelize, Sequelize) {
             type: Sequelize.DATE,
         },
         // BEGIN CUSTOM FIELDS
+        promo_project: {
+            type: Sequelize.BOOLEAN
+        },
+        level_of_service: {
+            type: Sequelize.TEXT
+        },
+        vertical: {
+            type: Sequelize.TEXT,
+        },
+        package: {
+            type: Sequelize.TEXT,
+        },
+        project_type: {
+            type: Sequelize.TEXT,
+        },
+        ps_phase: {
+            type: Sequelize.TEXT,
+        },
+        risk_level: {
+            type: Sequelize.TEXT,
+        },
+        project_impact: {
+            type: Sequelize.TEXT,
+        },
+        services_activated: {
+            type: Sequelize.BOOLEAN,
+        },
+        launch_type: {
+            type: Sequelize.TEXT,
+        },
         launch_day: {
             type: Sequelize.INTEGER,
         },
         launch_month: {
             type: Sequelize.TEXT,
         },
-        project_impact: {
+        copy: {
             type: Sequelize.TEXT,
         },
-        launch_type: {
+        design_initial_build: {
             type: Sequelize.TEXT,
         },
-        project_type: {
+        custom_logo: {
             type: Sequelize.TEXT,
         },
-        package: {
+        custom_copy_complete:{
             type: Sequelize.TEXT,
         },
-        services_activated: {
-            type: Sequelize.BOOLEAN,
-        },
-        risk_level: {
+        design_complete: {
             type: Sequelize.TEXT,
-        },
-        ps_phase: {
-            type: Sequelize.TEXT,
-        },
-        vertical: {
-            type: Sequelize.TEXT,
-        },
-        mrr: {
-            type: Sequelize.DECIMAL
-        },
-        otr_ps: {
-            type: Sequelize.DECIMAL
-        },
-        otr_cs: {
-            type: Sequelize.DECIMAL
-        },
-        integration_type: {
-            type: Sequelize.TEXT,
-        },
-        client_id: {
-            type: Sequelize.INTEGER,
         }
-    });
+    })
 
     LpProject.associate = function (models) {
-        // associate project tasks
-        models.lp_project.hasMany(models.lp_task, { foreignKey: 'project_id', sourceKey: 'id' });
         // associate project with priority
         models.lp_project.hasMany(models.lp_project_priority, { foreignKey: 'project_id', sourceKey: 'id' });
-        // associate project with Folders
-        models.lp_project.hasMany(models.lp_folder, { foreignKey: 'project_id', sourceKey: 'id' });
-    };
+        // associate project with children
+        models.lp_project.hasMany(models.treeitem, { foreignKey: 'parent_id', sourceKey: 'id' });
+    }
 
     return LpProject;
-
 }
