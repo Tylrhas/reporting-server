@@ -166,7 +166,7 @@ async function createSubItem (body) {
       date_done: body.done_on,
       hrs_remaning: body.high_effort_remaining,
       child_type: body.type.toLowerCase(),
-      task_type: body.custom_field_values
+      task_type: body.task_type
     }
   }).then(treeitem => {
     treeitem[0].update({
@@ -178,7 +178,8 @@ async function createSubItem (body) {
       hrs_logged: body.hours_logged,
       date_done: body.done_on,
       hrs_remaning: body.high_effort_remaining,
-      child_type: body.type.toLowerCase()
+      child_type: body.type.toLowerCase(),
+      task_type: body.task_type
     })
   }) 
 }
