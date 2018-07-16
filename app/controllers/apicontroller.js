@@ -195,44 +195,58 @@ exports.updateNsBacklog = function (req, res) {
 }
 
 exports.getAllProjects = function (req, res) {
-        db.treeitem.findAll({
-            order: Sequelize.col('hierarchyLevel')
-        }).then(results => {
-            res.send(results)
-        })
+    db.treeitem.findAll({
+        order: Sequelize.col('hierarchyLevel')
+    }).then(results => {
+        res.send(results)
+    })
 }
 
 exports.updateProjects = async function (req, res) {
     console.log(process.env.production)
     if (process.env.production === "false") {
-        let url = process.env.PRODUCTION_URL + '/api/projects'
-        request.get({ url: url}, (error, response, body) => {
-            if (error) {
-                console.log(error)
-                res.send(error)
-            } else {
-                console.log(body)
-                // delete everything in the database
-                db.treeitem.destroy({
-                    where: {
-                        id: {
-                            [Op.not]: null
-                        }
-                    }
-                }).then(() => {
-                    // dump all new data
-                    body = JSON.parse(body)
-                    db.treeitem.bulkCreate(body)
+        let hierarchyLevel = 0
+        get_tree_items (res, hierarchyLevel)
+    } else {
+        res.send("only available on non-production Enviornments")
+    }
+}
+
+exports.getTreeItemsByHierarchyLevel = function (req, res) {
+    let hierarchyLevel = req.params.hierarchyLevel
+    db.treeitem.findAll({
+        where: {
+            hierarchyLevel: hierarchyLevel
+        }
+    })
+    .then(results => {
+        res.send(results)
+    })
+}
+
+function get_tree_items (res, hierarchyLevel) {
+    hierarchyLevel++
+    let url = process.env.PRODUCTION_URL + '/api/treeitems/'+ hierarchyLevel
+    request.get({ url: url }, (error, response, body) => {
+        if (error) {
+            console.log(error)
+            res.send(error)
+        } else {
+            console.log(body)
+            // dump all new data
+            body = JSON.parse(body)
+            if (body.length) {
+                db.treeitem.bulkCreate(body)
                     .error(error => {
                         console.log(error)
                     })
                     .then(result => {
-                        res.send("yay")
+                        return get_tree_items(res, hierarchyLevel)
                     })
-                })
+            } else {
+                // there are no items left
+                res.send("yay")
             }
-        })
-    } else {
-        res.send("only available on non-production Enviornments")
-    }
+        }
+    })
 }
