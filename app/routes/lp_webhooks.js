@@ -140,20 +140,16 @@ async function checkParent (body, subFolders) {
       const auth = "Basic " + new Buffer(process.env.LpUserName + ":" + process.env.LPPassword).toString("base64");
       throttledRequest({ url: url, method: 'GET', headers: { "Authorization": auth } }, function (error, response, body) {
         if (error) {
-          //Handle request error 
-          console.log(error);
+          // Handle request error 
           request({
             url: process.env.SLACK_WEBHOOK_URL,
             method: 'POST',
             json: {
-              error: error,
-              body: body
+              text: "Error: "+ error + "\nBody: " + body
             }
           }, function(error, response, body){
             console.log(body);
           })
-        }
-
         }
         try {
           let parentBody = JSON.parse(body)
@@ -165,8 +161,7 @@ async function checkParent (body, subFolders) {
             url: process.env.SLACK_WEBHOOK_URL,
             method: 'POST',
             json: {
-              error: e,
-              body: body
+              text: "Error: "+ e + "\nBody: " + body
             }
           }, function(error, response, body){
             console.log(body);
