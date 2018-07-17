@@ -142,14 +142,35 @@ async function checkParent (body, subFolders) {
         if (error) {
           //Handle request error 
           console.log(error);
+          request({
+            url: process.env.SLACK_WEBHOOK_URL,
+            method: 'POST',
+            json: {
+              error: error,
+              body: body
+            }
+          }, function(error, response, body){
+            console.log(body);
+          })
+        }
+
         }
         try {
           let parentBody = JSON.parse(body)
                   // create the project if it is missing
         return checkParent(parentBody,subFolders)
         } catch(e) {
-          console.log(e)
-          console.log(body)
+        //  post error to slack
+          request({
+            url: process.env.SLACK_WEBHOOK_URL,
+            method: 'POST',
+            json: {
+              error: e,
+              body: body
+            }
+          }, function(error, response, body){
+            console.log(body);
+          })
         }
         if (parentBody !== null) {
         // create the project if it is missing

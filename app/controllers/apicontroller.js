@@ -218,26 +218,33 @@ exports.updateProjects = async function (req, res) {
     if (process.env.production === "false") {
         let url = process.env.PRODUCTION_URL + '/api/treeitems'
         let result = await rp.get({ url: url })
-            console.log(result)
-            // dump all new data
-            result = JSON.parse(result)
-            if (result.length) {
-                for (let i = 0; i < result.length; i++) {
-                    // create promise all
-                    await createTreeItem(result[i])
+        console.log(result)
+        // dump all new data
+        result = JSON.parse(result)
+        if (result.length) {
+            for (let i = 0; i < result.length; i++) {
+                // create promise all
+                await createTreeItem(result[i])
+                if (result[i].task_type === 'Location Service Billing' && result[i].child_type === 'Task') {
+                    let splitName = subFolders[i].name.split(/\s(.+)/, 2)
+                    let LBSId = splitName[0]
+                    let locationName = splitName[1]
+                    let lbsTask = await db.lbs.findOrCreate({ where: { id: LBSId }, defaults: { location_name: locationName, task_id: subFolders[i].id } })
+                    lbsTask[0].update({ location_name: locationName, task_id: body.id })
                 }
-                res.send('200')
-                db.job.findAll({
-                    where: {
-                        jobname: 'external_update'
-                    }
-                }).then(results => {
-                    results[0].update({
-                        lastrun: new Date(),
-                        lastrunstatus: 'complete'
-                    })
-                })
             }
+            res.send('200')
+            db.job.findAll({
+                where: {
+                    jobname: 'external_update'
+                }
+            }).then(results => {
+                results[0].update({
+                    lastrun: new Date(),
+                    lastrunstatus: 'complete'
+                })
+            })
+        }
     } else {
         res.send("only available on non-production Enviornments")
         db.job.findAll({
