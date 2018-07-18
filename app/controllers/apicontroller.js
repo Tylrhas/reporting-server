@@ -225,7 +225,7 @@ exports.updateProjects = async function (req, res) {
             for (let i = 0; i < result.length; i++) {
                 // create promise all
                 await createTreeItem(result[i])
-                if (result[i].task_type === 'Location Service Billing' && result[i].child_type === 'Task') {
+            if (result[i].task_type === 'Location Service Billing' && result[i].child_type === 'task') {
                     let splitName = subFolders[i].name.split(/\s(.+)/, 2)
                     let LBSId = splitName[0]
                     let locationName = splitName[1]
