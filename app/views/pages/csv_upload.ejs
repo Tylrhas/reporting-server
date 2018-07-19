@@ -16,13 +16,12 @@
       <div class="row">
         <div class="col-md-4">
           <div class="tile center">
-            <a href="#">
               <h4>Add NetSuite Backlog</h4>
               <hp>Upload via CSV</hp>
-              <p>Last Update:</p>
+              <p><b>Last Update: </b> <%= moment(jobs['ns_backlog'].lastRun).format( 'MMM-DD-YYYY hh:MM:SS A') %></p>
+              <p><b>Last Run Status: </b> <%= jobs['ns_backlog'].lastRunStatus %></p>
               <input type="file" id="files" class="form-control" accept=".csv" required />
-              <button id="backlogUpload">upload</button>
-            </a>
+              <button id="backlogUpload">Upload</button>
           </div>
         </div>
         <div class="col-md-4">
@@ -37,7 +36,8 @@
           <div class="tile center">
               <h4>Update Liquid Planner</h4>
               <p>Fetch Updated Data from the External Server</p>
-              <p><b>Last Update: </b> <%= moment(jobs[0].lastrun).format( 'MMM-DD-YYYY hh:MM:SS A') %></p>
+              <p><b>Last Update: </b> <%= moment(jobs['external_update'].lastRun).format( 'MMM-DD-YYYY hh:MM:SS A') %></p>
+              <p><b>Last Run Status: </b> <%= jobs['external_update'].lastRunStatus %></p>
               <button id="update_lp" class="center">Update</button>
           </div>
         </div>

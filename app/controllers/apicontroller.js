@@ -226,11 +226,11 @@ exports.updateProjects = async function (req, res) {
                 // create promise all
                 await createTreeItem(result[i])
             if (result[i].task_type === 'Location Service Billing' && result[i].child_type === 'task') {
-                    let splitName = subFolders[i].name.split(/\s(.+)/, 2)
+                    let splitName = result[i].name.split(/\s(.+)/, 2)
                     let LBSId = splitName[0]
                     let locationName = splitName[1]
-                    let lbsTask = await db.lbs.findOrCreate({ where: { id: LBSId }, defaults: { location_name: locationName, task_id: subFolders[i].id } })
-                    lbsTask[0].update({ location_name: locationName, task_id: body.id })
+                    let lbsTask = await db.lbs.findOrCreate({ where: { id: LBSId }, defaults: { location_name: locationName, task_id: result[i].id } })
+                    lbsTask[0].update({ location_name: locationName, task_id: result[i].id })
                 }
             }
             res.send('200')
@@ -284,9 +284,11 @@ async function createTreeItem (body) {
             hrs_logged: body.hrs_logged,
             date_done: body.date_done,
             hrs_remaning: body.hrs_remaning,
-            child_type: body.child_type
+            child_type: body.child_type,
+            task_type: body.task_type
         }
-    }).then(treeitem => {
+    })
+    .then(treeitem => {
         treeitem[0].update({
             parent_id: body.parent_id,
             e_start: body.e_start,
@@ -296,7 +298,8 @@ async function createTreeItem (body) {
             hrs_logged: body.hrs_logged,
             date_done: body.date_done,
             hrs_remaning: body.hrs_remaning,
-            child_type: body.child_type
+            child_type: body.child_type,
+            task_type: body.task_type
         })
     })
 }

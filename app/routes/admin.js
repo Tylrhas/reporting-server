@@ -6,21 +6,23 @@ var moment = require('moment');
 
 module.exports = function(app, passport) {
 
-   app.get('/jobs',isAdmin, function (req, res) {
-    sequelize.query("SELECT jobname, lastrun, lastrunstatus FROM jobs").then(results => {
-        res.render('pages/jobs', { user: req.user, jobs: formatresults(results[0]) });
-    });
-   });
 
    app.get('/admin/users',isAdmin, function (req, res) {
     models.user.findAll().then(results => {
         res.render('pages/users', { user: req.user, users: results, slug: "users", moment:moment });
     })
    })
-
    app.get('/admin/update',isAdmin, function (req, res) {
     models.job.findAll().then(results => {
-        res.render('pages/csv_upload', {slug: "update", user: req.user, jobs: results, moment:moment})
+        // Transform the data
+        let jobs = {}
+        for (let i = 0; i < results.length; i++) {
+            jobs[results[i].jobname] = {
+                lastRunStatus: results[i].lastrunstatus,
+                lastRun: results[i].lastrun
+            }
+        }
+        res.render('pages/csv_upload', {slug: "update", user: req.user, jobs: jobs, moment:moment})
     })
    })
 
