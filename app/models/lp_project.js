@@ -8,6 +8,9 @@ module.exports = function (sequelize, Sequelize) {
             primaryKey: true,
             type: Sequelize.INTEGER
         },
+        cft: {
+            type: Sequelize.INTEGER
+        },
         client_id: {
             type: Sequelize.INTEGER,
         },
@@ -79,7 +82,7 @@ module.exports = function (sequelize, Sequelize) {
         custom_logo: {
             type: Sequelize.TEXT,
         },
-        custom_copy_complete:{
+        custom_copy_complete: {
             type: Sequelize.TEXT,
         },
         design_complete: {
@@ -88,8 +91,8 @@ module.exports = function (sequelize, Sequelize) {
     })
 
     LpProject.associate = function (models) {
-        // associate project with priority
-        models.lp_project.hasMany(models.lp_project_priority, { foreignKey: 'project_id', sourceKey: 'id' });
+        // associate project tasks
+        models.cft.belongsTo(models.lp_project, { foreignKey: 'cft', sourceKey: 'id' });
         // associate project with children
         models.lp_project.hasMany(models.treeitem, { foreignKey: 'parent_id', sourceKey: 'id' });
     }

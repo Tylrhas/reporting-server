@@ -56,29 +56,16 @@ module.exports = function (app, passport) {
 
     app.get('/reports/active-projects', checkAuthentication, function (req, res) {
         db.lp_project.findAll({
-            attributes: ['project_name', 'expected_finish', 'id'],
+            attributes: ['expected_finish', 'id', 'package', 'project_type', 'services_activated'],
             where: {
                 is_done: false,
-                expected_finish: {
-                    [Op.not]: null
-                }
-
+                is_on_hold: false
             },
             include: [
                 {
-                    attributes: ['project_id', 'priority', 'index'],
-                    model: db.lp_project_priority,
-                    where: {
-                        [Op.or]: [
-                            { index: 3 },
-                            { index: null }
-                        ]
-                    }
-                }],
-            // //order by priority
-            order: [
-                [db.lp_project_priority, 'priority', 'ASC']
-            ]
+                    attributes: ['id', 'name'],
+                    model: db.treeitem,
+                }]
         }).then(results => {
             console.log(results)
             // send over the projects lp_space_id to create links on page and moment to change the date 

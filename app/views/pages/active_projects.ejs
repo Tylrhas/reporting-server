@@ -19,8 +19,11 @@
       <thead>
         <tr>
           <th scope="col">Project Name</th>
-          <th scope="col">Priority</th>
+          <th scope="col">Package</th>
+          <th scope="col">Project Type</th>
+          <th scope="col">Services Activated</th>
           <th scope="col">Estimated Finish</th>
+          
         </tr>
       </thead>
       <tbody>
@@ -28,11 +31,17 @@
             <tr>
               <td>
                 <a href="<%= 'https://app.liquidplanner.com/space/' + lp_space_id +'/projects/show/' + projects[i].dataValues.id %>" target="_blank">
-                  <%= projects[i].project_name %>
+                  <%= projects[i]['treeitems'][0].name %>
                 </a>
               </td>
               <td>
-                <%= projects[i].dataValues.lp_project_priorities[0].priority %>
+                <%= projects[i].package %>
+              </td>
+              <td>
+                <%= projects[i].project_type %>
+              </td>
+              <td>
+                <%= projects[i].services_activated %>
               </td>
               <td>
                 <%= moment(projects[i].dataValues.expected_finish).format( 'MMM-DD-YYYY') %>
