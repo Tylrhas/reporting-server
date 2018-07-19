@@ -26,19 +26,22 @@
         </div>
         <div class="col-md-4">
           <div class="tile center">
-            <a href="/reports/at-risk-projects">
-              <h4> Add Netsuite Launched Locations</h4>
-              <p>Upload</p>
-            </a>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="tile center">
-              <h4>Update Liquid Planner</h4>
+              <h4>Update LP Data</h4>
               <p>Fetch Updated Data from the External Server</p>
               <p><b>Last Update: </b> <%= moment(jobs['external_update'].lastRun).format( 'MMM-DD-YYYY hh:MM:SS A') %></p>
               <p><b>Last Run Status: </b> <%= jobs['external_update'].lastRunStatus %></p>
               <button id="update_lp" class="center">Update</button>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="tile center">
+            <a href="/reports/at-risk-projects">
+              <h4>Backfill LP Data</h4>
+              <p>Fetch Updated Data from the External Server</p>
+              <p><b>Last Update: </b> <%= moment(jobs['backfill_lp'].lastRun).format( 'MMM-DD-YYYY hh:MM:SS A') %></p>
+              <p><b>Last Run Status: </b> <%= jobs['backfill_lp'].lastRunStatus %></p>
+              <button id="update_lp" class="center">Backfill</button>
+            </a>
           </div>
         </div>
       </div>
