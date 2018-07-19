@@ -263,7 +263,7 @@ async function createProject (body) {
   for (let i = 0; i < body.parent_ids.length; i++ ) {
     // check each ID in the cft_ids array
     let parent_id = body.parent_ids[i]
-    if (CFT_ids.indexOf(parent_id)) {
+    if (CFT_ids.indexOf(parent_id) !== -1) {
       update_object.cft_id = parent_id
     }
   }
