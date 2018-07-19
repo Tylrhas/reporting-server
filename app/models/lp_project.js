@@ -8,7 +8,7 @@ module.exports = function (sequelize, Sequelize) {
             primaryKey: true,
             type: Sequelize.INTEGER
         },
-        cft: {
+        cft_id: {
             type: Sequelize.INTEGER
         },
         client_id: {
@@ -92,9 +92,9 @@ module.exports = function (sequelize, Sequelize) {
 
     LpProject.associate = function (models) {
         // associate project tasks
-        models.cft.belongsTo(models.lp_project, { foreignKey: 'cft', sourceKey: 'id' });
+        models.lp_project.belongsTo(models.cft, { foreignKey: 'cft_id', sourceKey: 'id' });
         // associate project with children
-        models.lp_project.hasMany(models.treeitem, { foreignKey: 'parent_id', sourceKey: 'id' });
+        models.lp_project.hasMany(models.treeitem, { foreignKey: 'id', sourceKey: 'id' });
     }
 
     return LpProject;

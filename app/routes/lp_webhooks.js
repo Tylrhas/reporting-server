@@ -255,6 +255,19 @@ async function createProject (body) {
     }
   }
 
+  // find CFT ID
+  var CFT_ids = await db.cft.findAll({
+    attributes: ['id']
+  })
+  // for each item in the parent_ids 
+  for (let i = 0; i < body.parent_ids.length; i++ ) {
+    // check each ID in the cft_ids array
+    let parent_id = body.parent_ids[i]
+    if (CFT_ids.indexOf(parent_id)) {
+      update_object.cft_id = parent_id
+    }
+  }
+
 
   // FIND OR CREATE THE LOCATION THEN UPDATE IT WITH THE NEW DATA
   return db.lp_project.upsert(update_object).then(() => {

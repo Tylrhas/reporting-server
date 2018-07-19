@@ -19,6 +19,7 @@
       <thead>
         <tr>
           <th scope="col">Project Name</th>
+          <th scope="col">Team</th>
           <th scope="col">Package</th>
           <th scope="col">Project Type</th>
           <th scope="col">Services Activated</th>
@@ -33,6 +34,9 @@
                 <a href="<%= 'https://app.liquidplanner.com/space/' + lp_space_id +'/projects/show/' + projects[i].dataValues.id %>" target="_blank">
                   <%= projects[i]['treeitems'][0].name %>
                 </a>
+              </td>
+              <td>
+                <%= projects[i]['cfts'][0].name %>
               </td>
               <td>
                 <%= projects[i].package %>

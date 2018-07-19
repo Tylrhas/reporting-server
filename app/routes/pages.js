@@ -56,16 +56,24 @@ module.exports = function (app, passport) {
 
     app.get('/reports/active-projects', checkAuthentication, function (req, res) {
         db.lp_project.findAll({
-            attributes: ['expected_finish', 'id', 'package', 'project_type', 'services_activated'],
+            attributes: ['expected_finish', 'id', 'package', 'project_type', 'ps_phase', 'services_activated'],
             where: {
                 is_done: false,
-                is_on_hold: false
+                is_on_hold: false,
+                expected_finish: {
+                    [Op.not]: null
+                }
             },
             include: [
                 {
                     attributes: ['id', 'name'],
                     model: db.treeitem,
-                }]
+                }, 
+                {
+                    attributes: ['name'],
+                    model: db.cft,
+                }
+            ]
         }).then(results => {
             console.log(results)
             // send over the projects lp_space_id to create links on page and moment to change the date 
