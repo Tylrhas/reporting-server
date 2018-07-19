@@ -91,8 +91,6 @@ module.exports = function (sequelize, Sequelize) {
     })
 
     LpProject.associate = function (models) {
-        // associate project tasks
-        models.lp_project.belongsTo(models.cft, { foreignKey: 'cft_id', sourceKey: 'id' });
         // associate project with children
         models.lp_project.hasMany(models.treeitem, { foreignKey: 'id', sourceKey: 'id' });
     }
