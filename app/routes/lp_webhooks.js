@@ -153,6 +153,8 @@ async function checkParent (body, subFolders) {
           }
           try {
             let parentBody = JSON.parse(body)
+            // create the project if it is missing
+            return checkParent(parentBody, subFolders)
           } catch (e) {
             //  post error to slack
             request({
@@ -165,8 +167,6 @@ async function checkParent (body, subFolders) {
               console.log(body);
             })
           }
-          // create the project if it is missing
-          return checkParent(parentBody, subFolders)
           if (parentBody != null) {
             // create the project if it is missing
             return checkParent(parentBody, subFolders)
