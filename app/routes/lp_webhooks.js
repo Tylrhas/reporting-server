@@ -76,7 +76,7 @@ async function checkParent (body, subFolders) {
     }
 
   } else {
-    if (body.parent_id !== null) {
+    if (body.parent_id != null) {
       let projectCount = await db.treeitem.count({ where: { id: body.parent_id } })
       if (projectCount > 0) {
         // parent exists
