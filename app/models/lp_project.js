@@ -33,6 +33,9 @@ module.exports = function (sequelize, Sequelize) {
         is_on_hold: {
             type: Sequelize.BOOLEAN,
         },
+        is_archived: {
+            type: Sequelize.BOOLEAN,
+        },
         promise_by: {
             type: Sequelize.DATE,
         },

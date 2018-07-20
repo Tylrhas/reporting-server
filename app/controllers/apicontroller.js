@@ -3,7 +3,6 @@ var exports = module.exports = {}
 lp_projects = require('./api/lp_projects');
 lp_lbs = require('./api/lp_lbs');
 client_time = require('./jobs/client_time');
-
 var Sequelize = require("sequelize")
 //Models
 var db = require("../models");
@@ -225,7 +224,7 @@ exports.updateProjects = async function (req, res) {
             for (let i = 0; i < result.length; i++) {
                 // create promise all
                 await createTreeItem(result[i])
-            if (result[i].task_type === 'Location Service Billing' && result[i].child_type === 'task') {
+                if (result[i].task_type === 'Location Service Billing' && result[i].child_type === 'task') {
                     let splitName = result[i].name.split(/\s(.+)/, 2)
                     let LBSId = splitName[0]
                     let locationName = splitName[1]
@@ -269,7 +268,65 @@ exports.getTreeItems = function (req, res) {
             res.send(results)
         })
 }
+exports.updateTeamProjects = function (req, res) {
+    // find CFT ID
+    db.cft.findAll({
+        attributes: ['id']
+    })
+        .then(results => {
+            let updateAll = []
+            let updates = []
+            for (let i = 0; i < results.length; i++) {
+                var teamID = results[i].id
+                updateAll.push(getTeamProjects(teamID))
+            }
+            Promise.all(updateAll).then(() => {
+                res.send('done')
+            })
 
+        })
+}
+
+function getTeamProjects (teamID) {
+    const auth = "Basic " + new Buffer(process.env.LpUserName + ":" + process.env.LPPassword).toString("base64")
+    // let url = 'https://app.liquidplanner.com/api/workspaces/' + process.env.LPWorkspaceId  + '/treeitems/' + teamID +'?depth=1'
+    let url = 'https://app.liquidplanner.com/api/workspaces/158330/projects?filter[]=parent_id=' + teamID
+    return rp.get({ url: url, headers: { "Authorization": auth } }).then(results => {
+        let body = JSON.parse(results)
+        // let projects = body.children
+        let projects = body
+        for (i2 = 0; i2 < projects.length; i2++) {
+            let project = projects[i2]
+            // find or create the project with the team id
+            if (project.type.toLowerCase() === 'folder' || project.type.toLowerCase() === 'milestone' || project.type.toLowerCase() === 'task' || project.type.toLowerCase() === 'project') {
+                updateProject(project, teamID)
+            }
+        }
+    })
+}
+
+function updateProject (project, teamID) {
+    return db.treeitem.findOrCreate({
+        where: {
+            id: project.id
+        },
+        defaults: {
+            e_start: project.expected_start,
+            name: project.name,
+            e_finish: project.expected_finish,
+            deadline: project.promise_by,
+            date_done: project.done_on,
+            hrs_logged: project.hours_logged,
+            hrs_remaning: project.high_effort_remaining,
+            child_type: project.type.toLowerCase()
+        }
+    }).then(results => {
+        db.lp_project.upsert({
+            id: project.id,
+            cft_id: teamID
+        })
+    })
+}
 async function createTreeItem (body) {
     return db.treeitem.findOrCreate({
         where: {
@@ -288,18 +345,18 @@ async function createTreeItem (body) {
             task_type: body.task_type
         }
     })
-    .then(treeitem => {
-        treeitem[0].update({
-            parent_id: body.parent_id,
-            e_start: body.e_start,
-            name: body.name,
-            e_finish: body.e_finish,
-            deadline: body.deadline,
-            hrs_logged: body.hrs_logged,
-            date_done: body.date_done,
-            hrs_remaning: body.hrs_remaning,
-            child_type: body.child_type,
-            task_type: body.task_type
+        .then(treeitem => {
+            treeitem[0].update({
+                parent_id: body.parent_id,
+                e_start: body.e_start,
+                name: body.name,
+                e_finish: body.e_finish,
+                deadline: body.deadline,
+                hrs_logged: body.hrs_logged,
+                date_done: body.date_done,
+                hrs_remaning: body.hrs_remaning,
+                child_type: body.child_type,
+                task_type: body.task_type
+            })
         })
-    })
 }

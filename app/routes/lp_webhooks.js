@@ -23,8 +23,13 @@ module.exports = function (app, passport) {
     else {
       let body = req.body
       let subFolders = []
-      // check if this is a LBS task
-      checkParent(body, subFolders)
+      if (body.parent_ids.indexOf(process.env.ProServFolderId !== -1)) {
+        // is this project in the active project PS folder
+        checkParent(body, subFolders, false)
+      } else if (body.parent_ids.indexOf(process.env.ProServArchiveFolder !== -1)){
+        // in the archived folder
+        checkParent(body, subFolders, true)
+      }
     }
   });
   app.post('/webhooks/clients', function (req, res) {
@@ -55,7 +60,21 @@ module.exports = function (app, passport) {
   })
 
 }
-async function checkParent (body, subFolders) {
+async function checkParent (body, subFolders, isArchived) {
+  if (isArchived) {
+    // update the project to archived
+    let project_id = body.project_id
+    db.lp_project.findAll({
+      where: { 
+        id :project_id
+      }
+    }) 
+    .then(requests => {
+      requests[0].update({
+        is_archived: true
+      })
+    })
+  } else {
   console.log(body.type.toLowerCase())
   if (body.type === 'Project') {
     // this is the top level folder and doesnt need a partent
@@ -175,6 +194,7 @@ async function checkParent (body, subFolders) {
       }
     }
   }
+}
 }
 async function createSubItem (body) {
   return db.treeitem.findOrCreate({
