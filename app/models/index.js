@@ -5,7 +5,7 @@ var Sequelize = require("sequelize");
 require('sequelize-hierarchy')(Sequelize);
 var sequelize = new Sequelize(process.env.DATABASE_URL, {
   pool: {
-    max: 15,
+    max: 5,
     min: 0,
     idle: 20000,
     acquire: 40000,

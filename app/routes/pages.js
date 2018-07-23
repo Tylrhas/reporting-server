@@ -59,6 +59,7 @@ module.exports = function (app, passport) {
             attributes: ['expected_finish', 'id', 'package', 'project_type', 'ps_phase', 'services_activated'],
             where: {
                 is_done: false,
+                is_archived: false,
                 is_on_hold: false,
                 expected_finish: {
                     [Op.not]: null

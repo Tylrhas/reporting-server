@@ -10,14 +10,9 @@ const Op = Sequelize.Op
 
 var Papa = require("papaparse")
 var moment = require('moment')
-const request = require("request"),
-    throttledRequest = require('throttled-request')(request);
+// import the config for throttled request
+var throttledRequest = require('../config/throttled_request')
 var rp = require('request-promise');
-//This will throttle the requests so no more than 20 are made every 15 seconds 
-throttledRequest.configure({
-    requests: 15,
-    milliseconds: 15000
-});
 
 //API Calls
 exports.updatelpLbsapi = function (req, res) {
@@ -269,10 +264,16 @@ exports.getTreeItems = function (req, res) {
         })
 }
 exports.updateTeamProjects = function (req, res) {
+    res.sendStatus(200)
     let teamIds = []
     // find CFT ID
     db.cft.findAll({
-        attributes: ['id']
+        attributes: ['id'],
+        where: {
+            id: {
+                [Op.not]: 0
+            }
+        }
     })
         .then(results => {
             // organize team IDs into array 
@@ -280,7 +281,7 @@ exports.updateTeamProjects = function (req, res) {
                 teamIds.push(results[i].id)
             }
             // get all projects 
-            db.lp_project.findAll()
+            db.lp_project.findAll({})
                 .then(results => {
                     for (let ri = 0; ri < results.length; ri++) {
                         let project = results[ri]
@@ -293,25 +294,34 @@ exports.updateTeamProjects = function (req, res) {
                                 //Handle request error 
                                 console.log(error);
                             } else {
-                                // index of parent ids
-                                console.log(project)
                                 // is it in PS Active folder
                                 try {
                                     body = JSON.parse(body)
-
                                 }
                                 catch (error) {
                                     console.log(error)
                                 }
                                 if (body.error !== undefined) {
-
+                                    console.log(body.error)
+                                    if (body.error === 'NotFound') {
+                                        results[ri].destroy()
+                                    }
                                 } else {
+                                    if (project.id === 34359938) {
+                                        console.log('woot')
+                                    }
                                     if (body.parent_ids.indexOf(parseInt(process.env.ProServFolderId)) !== -1) {
                                         for (i = 0; i < teamIds.length; i++) {
                                             // find the team it is associated with
-                                            if (body.parent_ids.indexOf(parseInt(teamIds[i])) != -1) {
-                                                results[ri].update({
+                                            if (body.parent_ids.indexOf(parseInt(teamIds[i])) !== -1) {
+                                            results[ri].update({
                                                     cft_id: teamIds[i],
+                                                    is_archived: false
+                                                })
+                                            } else {
+                                                // this project is active but not in a teams folder
+                                                results[ri].update({
+                                                    cft_id: 0,
                                                     is_archived: false
                                                 })
                                             }
@@ -321,6 +331,9 @@ exports.updateTeamProjects = function (req, res) {
                                         results[ri].update({
                                             is_archived: true
                                         })
+                                    }
+                                    else {
+                                        results[ri].destroy()
                                     }
                                 }
                             }
