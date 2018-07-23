@@ -23,10 +23,10 @@ module.exports = function (app, passport) {
     else {
       let body = req.body
       let subFolders = []
-      if (body.parent_ids.indexOf(process.env.ProServFolderId !== -1)) {
+      if (body.parent_ids.indexOf(parseInt(process.env.ProServFolderId)) !== -1) {
         // is this project in the active project PS folder
         checkParent(body, subFolders, false)
-      } else if (body.parent_ids.indexOf(process.env.ProServArchiveFolder !== -1)){
+      } else if (body.parent_ids.indexOf(parseInt(process.env.ProServArchiveFolder)) !== -1){
         // in the archived folder
         checkParent(body, subFolders, true)
       }

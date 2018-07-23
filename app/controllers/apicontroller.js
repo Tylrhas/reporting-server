@@ -15,7 +15,7 @@ const request = require("request"),
 var rp = require('request-promise');
 //This will throttle the requests so no more than 20 are made every 15 seconds 
 throttledRequest.configure({
-    requests: 20,
+    requests: 15,
     milliseconds: 15000
 });
 
@@ -269,20 +269,73 @@ exports.getTreeItems = function (req, res) {
         })
 }
 exports.updateTeamProjects = function (req, res) {
+    let teamIds = []
     // find CFT ID
     db.cft.findAll({
         attributes: ['id']
     })
         .then(results => {
-            let updateAll = []
-            let updates = []
+            // organize team IDs into array 
             for (let i = 0; i < results.length; i++) {
-                var teamID = results[i].id
-                updateAll.push(getTeamProjects(teamID))
+                teamIds.push(results[i].id)
             }
-            Promise.all(updateAll).then(() => {
-                res.send('done')
-            })
+            // get all projects 
+            db.lp_project.findAll()
+                .then(results => {
+                    for (let ri = 0; ri < results.length; ri++) {
+                        let project = results[ri]
+                        // API call to project
+                        const auth = "Basic " + new Buffer(process.env.LpUserName + ":" + process.env.LPPassword).toString("base64")
+                        let url = 'https://app.liquidplanner.com/api/workspaces/' + process.env.LPWorkspaceId + '/treeitems/' + results[ri].id
+                        // let url = 'https://app.liquidplanner.com/api/workspaces/' + process.env.LPWorkspaceId  + '/treeitems/' + teamID +'?depth=1'
+                        throttledRequest({ url: url, method: 'GET', headers: { "Authorization": auth } }, function (error, response, body) {
+                            if (error) {
+                                //Handle request error 
+                                console.log(error);
+                            } else {
+                                // index of parent ids
+                                console.log(project)
+                                // is it in PS Active folder
+                                try {
+                                    body = JSON.parse(body)
+
+                                }
+                                catch (error) {
+                                    console.log(error)
+                                }
+                                if (body.error !== undefined) {
+
+                                } else {
+                                    if (body.parent_ids.indexOf(parseInt(process.env.ProServFolderId)) !== -1) {
+                                        for (i = 0; i < teamIds.length; i++) {
+                                            // find the team it is associated with
+                                            if (body.parent_ids.indexOf(parseInt(teamIds[i])) != -1) {
+                                                results[ri].update({
+                                                    cft_id: teamIds[i],
+                                                    is_archived: false
+                                                })
+                                            }
+                                        }
+                                    } else if (body.parent_ids.indexOf(parseInt(process.env.ProServArchiveFolder)) !== -1) {
+                                        // is it in the PS archived folder
+                                        results[ri].update({
+                                            is_archived: true
+                                        })
+                                    }
+                                }
+                            }
+                        })
+                    }
+                })
+            // let updateAll = []
+            // let updates = []
+            // for (let i = 0; i < results.length; i++) {
+            //     var teamID = results[i].id
+            //     updateAll.push(getTeamProjects(teamID))
+            // }
+            // Promise.all(updateAll).then(() => {
+            //     res.send('done')
+            // })
 
         })
 }
@@ -290,7 +343,7 @@ exports.updateTeamProjects = function (req, res) {
 function getTeamProjects (teamID) {
     const auth = "Basic " + new Buffer(process.env.LpUserName + ":" + process.env.LPPassword).toString("base64")
     // let url = 'https://app.liquidplanner.com/api/workspaces/' + process.env.LPWorkspaceId  + '/treeitems/' + teamID +'?depth=1'
-    let url = 'https://app.liquidplanner.com/api/workspaces/158330/projects?filter[]=parent_id=' + teamID
+    let url = 'https://app.liquidplanner.com/api/workspaces/' + process.env.LPWorkspaceId + '/projects?filter[]=parent_id=' + teamID
     return rp.get({ url: url, headers: { "Authorization": auth } }).then(results => {
         let body = JSON.parse(results)
         // let projects = body.children
