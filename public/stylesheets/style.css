@@ -112,3 +112,9 @@ input {
 .input-daterange input:last-child {
     border-radius: 0 4px 4px 0 !important;
 }
+button.multiselect {
+    border: solid 1px #0d2240;
+}
+.multiselect-container>li>a>label.checkbox {
+    white-space:nowrap;
+}

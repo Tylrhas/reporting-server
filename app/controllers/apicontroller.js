@@ -311,20 +311,22 @@ exports.updateTeamProjects = function (req, res) {
                                         console.log('woot')
                                     }
                                     if (body.parent_ids.indexOf(parseInt(process.env.ProServFolderId)) !== -1) {
+                                        let updated = false
                                         for (i = 0; i < teamIds.length; i++) {
                                             // find the team it is associated with
                                             if (body.parent_ids.indexOf(parseInt(teamIds[i])) !== -1) {
-                                            results[ri].update({
+                                                updated = true
+                                                results[ri].update({
                                                     cft_id: teamIds[i],
                                                     is_archived: false
                                                 })
-                                            } else {
-                                                // this project is active but not in a teams folder
-                                                results[ri].update({
-                                                    cft_id: 0,
-                                                    is_archived: false
-                                                })
                                             }
+                                        }
+                                        if (!updated) {
+                                            results[ri].update({
+                                                cft_id: 0,
+                                                is_archived: false
+                                            })
                                         }
                                     } else if (body.parent_ids.indexOf(parseInt(process.env.ProServArchiveFolder)) !== -1) {
                                         // is it in the PS archived folder
