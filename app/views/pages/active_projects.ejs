@@ -1,48 +1,132 @@
 <% include ../partials/header.ejs %>
-<% include ../partials/nav.ejs %>
-<main class="app-content">
+  <script type="text/javascript" src="/js/bootstrap-multiselect.js"></script>
+  <link rel="stylesheet" href="/stylesheets/bootstrap-multiselect.css" type="text/css" />
+  <% include ../partials/nav.ejs %>
+    <main class="app-content">
 
-  <div class="app-title">
-    <div>
-      <h1>Active Projects</h1>
-    </div>
-    <ul class="app-breadcrumb breadcrumb">
-      <li class="breadcrumb-item"><i class="fa fa-home fa-lg"></i></li>
-      <li class="breadcrumb-item">Project Status</li>
-      <li class="breadcrumb-item active"><a href="#">Active Projects</a></li>
-    </ul>
-  </div>
-<div class="row">
-  <div class="col">
-  <div class="tile">
-    <table class="table">
-      <thead>
-        <tr>
-          <th scope="col">Project Name</th>
-          <th scope="col">Priority</th>
-          <th scope="col">Estimated Finish</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% for(var i=0; i < projects.length; i++) { %>
-            <tr>
-              <td>
-                <a href="<%= 'https://app.liquidplanner.com/space/' + lp_space_id +'/projects/show/' + projects[i].dataValues.id %>" target="_blank">
-                  <%= projects[i].project_name %>
-                </a>
-              </td>
-              <td>
-                <%= projects[i].dataValues.lp_project_priorities[0].priority %>
-              </td>
-              <td>
-                <%= moment(projects[i].dataValues.expected_finish).format( 'MMM-DD-YYYY') %>
-              </td>
-            </tr>
-        <% } %>
-      </tbody>
-    </table>
-  </div>
-</div>
-</div>
-  <% include ../partials/footer.ejs %>
-</main>
+      <div class="app-title">
+        <div>
+          <h1>Active Projects</h1>
+        </div>
+        <ul class="app-breadcrumb breadcrumb">
+          <li class="breadcrumb-item">
+            <i class="fa fa-home fa-lg"></i>
+          </li>
+          <li class="breadcrumb-item">Project Status</li>
+          <li class="breadcrumb-item active">
+            <a href="#">Active Projects</a>
+          </li>
+        </ul>
+      </div>
+      <div class="row">
+        <div class="col">
+          <div class="tile">
+            <div class="filters">
+              <div class="form-horizontal form-group" id="filters">
+                <div>
+                  <label for="cft">Team : </label>
+                  <div class="btn-group cft">
+                    <select id="cft" multiple="multiple">
+                      <% for(let i=0; i < cfts.length; i++) { %>
+                        <option value="<%= cfts[i].name %>">
+                          <%= cfts[i].name %>
+                        </option>
+                        <% } %>
+                    </select>
+                  </div>
+                  <label for="cft">Package : </label>
+                  <div class="btn-group package">
+                    <select id="package" multiple="multiple">
+                      <% for(let i=0; i < package.length; i++) { %>
+                        <option value="<%= package[i] %>">
+                          <%= package[i] %>
+                        </option>
+                        <% } %>
+                    </select>
+                  </div>
+                  <label for="projectType">Project Type : </label>
+                  <div class="btn-group projectType">
+                    <select id="projectType" multiple="multiple">
+                      <% for(let i=0; i < projectType.length; i++) { %>
+                        <option value="<%= projectType[i] %>">
+                          <%= projectType[i] %>
+                        </option>
+                        <% } %>
+                    </select>
+                  </div>
+                  <label for="servicesActivated">Services Activated : </label>
+                  <div class="btn-group servicesActivated">
+                    <select id="servicesActivated" multiple="multiple">
+                      <option value="true">True</option>
+                      <option value="false">False</option>
+                    </select>
+                  </div>
+
+                  <label for="estFinnish">Estimated Finish Month : </label>
+                  <div class="btn-group estFinnish">
+                    <select id="estFinnish" multiple="multiple">
+                      <option value="Jan">January</option>
+                      <option value="Feb">Febuary</option>
+                      <option value="Mar">March</option>
+                      <option value="Apr">April</option>
+                      <option value="May">May</option>
+                      <option value="Jun">June</option>
+                      <option value="Jul">July</option>
+                      <option value="Aug">August</option>
+                      <option value="Sep">September</option>
+                      <option value="Oct">October</option>
+                      <option value="Nov">November</option>
+                      <option value="Dec">December</option>
+                    </select>
+                  </div>
+                                    <!-- <button class="btn btn-danger" id="clear_filter"> Clear Filters</button> -->
+                                    <button class="btn btn-primary" id="download_csv">Download CSV</button>
+                </div>
+              </div>
+              </div>
+              <table class="table" id="active_projects">
+                <thead>
+                  <tr>
+                    <th scope="col">Project Name</th>
+                    <th scope="col">Team</th>
+                    <th scope="col">Package</th>
+                    <th scope="col">Project Type</th>
+                    <th scope="col">Services Activated</th>
+                    <th scope="col"> LP Estimated Finish</th>
+
+                  </tr>
+                </thead>
+                <tbody>
+                  <% for(var i=0; i < projects.length; i++) { %>
+                    <tr>
+                      <td>
+                        <a href="<%= 'https://app.liquidplanner.com/space/' + lp_space_id +'/projects/show/' + projects[i].dataValues.id %>" target="_blank">
+                          <%= projects[i]['treeitems'][0].name %>
+                        </a>
+                      </td>
+                      <td>
+                        <%= projects[i]['cft'].name %>
+                      </td>
+                      <td>
+                        <%= projects[i].package %>
+                      </td>
+                      <td>
+                        <%= projects[i].project_type %>
+                      </td>
+                      <td>
+                        <%= projects[i].services_activated %>
+                      </td>
+                      <td>
+                        <%= moment(projects[i].dataValues.expected_finish).format( 'MMM-DD-YYYY') %>
+                      </td>
+                    </tr>
+                    <% } %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <script type="text/javascript" src="/js/pages/active_projects.js"></script>
+        <script type="text/javascript" src="/js/plugins/papaparse.min.js"></script>
+        <% include ../partials/footer.ejs %>
+    </main>

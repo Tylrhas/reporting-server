@@ -13,6 +13,9 @@ module.exports = function (sequelize, Sequelize) {
     task_id: {
       type: Sequelize.INTEGER
     },
+    master_project_id: {
+      type: Sequelize.INTEGER
+    },
     total_mrr: {
       type: Sequelize.REAL
     },

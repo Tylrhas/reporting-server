@@ -4,7 +4,7 @@
 
       <div class="app-title">
         <div>
-          <h1>CSV Upload</h1>
+          <h1>Update Data</h1>
           <p>A quick way to Update the Databases</p>
         </div>
         <ul class="app-breadcrumb breadcrumb">
@@ -15,28 +15,31 @@
       </div>
       <div class="row">
         <div class="col-md-4">
-          <div class="tile">
-            <a href="#">
-              <h4 class="center">Add NetSuite Backlog</h4>
+          <div class="tile center">
+              <h4>Add NetSuite Backlog</h4>
+              <hp>Upload via CSV</hp>
+              <p><b>Last Update: </b> <%= moment(jobs['ns_backlog'].lastRun).format( 'MMM-DD-YYYY hh:MM:SS A') %></p>
+              <p><b>Last Run Status: </b> <%= jobs['ns_backlog'].lastRunStatus %></p>
               <input type="file" id="files" class="form-control" accept=".csv" required />
-              <button id="backlogUpload">upload</button>
-            </a>
+              <button id="backlogUpload">Upload</button>
           </div>
         </div>
         <div class="col-md-4">
-          <div class="tile">
-            <a href="/reports/at-risk-projects">
-              <h4 class="center">Add Netsuite Launched Locations</h4>
-              <p class="center">Upload</p>
-            </a>
+          <div class="tile center">
+              <h4>Update LP Data</h4>
+              <p>Fetch Updated Data from the External Server</p>
+              <p><b>Last Update: </b> <%= moment(jobs['external_update'].lastRun).format( 'MMM-DD-YYYY hh:MM:SS A') %></p>
+              <p><b>Last Run Status: </b> <%= jobs['external_update'].lastRunStatus %></p>
+              <button id="update_lp" class="center">Update</button>
           </div>
         </div>
         <div class="col-md-4">
-          <div class="tile">
-            <a href="/reports/deadline-passed">
-              <h4 class="center">Update Liquid Planner</h4>
-              <p class="center">Upload</p>
-            </a>
+          <div class="tile center">
+              <h4>Backfill LP Data</h4>
+              <p>Fetch Project Team Assignments from LP</p>
+              <p><b>Last Update: </b> <%= moment(jobs['backfill_lp'].lastRun).format( 'MMM-DD-YYYY hh:MM:SS A') %></p>
+              <p><b>Last Run Status: </b> <%= jobs['backfill_lp'].lastRunStatus %></p>
+              <button id="backfill_lp" class="center">Backfill</button>
           </div>
         </div>
       </div>
@@ -75,5 +78,26 @@
       function success(data) {
         console.log(data)
       }
+    </script>
+    <script>
+    $('#update_lp').click(function() {
+      $.ajax({
+          type: "get",
+          url: '/api/projects/update',
+          success: function (data) {
+
+          },
+          dataType: 'JSON'
+        })
+    })
+    $('#backfill_lp').click(function() {
+      $.ajax({
+          type: "get",
+          url: '/api/admin/teams/update',
+          success: function (data) {
+          },
+          dataType: 'JSON'
+        })
+    })
     </script>
     <% include ../partials/footer.ejs %>
