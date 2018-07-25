@@ -159,3 +159,34 @@ function filter () {
   }
 
 }
+
+$('#download_csv').click(function () {
+  // gather all visable rows in the table
+  let headers = $('table#active_projects thead tr').get().map(function (row) {
+    return $(row).find('th').get().map(function (cell) {
+      return $(cell).text().trim();
+    })
+  })
+console.log(headers)
+  let data = $('table#active_projects tbody tr:visible').get().map(function (row) {
+    return $(row).find('td').get().map(function (cell) {
+      return $(cell).text().trim();
+    })
+  })
+  data = headers.concat(data)
+  var csv = Papa.unparse(data);
+// construct and download CSV
+  var blob = new Blob([csv]);
+  if (window.navigator.msSaveOrOpenBlob)  // IE hack; see http://msdn.microsoft.com/en-us/library/ie/hh779016.aspx
+    window.navigator.msSaveBlob(blob, "active_projects.csv");
+  else {
+    var a = window.document.createElement("a");
+    a.href = window.URL.createObjectURL(blob, { type: "text/plain" });
+    a.download = "active_projects.csv";
+    document.body.appendChild(a);
+    a.click();  // IE: "Access is denied"; see: https://connect.microsoft.com/IE/feedback/details/797361/ie-10-treats-blob-url-as-cross-origin-and-denies-access
+    document.body.removeChild(a);
+  }
+
+  console.log(csv)
+})
