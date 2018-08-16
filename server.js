@@ -22,11 +22,8 @@ if (process.env.production === true) {
     })
   }
 
-app.use(bodyParser({
-        extended: true,
-        limit: '2mb',
-        parameterLimit: 10000
-    }));
+  app.use(bodyParser.json({limit: '50mb'}))
+  app.use(bodyParser.urlencoded({limit: '50mb', extended: true, parameterLimit: 100000}))
 
 
 // For Passport

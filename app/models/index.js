@@ -12,7 +12,8 @@ var sequelize = new Sequelize(process.env.DATABASE_URL, {
     evict: 20000,
   },
   dialectOptions: {
-    ssl: true
+    // convert the string to a boolean
+    ssl: (process.env.DATABASE_SSL =="true")
   }
 }
 );
