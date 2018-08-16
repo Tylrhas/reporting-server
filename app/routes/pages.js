@@ -12,7 +12,7 @@ module.exports = function (app, passport) {
             attributes: ['name']
         })
         let projects = db.lp_project.findAll({
-            attributes: ['expected_finish', 'id', 'package', 'project_type', 'ps_phase', 'services_activated'],
+            attributes: ['expected_finish', 'id', 'package', 'project_type', 'ps_phase'],
             where: {
                 is_done: false,
                 is_archived: false,

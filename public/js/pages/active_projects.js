@@ -58,26 +58,6 @@ $(document).ready(function () {
   $('#package').multiselect('selectAll', false)
   $('#package').multiselect('updateButtonText')
 
-  $('#servicesActivated').multiselect({
-    onChange: function (option, checked, select) {
-      filter()
-    },
-    onSelectAll: function () {
-      // show all teams
-      filter()
-    },
-    onDeselectAll: function () {
-      // hide all teams
-      filter()
-    },
-    includeSelectAllOption: true,
-    selectedClass: 'multiselect-selected',
-  })
-
-  // select all of the teams
-  $('#servicesActivated').multiselect('selectAll', false)
-  $('#servicesActivated').multiselect('updateButtonText')
-
   $('#estFinnish').multiselect({
     onChange: function (option, checked, select) {
       filter()
@@ -105,8 +85,7 @@ function filter () {
     team: 1,
     package: 2,
     projectType: 3,
-    servicesActivated: 4,
-    estFinnish: 5
+    estFinnish: 4
   }
   // get the filters
   teamFilter = $('.cft .multiselect-container>li.multiselect-selected:not(".multiselect-all") input').map(function () {
@@ -116,9 +95,6 @@ function filter () {
     return $(this).val()
   }).get()
   projectTypeFilter = $('.projectType .multiselect-container>li.multiselect-selected:not(".multiselect-all") input').map(function () {
-    return $(this).val()
-  }).get()
-  servicesActivatedFilter = $('.servicesActivated .multiselect-container>li.multiselect-selected:not(".multiselect-all") input').map(function () {
     return $(this).val()
   }).get()
   estFinnishFilter = $('.estFinnish .multiselect-container>li.multiselect-selected:not(".multiselect-all") input').map(function () {
@@ -141,8 +117,6 @@ function filter () {
       } else if (packageFilter.indexOf(tds[lut.package].trim()) === -1) {
         hide = true
       } else if (projectTypeFilter.indexOf(tds[lut.projectType].trim()) === -1) {
-        hide = true
-      } else if (servicesActivatedFilter.indexOf(tds[lut.servicesActivated].trim()) === -1) {
         hide = true
       } else if (estFinnishFilter.indexOf(tds[lut.estFinnish].trim().substring(0, 3)) === -1) {
         hide = true

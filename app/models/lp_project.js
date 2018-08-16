@@ -64,9 +64,6 @@ module.exports = function (sequelize, Sequelize) {
         project_impact: {
             type: Sequelize.TEXT,
         },
-        services_activated: {
-            type: Sequelize.BOOLEAN,
-        },
         launch_type: {
             type: Sequelize.TEXT,
         },

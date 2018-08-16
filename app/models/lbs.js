@@ -39,6 +39,12 @@ module.exports = function (sequelize, Sequelize) {
     },
     opportunity_close_date: {
       type: Sequelize.DATE
+    }, 
+    estimated_go_live: {
+      type: Sequelize.DATE
+    },
+    actual_go_live: {
+      type: Sequelize.DATE
     }
   },
     {
