@@ -171,7 +171,8 @@ exports.updateNsBacklog = function (req, res) {
                 gross_cs: data[i]['Gross Creative Services'],
                 net_cs: data[i]['Net Creative Services'],
                 total_cs_discount: data[i]['Total Creative Services Discount'],
-                opportunity_close_date: data[i]['Opportunity Close Date']
+                opportunity_close_date: data[i]['Opportunity Close Date'],
+                estimated_go_live: data[i]['Estimated Go-Live Date (Day)']
             }
             if (data[i]['Location'].split(/\s(.+)/).length > 1) {
                 row.location_name = data[i]['Location'].split(/\s(.+)/)[1]
