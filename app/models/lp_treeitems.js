@@ -1,6 +1,5 @@
 module.exports = function (sequelize, Sequelize) {
   var treeitem = sequelize.define('treeitem', {
-
     id: {
       autoIncrement: true,
       primaryKey: true,
@@ -13,6 +12,9 @@ module.exports = function (sequelize, Sequelize) {
     parent_id: {
       type: Sequelize.INTEGER,
       hierarchy: true
+    },
+    project_id: {
+      type: Sequelize.INTEGER
     },
     child_type: {
       type: Sequelize.ENUM('folder', 'milestone','task', 'project'),

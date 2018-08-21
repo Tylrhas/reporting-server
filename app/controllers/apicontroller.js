@@ -1,12 +1,16 @@
 var exports = module.exports = {}
+var projects = require('../lib/controllers/projects')
 //require api functions
 lp_projects = require('./api/lp_projects');
 lp_lbs = require('./api/lp_lbs');
+backfill = require('../lib/controllers/backfill')
 client_time = require('./jobs/client_time');
 var Sequelize = require("sequelize")
 //Models
 var db = require("../models");
 const Op = Sequelize.Op
+
+const auth = "Basic " + new Buffer(process.env.LpUserName + ":" + process.env.LPPassword).toString("base64");
 
 var Papa = require("papaparse")
 var moment = require('moment')
@@ -209,50 +213,7 @@ exports.getAllProjects = function (req, res) {
 }
 
 exports.updateProjects = async function (req, res) {
-    console.log(process.env.production)
-    if (process.env.production === "false") {
-        let url = process.env.PRODUCTION_URL + '/api/treeitems'
-        let result = await rp.get({ url: url })
-        console.log(result)
-        // dump all new data
-        result = JSON.parse(result)
-        if (result.length) {
-            for (let i = 0; i < result.length; i++) {
-                // create promise all
-                await createTreeItem(result[i])
-                if (result[i].task_type === 'Location Service Billing' && result[i].child_type === 'task') {
-                    let splitName = result[i].name.split(/\s(.+)/, 2)
-                    let LBSId = splitName[0]
-                    let locationName = splitName[1]
-                    let lbsTask = await db.lbs.findOrCreate({ where: { id: LBSId }, defaults: { location_name: locationName, task_id: result[i].id } })
-                    lbsTask[0].update({ location_name: locationName, task_id: result[i].id })
-                }
-            }
-            res.send('200')
-            db.job.findAll({
-                where: {
-                    jobname: 'external_update'
-                }
-            }).then(results => {
-                results[0].update({
-                    lastrun: new Date(),
-                    lastrunstatus: 'complete'
-                })
-            })
-        }
-    } else {
-        res.send("only available on non-production Enviornments")
-        db.job.findAll({
-            where: {
-                jobname: 'external_update'
-            }
-        }).then(results => {
-            results[0].update({
-                lastrun: new Date(),
-                lastrunstatus: 'error'
-            })
-        })
-    }
+    backfill.remote(req, res)
 }
 
 exports.getTreeItems = function (req, res) {

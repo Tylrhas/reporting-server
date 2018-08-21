@@ -19,7 +19,8 @@ module.exports = function(app, passport) {
         for (let i = 0; i < results.length; i++) {
             jobs[results[i].jobname] = {
                 lastRunStatus: results[i].lastrunstatus,
-                lastRun: results[i].lastrun
+                lastRun: results[i].lastrun,
+                status: results[i].status
             }
         }
         res.render('pages/csv_upload', {slug: "update", user: req.user, jobs: jobs, moment:moment})

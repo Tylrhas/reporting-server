@@ -30,6 +30,7 @@
               <p>Fetch Updated Data from the External Server</p>
               <p><b>Last Update: </b> <%= moment(jobs['external_update'].lastRun).format( 'MMM-DD-YYYY hh:MM:SS A') %></p>
               <p><b>Last Run Status: </b> <%= jobs['external_update'].lastRunStatus %></p>
+              <p><b>Status: </b> <%= jobs['external_update'].status %></p>
               <button id="update_lp" class="center">Update</button>
           </div>
         </div>
