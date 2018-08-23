@@ -1,4 +1,5 @@
 $(document).ready(function () {
+  mrrTotals()
   $('#cft').multiselect({
     onChange: function (option, checked, select) {
       filter()
@@ -10,7 +11,7 @@ $(document).ready(function () {
     },
     onDeselectAll: function () {
       // hide all teams
-      $('#active_projects tr').slice(1).hide()
+      $('#active_projects tr').not(':first').not(':last').hide()
     },
     includeSelectAllOption: true,
     selectedClass: 'multiselect-selected',
@@ -30,7 +31,7 @@ $(document).ready(function () {
     },
     onDeselectAll: function () {
       // hide all teams
-      $('#active_projects tr').slice(1).hide()
+      $('#active_projects tr').not(':first').not(':last').hide()
     },
     includeSelectAllOption: true,
     selectedClass: 'multiselect-selected',
@@ -51,7 +52,7 @@ $(document).ready(function () {
     },
     onDeselectAll: function () {
       // hide all teams
-      $('#active_projects tr').slice(1).hide()
+      $('#active_projects tr').not(':first').not(':last').hide()
     },
     includeSelectAllOption: true,
     selectedClass: 'multiselect-selected',
@@ -72,7 +73,7 @@ $(document).ready(function () {
     },
     onDeselectAll: function () {
       // hide all teams
-      $('#active_projects tr').slice(1).hide()
+      $('#active_projects tr').not(':first').not(':last').hide()
     },
     includeSelectAllOption: true,
     selectedClass: 'multiselect-selected',
@@ -94,7 +95,7 @@ $(document).ready(function () {
     },
     onDeselectAll: function () {
       // hide all teams
-      $('#active_projects tr').slice(1).hide()
+      $('#active_projects tr').not(':first').not(':last').hide()
     },
     includeSelectAllOption: true,
     selectedClass: 'multiselect-selected',
@@ -106,7 +107,7 @@ $(document).ready(function () {
 })
 
 function filter () {
-  var table = $('#active_projects tr')
+  var table = $('#active_projects tr').not(':first').not(':last')
   let lut = {
     team: 1,
     package: 2,
@@ -130,12 +131,6 @@ function filter () {
   goLiveFilter = $('.actual_go_live .multiselect-container>li.multiselect-selected:not(".multiselect-all") input').map(function () {
     return $(this).val()
   }).get()
-  console.log(teamFilter)
-  console.log(packageFilter)
-  console.log(projectTypeFilter)
-  console.log(estFinnishFilter)
-  console.log('filtering')
-
   for (let i = 0; i < table.length; i++) {
     let hide = false
     // for each row in the table check the tds for match with filter
@@ -143,44 +138,56 @@ function filter () {
       return $(this).text().trim();
     }).get()
 
-    console.log(tds)
-
-
     if (tds.length !== 0) {
       // check if this row should be displayed or not
       if (teamFilter.indexOf(tds[lut.team].trim()) === -1) {
         hide = true
-        console.log('no match')
-        debugger
       } else if (packageFilter.indexOf(tds[lut.package].trim()) === -1) {
         hide = true
-        console.log('no match')
-        debugger
       } else if (projectTypeFilter.indexOf(tds[lut.projectType].trim()) === -1) {
         hide = true
-        console.log('no match')
-        debugger
       } else if (estFinnishFilter.indexOf(tds[lut.estFinnish].trim().substring(0, 3)) === -1) {
         hide = true
-        console.log('no match')
-        debugger
-      } else if(goLiveFilter.indexOf(tds[lut.go_live].trim().substring(0, 3)) === -1) {
+      } else if (goLiveFilter.indexOf(tds[lut.go_live].trim().substring(0, 3)) === -1) {
         hide = true
-        console.log('no match')
-        debugger
       }
 
       // hide row if needed
       if (hide) {
         $(table[i]).hide()
-        console.log('hiding')
       } else {
         $(table[i]).show()
       }
     }
-
   }
+  mrrTotals()
+}
 
+function mrrTotals () {
+  var activatedMRRcells = $('#active_projects tr:visible #activatedMRR')
+  var unactivatedMRRcells = $('#active_projects tr:visible #unactivatedMRR')
+  if (activatedMRRcells.length > 0 && unactivatedMRRcells.length > 0) {
+    // get all rows that are not hidden
+    activatedMRRcells = activatedMRRcells.map(function () {
+      return parseInt($(this).text())
+    }).get()
+    unactivatedMRRcells = unactivatedMRRcells.map(function () {
+      return parseInt($(this).text())
+    }).get()
+
+    let activated = activatedMRRcells.reduce(getSum)
+    var unactivated = unactivatedMRRcells.reduce(getSum)
+    $('#totalUnactivated').html('$ ' + unactivated.toLocaleString())
+    $('#totalActivated').html('$ ' + activated.toLocaleString())
+  }
+  else {
+    $('#totalUnactivated').html('$ ' + null)
+    $('#totalActivated').html('$ ' + null)
+  }
+}
+
+function getSum (total, num) {
+  return total + num;
 }
 
 $('#download_csv').click(function () {
@@ -190,7 +197,6 @@ $('#download_csv').click(function () {
       return $(cell).text().trim();
     })
   })
-console.log(headers)
   let data = $('table#active_projects tbody tr:visible').get().map(function (row) {
     return $(row).find('td').get().map(function (cell) {
       return $(cell).text().trim();
@@ -198,7 +204,7 @@ console.log(headers)
   })
   data = headers.concat(data)
   var csv = Papa.unparse(data);
-// construct and download CSV
+  // construct and download CSV
   var blob = new Blob([csv]);
   if (window.navigator.msSaveOrOpenBlob)  // IE hack; see http://msdn.microsoft.com/en-us/library/ie/hh779016.aspx
     window.navigator.msSaveBlob(blob, "active_projects.csv");
@@ -210,6 +216,4 @@ console.log(headers)
     a.click();  // IE: "Access is denied"; see: https://connect.microsoft.com/IE/feedback/details/797361/ie-10-treats-blob-url-as-cross-origin-and-denies-access
     document.body.removeChild(a);
   }
-
-  console.log(csv)
 })

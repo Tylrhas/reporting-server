@@ -141,17 +141,28 @@
                         <!-- estimated go-live -->
                         <%= moment(projects[i].estimatedGolive).format( 'MMM-DD-YYYY') %>
                       </td>
-                      <td>
+                      <td id="activatedMRR">
                         <!-- activated MRR -->
                         <%= projects[i].activatedMRR %>
                       </td>
-                      <td>
+                      <td id="unactivatedMRR">
                         <!-- unactivated MRR -->
                         <%= projects[i].unactivatedMRR %>
                       </td>
                     </tr>
                     <% } %>
                 </tbody>
+                <tfoot>
+                    <tr>
+                      <td></td>
+                      <th colspan="2">Total Activated MRR :</th>
+                      <td id="totalActivated">200</td>
+                      <td></td>
+                      <th colspan="2">Total Unactivated MRR:</th>
+                      <td id="totalUnactivated">200</td>
+                      <td></td>
+                    </tr>
+                   </tfoot>
               </table>
             </div>
           </div>
