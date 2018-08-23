@@ -6,10 +6,11 @@ $(document).ready(function () {
     onSelectAll: function () {
       // show all teams
       $('#active_projects tr').show()
+      filter()
     },
     onDeselectAll: function () {
       // hide all teams
-      $('#active_projects tr').hide()
+      $('#active_projects tr').slice(1).hide()
     },
     includeSelectAllOption: true,
     selectedClass: 'multiselect-selected',
@@ -25,10 +26,11 @@ $(document).ready(function () {
     onSelectAll: function () {
       // show all teams
       $('#active_projects tr').show()
+      filter()
     },
     onDeselectAll: function () {
       // hide all teams
-      $('#active_projects tr').hide()
+      $('#active_projects tr').slice(1).hide()
     },
     includeSelectAllOption: true,
     selectedClass: 'multiselect-selected',
@@ -45,10 +47,11 @@ $(document).ready(function () {
     onSelectAll: function () {
       // show all teams
       $('#active_projects tr').show()
+      filter()
     },
     onDeselectAll: function () {
       // hide all teams
-      $('#active_projects tr').hide()
+      $('#active_projects tr').slice(1).hide()
     },
     includeSelectAllOption: true,
     selectedClass: 'multiselect-selected',
@@ -64,19 +67,42 @@ $(document).ready(function () {
     },
     onSelectAll: function () {
       // show all teams
+      $('#active_projects tr').show()
       filter()
     },
     onDeselectAll: function () {
       // hide all teams
-      filter()
+      $('#active_projects tr').slice(1).hide()
     },
     includeSelectAllOption: true,
     selectedClass: 'multiselect-selected',
   })
 
-  // select all of the teams
+  // select all of the go-live months
   $('#estFinnish').multiselect('selectAll', false)
   $('#estFinnish').multiselect('updateButtonText')
+
+  $('#actual_go_live').multiselect({
+    onChange: function (option, checked, select) {
+      $('#active_projects tr').show()
+      filter()
+    },
+    onSelectAll: function () {
+      // show all teams
+      $('#active_projects tr').show()
+      filter()
+    },
+    onDeselectAll: function () {
+      // hide all teams
+      $('#active_projects tr').slice(1).hide()
+    },
+    includeSelectAllOption: true,
+    selectedClass: 'multiselect-selected',
+  })
+
+  // select all of the go-live months
+  $('#actual_go_live').multiselect('selectAll', false)
+  $('#actual_go_live').multiselect('updateButtonText')
 })
 
 function filter () {
@@ -85,6 +111,7 @@ function filter () {
     team: 1,
     package: 2,
     projectType: 3,
+    go_live: 4,
     estFinnish: 5
   }
   // get the filters
@@ -98,6 +125,9 @@ function filter () {
     return $(this).val()
   }).get()
   estFinnishFilter = $('.estFinnish .multiselect-container>li.multiselect-selected:not(".multiselect-all") input').map(function () {
+    return $(this).val()
+  }).get()
+  goLiveFilter = $('.actual_go_live .multiselect-container>li.multiselect-selected:not(".multiselect-all") input').map(function () {
     return $(this).val()
   }).get()
   console.log(teamFilter)
@@ -131,6 +161,10 @@ function filter () {
         console.log('no match')
         debugger
       } else if (estFinnishFilter.indexOf(tds[lut.estFinnish].trim().substring(0, 3)) === -1) {
+        hide = true
+        console.log('no match')
+        debugger
+      } else if(goLiveFilter.indexOf(tds[lut.go_live].trim().substring(0, 3)) === -1) {
         hide = true
         console.log('no match')
         debugger
