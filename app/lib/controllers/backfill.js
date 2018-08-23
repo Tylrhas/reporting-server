@@ -115,16 +115,26 @@ async function upsertProject (project) {
       is_archived: projectRequest.is_archived,
       promise_by: projectRequest.promise_by
     }
-
-    // fill out the custom values
-    for (let i = 0; i < Object.keys(projectRequest.custom_field_values).length; i++) {
-      let key = Object.keys(projectRequest.custom_field_values)[i]
-      // check if the custom field is already in the update object if so add the new data to it
-      if (update_object[key.replace(/ /g, "_").toLowerCase()] !== 'undefined') {
-        update_object[key.replace(/ /g, "_").toLowerCase()] = projectRequest.custom_field_values[key]
+    if (projectRequest.hasOwnProperty('custom_field_values')) {
+      // fill out the custom values
+      for (let i = 0; i < Object.keys(projectRequest.custom_field_values).length; i++) {
+        let key = Object.keys(projectRequest.custom_field_values)[i]
+        // check if the custom field is already in the update object if so add the new data to it
+        if (update_object[key.replace(/ /g, "_").toLowerCase()] !== 'undefined') {
+          update_object[key.replace(/ /g, "_").toLowerCase()] = projectRequest.custom_field_values[key]
+        }
       }
     }
 
+    if (projectRequest.hasOwnProperty('parent_ids')) {
+      if (projectRequest.parent_ids.indexOf(parseInt(process.env.ProServFolderId)) !== -1) {
+        // is this project in the active project PS folder
+        update_object.is_archived = false
+      } else if (projectRequest.parent_ids.indexOf(parseInt(process.env.ProServArchiveFolder)) !== -1) {
+        // in the archived folder
+        update_object.is_archived = true
+      }
+    }
     // get the CFT_ID for the project
     try {
       update_object.cft_id = await get_cft_id(projectRequest)
@@ -221,12 +231,16 @@ async function createTreeItem (body) {
     child_type: body.type.toLowerCase()
   }
 
-  // fill out the custom values
-  for (let i = 0; i < Object.keys(body.custom_field_values).length; i++) {
-    let key = Object.keys(body.custom_field_values)[i]
-    // check if the custom field is already in the update object if so add the new data to it
-    if (update_object[key.replace(/ /g, "_").toLowerCase()] !== 'undefined') {
-      update_object[key.replace(/ /g, "_").toLowerCase()] = body.custom_field_values[key]
+  if (body.hasOwnProperty('custom_field_values')) {
+    // fill out the custom values
+    for (let i = 0; i < Object.keys(body.custom_field_values).length; i++) {
+      let key = Object.keys(body.custom_field_values)[i]
+      // check if the custom field is already in the update object if so add the new data to it
+      if (update_object[key.replace(/ /g, "_").toLowerCase()] !== 'undefined') {
+        if (body.custom_field_values[key] != null) {
+          update_object[key.replace(/ /g, "_").toLowerCase()] = body.custom_field_values[key]
+        }
+      }
     }
   }
 
@@ -235,6 +249,10 @@ async function createTreeItem (body) {
   if (body.type.toLowerCase() !== 'project') {
     update_object.parent_id = body.parent_id
   }
+
+  // look for null in the update object
+  Object.keys(update_object).forEach(key => { if (update_object[key] === null) { delete update_object[key]; }})
+
   try {
     var count = await db.treeitem.count({ where: { id: id } })
     var parentCount = await db.treeitem.count({ where: { id: body.parent_id } })
@@ -264,7 +282,12 @@ async function createTreeItem (body) {
       let splitName = body.name.split(/\s(.+)/, 2)
       let LBSId = splitName[0]
       let locationName = splitName[1]
-      await db.lbs.findOrCreate({ where: { id: LBSId }, defaults: { location_name: locationName, task_id: body.id } })
+      try {
+        await db.lbs.findOrCreate({ where: { id: LBSId }, defaults: { location_name: locationName, task_id: body.id, project_id : body.project_id } })
+      } 
+      catch (error) {
+        console.log(error)
+      }
     }
   }
 

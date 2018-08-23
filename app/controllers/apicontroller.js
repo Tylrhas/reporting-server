@@ -163,31 +163,53 @@ exports.updateNsBacklog = function (req, res) {
     res.status(200)
     var updates = []
     var data = req.body.data
+    var row
     for (i = 0; i < data.length; i++) {
         if (data[i]['Internal ID'] !== undefined) {
-            let row = {
-                id: data[i]['Internal ID'],
-                location_name: null,
-                total_mrr: data[i]['Total MRR'],
-                gross_ps: data[i]['Gross Professional Services'],
-                net_ps: data[i]['Net Professional Services'],
-                total_ps_discount: data[i]['Total Professional Services Discount'],
-                gross_cs: data[i]['Gross Creative Services'],
-                net_cs: data[i]['Net Creative Services'],
-                total_cs_discount: data[i]['Total Creative Services Discount'],
-                opportunity_close_date: data[i]['Opportunity Close Date'],
-                estimated_go_live: data[i]['Estimated Go-Live Date (Day)']
-            }
-            if (data[i]['Location'].split(/\s(.+)/).length > 1) {
-                row.location_name = data[i]['Location'].split(/\s(.+)/)[1]
+            if (data[i].hasOwnProperty('Go-Live Date (Day)')) {
+                row = {
+                    id: data[i]['Internal ID'],
+                    location_name: null,
+                    total_mrr: data[i]['Total MRR'],
+                    gross_ps: data[i]['Gross Professional Services'],
+                    net_ps: data[i]['Net Professional Services'],
+                    total_ps_discount: data[i]['Total Professional Services Discount'],
+                    gross_cs: data[i]['Gross Creative Services'],
+                    net_cs: data[i]['Net Creative Services'],
+                    total_cs_discount: data[i]['Total Creative Services Discount'],
+                    opportunity_close_date: data[i]['Opportunity Close Date'],
+                    actual_go_live: data[i]['Go-Live Date (Day)']
+                }
+                if (data[i]['Location'].split(/\s(.+)/).length > 1) {
+                    row.location_name = data[i]['Location'].split(/\s(.+)/)[1]
+                } else {
+                    row.location_name = data[i]['Location'].split(/\s(.+)/)[0]
+                }
             } else {
-                row.location_name = data[i]['Location'].split(/\s(.+)/)[0]
+                row = {
+                    id: data[i]['Internal ID'],
+                    location_name: null,
+                    total_mrr: data[i]['Total MRR'],
+                    gross_ps: data[i]['Gross Professional Services'],
+                    net_ps: data[i]['Net Professional Services'],
+                    total_ps_discount: data[i]['Total Professional Services Discount'],
+                    gross_cs: data[i]['Gross Creative Services'],
+                    net_cs: data[i]['Net Creative Services'],
+                    total_cs_discount: data[i]['Total Creative Services Discount'],
+                    opportunity_close_date: data[i]['Opportunity Close Date'],
+                    estimated_go_live: data[i]['Estimated Go-Live Date (Day)']
+                }
+                if (data[i]['Location'].split(/\s(.+)/).length > 1) {
+                    row.location_name = data[i]['Location'].split(/\s(.+)/)[1]
+                } else {
+                    row.location_name = data[i]['Location'].split(/\s(.+)/)[0]
+                }
             }
-
-            updates.push(db.lbs.upsert(row).then(results => {
-                console.log(results)
-            }))
         }
+
+        updates.push(db.lbs.upsert(row).then(results => {
+            console.log(results)
+        }))
     }
     Promise.all(updates).then(() => {
         res.status(200)

@@ -85,7 +85,7 @@ function filter () {
     team: 1,
     package: 2,
     projectType: 3,
-    estFinnish: 4
+    estFinnish: 5
   }
   // get the filters
   teamFilter = $('.cft .multiselect-container>li.multiselect-selected:not(".multiselect-all") input').map(function () {
@@ -100,7 +100,12 @@ function filter () {
   estFinnishFilter = $('.estFinnish .multiselect-container>li.multiselect-selected:not(".multiselect-all") input').map(function () {
     return $(this).val()
   }).get()
+  console.log(teamFilter)
+  console.log(packageFilter)
+  console.log(projectTypeFilter)
+  console.log(estFinnishFilter)
   console.log('filtering')
+
   for (let i = 0; i < table.length; i++) {
     let hide = false
     // for each row in the table check the tds for match with filter
@@ -108,23 +113,33 @@ function filter () {
       return $(this).text().trim();
     }).get()
 
+    console.log(tds)
 
 
     if (tds.length !== 0) {
       // check if this row should be displayed or not
       if (teamFilter.indexOf(tds[lut.team].trim()) === -1) {
         hide = true
+        console.log('no match')
+        debugger
       } else if (packageFilter.indexOf(tds[lut.package].trim()) === -1) {
         hide = true
+        console.log('no match')
+        debugger
       } else if (projectTypeFilter.indexOf(tds[lut.projectType].trim()) === -1) {
         hide = true
+        console.log('no match')
+        debugger
       } else if (estFinnishFilter.indexOf(tds[lut.estFinnish].trim().substring(0, 3)) === -1) {
         hide = true
+        console.log('no match')
+        debugger
       }
 
       // hide row if needed
       if (hide) {
         $(table[i]).hide()
+        console.log('hiding')
       } else {
         $(table[i]).show()
       }

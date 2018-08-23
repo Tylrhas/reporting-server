@@ -61,7 +61,7 @@ module.exports = function (sequelize, Sequelize) {
       type: Sequelize.TEXT,
     },
     billing_type: {
-      type: Sequelize.DATE,
+      type: Sequelize.TEXT,
     },
     billing_lost_reason: {
       type: Sequelize.TEXT,
