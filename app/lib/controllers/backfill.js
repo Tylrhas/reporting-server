@@ -4,7 +4,6 @@ var slack = require('../error')
 var db = require("../../models")
 var Sequelize = require("sequelize")
 const Op = Sequelize.Op
-var rp = require('request-promise');
 var throttledRequest = require('../../config/throttled_request')
 const auth = "Basic " + new Buffer(process.env.LpUserName + ":" + process.env.LPPassword).toString("base64");
 

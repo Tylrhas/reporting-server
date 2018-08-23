@@ -16,7 +16,6 @@ var Papa = require("papaparse")
 var moment = require('moment')
 // import the config for throttled request
 var throttledRequest = require('../config/throttled_request')
-var rp = require('request-promise');
 
 //API Calls
 exports.updatelpLbsapi = function (req, res) {
@@ -326,35 +325,8 @@ exports.updateTeamProjects = function (req, res) {
                         })
                     }
                 })
-            // let updateAll = []
-            // let updates = []
-            // for (let i = 0; i < results.length; i++) {
-            //     var teamID = results[i].id
-            //     updateAll.push(getTeamProjects(teamID))
-            // }
-            // Promise.all(updateAll).then(() => {
-            //     res.send('done')
-            // })
 
         })
-}
-
-function getTeamProjects (teamID) {
-    const auth = "Basic " + new Buffer(process.env.LpUserName + ":" + process.env.LPPassword).toString("base64")
-    // let url = 'https://app.liquidplanner.com/api/workspaces/' + process.env.LPWorkspaceId  + '/treeitems/' + teamID +'?depth=1'
-    let url = 'https://app.liquidplanner.com/api/workspaces/' + process.env.LPWorkspaceId + '/projects?filter[]=parent_id=' + teamID
-    return rp.get({ url: url, headers: { "Authorization": auth } }).then(results => {
-        let body = JSON.parse(results)
-        // let projects = body.children
-        let projects = body
-        for (i2 = 0; i2 < projects.length; i2++) {
-            let project = projects[i2]
-            // find or create the project with the team id
-            if (project.type.toLowerCase() === 'folder' || project.type.toLowerCase() === 'milestone' || project.type.toLowerCase() === 'task' || project.type.toLowerCase() === 'project') {
-                updateProject(project, teamID)
-            }
-        }
-    })
 }
 
 function updateProject (project, teamID) {
