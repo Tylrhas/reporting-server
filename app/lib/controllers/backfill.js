@@ -282,7 +282,8 @@ async function createTreeItem (body) {
       let LBSId = splitName[0]
       let locationName = splitName[1]
       try {
-        await db.lbs.findOrCreate({ where: { id: LBSId }, defaults: { location_name: locationName, task_id: body.id, project_id : body.project_id } })
+        lbs = await db.lbs.findOrCreate({ where: { id: LBSId }, defaults: { location_name: locationName, task_id: body.id, project_id : body.project_id } })
+        lbs[0].update({ location_name: locationName, task_id: body.id, project_id : body.project_id })
       } 
       catch (error) {
         console.log(error)
