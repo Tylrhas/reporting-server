@@ -138,6 +138,9 @@ module.exports = function (app, passport) {
             res.send(results)
         })
     })
+    app.get('/reports/teams/mrr/all', checkAuthentication , function (req, res) {
+
+    })
 
     function isAdmin (req, res, next) {
         if (req.isAuthenticated() && req.user.user_group == 'admin') {

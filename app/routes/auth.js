@@ -17,6 +17,32 @@ module.exports = function (app, passport) {
         })
 
     app.get('/', checkAuthentication, function (req, res) {
+        // get todays month
+        var date = new Date();
+        var firstDay = new Date(date.getFullYear(), date.getMonth() , 0);
+        var lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+        var month = date.getMonth()
+        firstDay.setHours(23,59,59,999);
+        lastDay.setHours(23,59,59,999);
+
+        var backlogMonthlyMRR = db.lbs.findAll({
+            attributes: ['total_mrr'],
+            where: {
+                estimated_go_live: {
+                    [Op.between]: [firstDay, lastDay]
+                },
+                actual_go_live: null
+            }
+        })
+
+        var activatedMonthlyMRR = db.lbs.findAll({
+            attributes: ['total_mrr'],
+            where: {
+                actual_go_live: {
+                    [Op.between]: [firstDay, lastDay]
+                }
+            }
+        })
         // Successful authentication, render home.
         var active_projects = db.lp_project.count({
             where: {
@@ -26,14 +52,22 @@ module.exports = function (app, passport) {
                 expected_finish: {
                     [Op.not]: null
                 }
-            },
-        }).then(results => {
-            return results;
-        });
+            }
+        })
 
+        Promise.all([active_projects, backlogMonthlyMRR, activatedMonthlyMRR]).then(function (values) {
+            // calculate the estimated go-live MRR for august
+            var backlog_mrr = 0
+            for (i = 0; i < values[1].length; i++) {
+                backlog_mrr = backlog_mrr + values[1][i].total_mrr
+            }
 
-        Promise.all([active_projects]).then(function (values) {
-            res.render('pages/index', { user: req.user, slug: 'home', active_projects: values[0]})
+            var activatedMRR = 0
+            for (i = 0; i < values[2].length; i++) {
+                activatedMRR = activatedMRR + values[2][i].total_mrr
+            }
+
+            res.render('pages/index', { user: req.user, slug: 'home', active_projects: values[0], backlog_mrr: backlog_mrr.toLocaleString(), activatedMRR: activatedMRR.toLocaleString(),  date: date, moment:moment  })
         })
         // res.render('pages/index', { user: req.user, slug: 'home', active_projects: 1 })
     })

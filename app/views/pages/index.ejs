@@ -22,6 +22,22 @@
           </a>
           </div>
         </div>
+        <div class="col-md-4">
+            <div class="tile">
+              <a href="/reports/active-projects">
+              <h4 class="center"><%= moment(date).format( 'MMMM') %> Backlog MRR</h4>
+              <p class="center">$ <%= backlog_mrr %></p>
+            </a>
+            </div>
+          </div>
+          <div class="col-md-4">
+              <div class="tile">
+                <a href="/reports/active-projects">
+                <h4 class="center"><%= moment(date).format( 'MMMM') %> Activated  MRR</h4>
+                <p class="center">$ <%= activatedMRR %></p>
+              </a>
+              </div>
+            </div>
       </div>
     </main>
     <% include ../partials/footer.ejs %>
