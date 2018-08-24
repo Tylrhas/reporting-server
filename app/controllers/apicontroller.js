@@ -165,10 +165,6 @@ exports.updateNsBacklog = function (req, res) {
     var row
     for (i = 0; i < data.length; i++) {
         if (data[i]['Internal ID'] !== undefined) {
-
-            if (data[i]['Internal ID'] == 2754952) {
-                console.log('stop!')
-            }
             if (data[i].hasOwnProperty('Go-Live Date (Day)')) {
                 row = {
                     id: data[i]['Internal ID'],
@@ -180,7 +176,8 @@ exports.updateNsBacklog = function (req, res) {
                     gross_cs: data[i]['Gross Creative Services'],
                     net_cs: data[i]['Net Creative Services'],
                     total_cs_discount: data[i]['Total Creative Services Discount'],
-                    actual_go_live: data[i]['Go-Live Date (Day)']
+                    actual_go_live: data[i]['Go-Live Date (Day)'],
+                    project_type: data[i]['Project Type']
                 }
                 if (data[i]['Location'].split(/\s(.+)/).length > 1) {
                     row.location_name = data[i]['Location'].split(/\s(.+)/)[1]
@@ -198,7 +195,8 @@ exports.updateNsBacklog = function (req, res) {
                     gross_cs: data[i]['Gross Creative Services'],
                     net_cs: data[i]['Net Creative Services'],
                     total_cs_discount: data[i]['Total Creative Services Discount'],
-                    estimated_go_live: data[i]['Estimated Go-Live Date (Day)']
+                    estimated_go_live: data[i]['Estimated Go-Live Date (Day)'],
+                    project_type: data[i]['Project Type']
                 }
                 if (data[i]['Location'].split(/\s(.+)/).length > 1) {
                     row.location_name = data[i]['Location'].split(/\s(.+)/)[1]

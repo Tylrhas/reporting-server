@@ -19,6 +19,9 @@ module.exports = function (sequelize, Sequelize) {
     master_project_id: {
       type: Sequelize.INTEGER
     },
+    project_type: {
+      type: Sequelize.TEXT
+    },
     total_mrr: {
       type: Sequelize.REAL
     },

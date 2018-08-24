@@ -139,7 +139,8 @@ module.exports = function (app, passport) {
         })
     })
     app.get('/reports/teams/mrr/all', checkAuthentication , function (req, res) {
-
+        // get all LBS items launched this month and match to project and CFT and sum the totals for each team
+        
     })
 
     function isAdmin (req, res, next) {

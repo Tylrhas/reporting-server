@@ -1,7 +1,6 @@
 <% include ../partials/header.ejs %>
   <% include ../partials/nav.ejs %>
     <main class="app-content">
-
       <div class="app-title">
         <div>
           <h1>Professional Services Reporting Dashboard</h1>
@@ -16,28 +15,42 @@
       <div class="row">
         <div class="col-md-4">
           <div class="tile">
-            <a href="/reports/active-projects">
-            <h4 class="center">Active Projects</h4>
-            <p class="center"><%= active_projects %></p>
-          </a>
+            <h4 class="center">Total MRR</h4>
+            <p class="center"><%= total_mrr %></p>   
           </div>
         </div>
         <div class="col-md-4">
             <div class="tile">
-              <a href="/reports/active-projects">
               <h4 class="center"><%= moment(date).format( 'MMMM') %> Backlog MRR</h4>
               <p class="center">$ <%= backlog_mrr %></p>
-            </a>
             </div>
           </div>
           <div class="col-md-4">
               <div class="tile">
-                <a href="/reports/active-projects">
                 <h4 class="center"><%= moment(date).format( 'MMMM') %> Activated  MRR</h4>
                 <p class="center">$ <%= activatedMRR %></p>
-              </a>
               </div>
             </div>
       </div>
+      <div class="row">
+          <div class="col-md-4">
+            <div class="tile">
+              <h4 class="center">PS MRR</h4>
+              <p class="center">null</p>   
+            </div>
+          </div>
+          <div class="col-md-4">
+              <div class="tile">
+                <h4 class="center">SEM</h4>
+                <p class="center">null</p>
+              </div>
+            </div>
+            <div class="col-md-4">
+                <div class="tile">
+                  <h4 class="center">DA</h4>
+                  <p class="center">null</p>
+                </div>
+              </div>
+        </div>
     </main>
     <% include ../partials/footer.ejs %>
