@@ -21,6 +21,10 @@ var throttledRequest = require('../config/throttled_request')
 exports.updatelpLbsapi = function (req, res) {
     lp_lbs.updateapi(req, res);
 }
+
+exports.findLBSProjects = function (req, res) {
+    backfill.findMissingLBSProjects(req, res);
+}
 exports.updatelpprojectsapi = function (req, res) {
     lp_projects.updateProjectsapi(req, res);
 

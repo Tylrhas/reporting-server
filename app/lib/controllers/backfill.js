@@ -1,5 +1,6 @@
 var exports = module.exports = {}
 var slack = require('../error')
+var teamMrr = require('../reports/team_mrr')
 //Models
 var db = require("../../models")
 var Sequelize = require("sequelize")
@@ -10,6 +11,7 @@ const auth = "Basic " + new Buffer(process.env.LpUserName + ":" + process.env.LP
 var status = 'complete'
 
 exports.remote = backFillRemoteData
+exports.findMissingLBSProjects = findMissingLBSProjects
 
 async function backFillRemoteData (req, res) {
   res.send(200)
@@ -250,7 +252,7 @@ async function createTreeItem (body) {
   }
 
   // look for null in the update object
-  Object.keys(update_object).forEach(key => { if (update_object[key] === null) { delete update_object[key]; }})
+  Object.keys(update_object).forEach(key => { if (update_object[key] === null) { delete update_object[key]; } })
 
   try {
     var count = await db.treeitem.count({ where: { id: id } })
@@ -282,9 +284,9 @@ async function createTreeItem (body) {
       let LBSId = splitName[0]
       let locationName = splitName[1]
       try {
-        lbs = await db.lbs.findOrCreate({ where: { id: LBSId }, defaults: { location_name: locationName, task_id: body.id, project_id : body.project_id } })
-        lbs[0].update({ location_name: locationName, task_id: body.id, project_id : body.project_id })
-      } 
+        lbs = await db.lbs.findOrCreate({ where: { id: LBSId }, defaults: { location_name: locationName, task_id: body.id, project_id: body.project_id } })
+        lbs[0].update({ location_name: locationName, task_id: body.id, project_id: body.project_id })
+      }
       catch (error) {
         console.log(error)
       }
@@ -294,5 +296,30 @@ async function createTreeItem (body) {
   if (body.hasOwnProperty('children')) {
     // there are children for this treeitem
     return findChildren(body)
+  }
+}
+
+
+async function findMissingLBSProjects (req, res) {
+  res.send(200)
+  // get all non_associated MRR LBS and see if there is a project in LP for them
+  var non_associated_lbs = await teamMrr.non_associated()
+
+  for (let i = 0; i < non_associated_lbs.length; i++) {
+    let url = 'https://app.liquidplanner.com/api/workspaces/' + process.env.LPWorkspaceId + '/tasks/?filter[]=name starts_with ' + non_associated_lbs[i].id
+    let lplbs = await throttledRequestPromise({ url: url, method: 'GET', headers: { "Authorization": auth } })
+
+    if (lplbs.length > 0) {
+      // see if the project exists and insert the id
+      var count = await db.lp_project.count({ where: { id: lplbs[0].project_id } })
+      if (count > 0) {
+        // update LBS
+        await db.lbs.upsert({ id: non_associated_lbs[i].id, project_id: lplbs[0].project_id })
+      } else {
+        // insert the project then update the LBS
+        await upsertProject({ key: lplbs[0].project_id })
+        await db.lbs.upsert({ id: non_associated_lbs[i].id, project_id: lplbs[0].project_id })
+      }
+    }
   }
 }

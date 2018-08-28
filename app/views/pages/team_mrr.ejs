@@ -1,0 +1,32 @@
+<% include ../partials/header.ejs %>
+  <% include ../partials/nav.ejs %>
+    <main class="app-content">
+      <div class="app-title">
+        <div>
+          <h1>Team Based MRR</h1>
+          <p>All teams Activated MRR</p>
+        </div>
+        <ul class="app-breadcrumb breadcrumb">
+          <li class="breadcrumb-item">
+            <i class="fa fa-home fa-lg"></i>
+          </li>
+        </ul>
+      </div>
+      <% for(var i = 0; i < teamMrr.length; i++) { %>
+        <% if ( i === 0 || i === 3) { %>
+          <div class="row">
+          <% } %>
+          <div class="col-md-4">
+              <div class="tile">
+                <a href="/reports/teams/mrr/<%= teamMrr[i][0]  %>">
+                <h4 class="center"><%= teamMrr[i][1]  %></h4>
+                <p class="center">$ <%= teamMrr[i][2] %></p> 
+              </a>
+              </div>
+            </div>
+          <% if ( i === 2 || i === teamMrr.length -1 ) { %>
+          </div>
+            <% } %>
+      <% } %>
+    </main>
+    <% include ../partials/footer.ejs %>

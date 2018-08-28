@@ -36,11 +36,11 @@
         </div>
         <div class="col-md-4">
           <div class="tile center">
-              <h4>Backfill LP Data</h4>
-              <p>Fetch Project Team Assignments from LP</p>
+              <h4>Match LP LBS</h4>
+              <p>Look for LP LBS tasks that are not matched with a project</p>
               <p><b>Last Update: </b> <%= moment(jobs['backfill_lp'].lastRun).format( 'MMM-DD-YYYY hh:MM:SS A') %></p>
               <p><b>Last Run Status: </b> <%= jobs['backfill_lp'].lastRunStatus %></p>
-              <button id="backfill_lp" class="center">Backfill</button>
+              <button id="backfill_lp" class="center">Match</button>
           </div>
         </div>
       </div>
@@ -94,7 +94,7 @@
     $('#backfill_lp').click(function() {
       $.ajax({
           type: "get",
-          url: '/api/admin/teams/update',
+          url: '/api/admin/lbs/match',
           success: function (data) {
           },
           dataType: 'JSON'
