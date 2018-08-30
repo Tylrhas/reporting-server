@@ -12,7 +12,7 @@ module.exports = function(app, passport) {
     var month = date.getMonth()
     var year = date.getFullYear()
     models.user.findAll().then(results => {
-        res.render('pages/users', { user: req.user, users: results, slug: "users", moment:moment, month: month, year: year });
+        res.render('pages/users', { user: req.user, users: results, slug: "users", moment:moment, month: month +1, year: year });
     })
    })
    app.get('/admin/update',isAdmin, function (req, res) {
@@ -29,7 +29,7 @@ module.exports = function(app, passport) {
                 status: results[i].status
             }
         }
-        res.render('pages/csv_upload', {slug: "update", user: req.user, jobs: jobs, moment:moment, month: month, year: year})
+        res.render('pages/csv_upload', {slug: "update", user: req.user, jobs: jobs, moment:moment, month: month +1, year: year})
     })
    })
 

@@ -143,7 +143,19 @@ async function upsertProject (project) {
     catch (error) {
       slack.sendError(update_object, error)
     }
-    await db.lp_project.upsert(update_object)
+    var lp_project = await db.lp_project.findAll({
+      where: {
+        id: update_object.id
+      }
+    })
+    if (lp_project.length > 0) {
+      if (lp_project[0].cft_id === null || lp_project[0].cft_id === 0) {
+        await db.lp_project.upsert(update_object)
+      } else {
+        delete update_object.cft_id
+        await db.lp_project.upsert(update_object)
+      }
+    }
 
     // create the tree item for the project
     let treeitem = await db.treeitem.findOrCreate({
