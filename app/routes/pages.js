@@ -134,7 +134,7 @@ module.exports = function (app, passport) {
                     }
                 }
                 // send over the projects lp_space_id to create links on page and moment to change the date 
-                res.render('pages/active_projects', { user: req.user, projects: results[1], cfts: results[0], projectType: projectType, package: package, lp_space_id: process.env.LPWorkspaceId, moment: moment, slug: 'active-projects', month: month, year: year});
+                res.render('pages/active_projects', { user: req.user, projects: results[1], cfts: results[0], projectType: projectType, package: package, lp_space_id: process.env.LPWorkspaceId, moment: moment, slug: 'active-projects', month: month +1, year: year});
             })
     })
     app.get('/reports/mrr/:month/:year/teams', checkAuthentication, function (req, res) {
