@@ -155,6 +155,8 @@ async function upsertProject (project) {
         delete update_object.cft_id
         await db.lp_project.upsert(update_object)
       }
+    } else {
+      await db.lp_project.upsert(update_object)
     }
 
     // create the tree item for the project
