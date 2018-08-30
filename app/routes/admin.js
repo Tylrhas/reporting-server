@@ -29,7 +29,7 @@ module.exports = function(app, passport) {
                 status: results[i].status
             }
         }
-        res.render('pages/csv_upload', {slug: "update", user: req.user, jobs: jobs, moment:moment, , month: month, year: year})
+        res.render('pages/csv_upload', {slug: "update", user: req.user, jobs: jobs, moment:moment, month: month, year: year})
     })
    })
 
