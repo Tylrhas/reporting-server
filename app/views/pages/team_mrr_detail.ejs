@@ -7,10 +7,15 @@
           <p>Activated MRR for  <%= moment(month + '/' + 1 +'/' + year) .format( 'MMM-YYYY') %> </p>
         </div>
         <ul class="app-breadcrumb breadcrumb">
-          <li class="breadcrumb-item">
-            <i class="fa fa-home fa-lg"></i>
-          </li>
-        </ul>
+            <li class="breadcrumb-item">
+              <i class="fa fa-home fa-lg"></i>
+            </li>
+            <li class="breadcrumb-item">Team Goals </li>
+            <li class="breadcrumb-item"><a href="/reports/mrr/<%= month %>/<%= year %>/teams">MRR</a></li>
+            <li class="breadcrumb-item active">
+              <a href="#"><%= projects[0].cft.name %></a>
+            </li>
+          </ul>
       </div>
       <div class="row">
           <div class="col">

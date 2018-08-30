@@ -7,10 +7,14 @@
           <p>All teams Activated MRR for  <%= moment(month + '/' + 1 +'/' + year) .format( 'MMM-YYYY') %></p>
         </div>
         <ul class="app-breadcrumb breadcrumb">
-          <li class="breadcrumb-item">
-            <i class="fa fa-home fa-lg"></i>
-          </li>
-        </ul>
+            <li class="breadcrumb-item">
+              <i class="fa fa-home fa-lg"></i>
+            </li>
+            <li class="breadcrumb-item">Team Goals </li>
+            <li class="breadcrumb-item active">
+              <a href="#">MRR</a>
+            </li>
+          </ul>
       </div>
       <% for(var i = 0; i < teamMrr.length; i++) { %>
         <% if ( i === 0 || i === 3) { %>
