@@ -55,11 +55,7 @@ function month_id (firstDay, lastDay, id) {
     ]
   })
 }
-function non_associated_total () {
-  var date = new Date();
-  var firstDay = new Date(date.getFullYear(), date.getMonth(), 0);
-  var lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-  var month = date.getMonth()
+function non_associated_total (firstDay, lastDay) {
   return db.lbs.sum('total_mrr',{
     where: {
       project_id: null,

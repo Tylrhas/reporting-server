@@ -151,7 +151,7 @@ module.exports = function (app, passport) {
 
         var mrr = teamMrr.month(firstDay, lastDay)
         var teams = cfts.getall()
-        var non_assigned_mrr = teamMrr.non_associated_total()
+        var non_assigned_mrr = teamMrr.non_associated_total(firstDay, lastDay)
 
 
         Promise.all([mrr, teams, non_assigned_mrr]).then(results => {
