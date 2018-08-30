@@ -3,67 +3,36 @@
     <div class="tile">
       <h2 class="tile-header center">This Month</h2>
       <div class="row row_title">
-        <div class="col-md-8">
-            <h4 class="center">Overview</h4>
-        </div>
-        <div class="col-md-4">
-            <h4 class="center">Detail</h4>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-md-8 row">
-        <div class="col-md-4">
-          <div class="child_tile">
-            <h4 class="center">
-              Backlog MRR
-            </h4>
-            <p class="center">$
-              <%= backlog_mrr %>
-            </p>
-          </div>
-        </div>
-
-        <div class="col-md-4">
-          <div class="child_tile">
-            <h4 class="center">
-              Activated MRR
-            </h4>
-            <p class="center">$
-              <%= activatedMRR %>
-            </p>
-          </div>
-        </div>
-
-        <div class="col-md-4">
-          <div class="child_tile">
-            <h4 class="center">Total MRR</h4>
-            <p class="center">
-              <%= total_mrr %>
-            </p>
-          </div>
-        </div>
-        </div>
-        <div class="col-md-4 row">
-        <div class="col-md-6">
-          <a href="/reports/mrr/<%= month %>/<%= year %>/teams">
-          <div class="child_tile">
-            <h4 class="center">PS MRR</h4>
-            <p class="center">
-              <%= ps_MRR %>
-            </p>
-          </div>
-        </a>
-        </div>
-
-        <div class="col-md-6">
-          <div class="child_tile">
-            <h4 class="center">DA MRR</h4>
-            <p class="center">
-              <%= da_mrr %>
-            </p>
-          </div>
-        </div>
-      </div>
+        <table class="table center">
+          <thead>
+            <tr>
+              <th>Backlog</th>
+              <th>Activated</th>
+              <th>Total</th>
+              <th>PS Activated</th>
+              <th>DA Activated</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>$
+                <%= backlog_mrr %>
+              </td>
+              <td>$
+                <%= activatedMRR %>
+              </td>
+              <td>$
+                <%= total_mrr %>
+              </td>
+              
+                <td><a href=" /reports/mrr/<%= month %>/<%= year %>/teams">$<%= ps_MRR %></a>
+                </td>
+              <td>$
+                <%= da_mrr %>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
