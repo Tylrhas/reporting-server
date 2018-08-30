@@ -118,3 +118,34 @@ button.multiselect {
 .multiselect-container>li>a>label.checkbox {
     white-space:nowrap;
 }
+
+.tile-header {
+    margin-bottom: 1em;
+    padding: .75em;
+    border-bottom: 2px solid #000;
+}
+
+/* .child_tile {
+    background-color:#0d2240;
+    padding: 1em;
+    margin: 1em;
+    border-radius: 3px;
+    color: #fefefe;
+} */
+.tile {
+    background-color: #fefefe;
+}
+body {
+    text-transform: uppercase;
+}
+/* .row_title {
+    margin-bottom: 1.5em
+} */
+.row_title div h4 {
+    padding-bottom: 1em;
+    border-bottom: 2px solid #0d2240;
+    margin-bottom: 1em;
+}
+.border-right {
+    border-right: solid #0d2240 1px !important;
+}

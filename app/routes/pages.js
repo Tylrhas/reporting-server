@@ -10,9 +10,10 @@ module.exports = function (app, passport) {
     app.get('/', checkAuthentication, function (req, res) {
         // get todays month
         var date = new Date();
-        var firstDay = new Date(date.getFullYear(), date.getMonth() , 0);
-        var lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
         var month = date.getMonth()
+        var year = date.getFullYear()
+        var firstDay = new Date(year, month , 0);
+        var lastDay = new Date(year, month + 1, 0);
         firstDay.setHours(23,59,59,999);
         lastDay.setHours(23,59,59,999);
 
@@ -47,18 +48,6 @@ module.exports = function (app, passport) {
             }
           })
 
-          var sem_mrr = db.lbs.sum('total_mrr',{
-            where: {
-            total_mrr: {
-                [Op.not]: null
-              },
-              actual_go_live: {
-                [Op.between]: [firstDay, lastDay]
-              },
-              project_type: "SEM Only"
-              }
-          })
-
           var da_mrr = db.lbs.sum('total_mrr',{
             where: {
             total_mrr: {
@@ -67,19 +56,22 @@ module.exports = function (app, passport) {
               actual_go_live: {
                 [Op.between]: [firstDay, lastDay]
               },
-              project_type: ["DA Rep & Social", "Digital Advertising" ]
+              project_type: ["DA Rep & Social", "SEM Only", "Digital Advertising" ]
               }
           })
 
-        Promise.all([backlogMonthlyMRR, activatedMonthlyMRR, ps_MRR, sem_mrr, da_mrr]).then(function (values) {
+        Promise.all([backlogMonthlyMRR, activatedMonthlyMRR, ps_MRR, da_mrr]).then(function (values) {
             // calculate the estimated go-live MRR for august
             total_mrr = values[0] + values[1]
 
-            res.render('pages/index', { user: req.user, slug: 'home', total_mrr: total_mrr.toLocaleString() , backlog_mrr: values[0].toLocaleString(), activatedMRR: values[1].toLocaleString(), ps_MRR: values[2].toLocaleString() , sem_mrr: values[3].toLocaleString() , da_mrr: values[4].toLocaleString() ,  date: date, moment:moment  })
+            res.render('pages/index', { user: req.user, slug: 'home', total_mrr: total_mrr.toLocaleString() , backlog_mrr: values[0].toLocaleString(), activatedMRR: values[1].toLocaleString(), ps_MRR: values[2].toLocaleString(), da_mrr: values[3].toLocaleString() , year: year, month: month +1,  date: date, moment:moment  })
         })
         // res.render('pages/index', { user: req.user, slug: 'home', active_projects: 1 })
     })
     app.get('/reports/active-projects', checkAuthentication, function (req, res) {
+        var date = new Date();
+        var month = date.getMonth()
+        var year = date.getFullYear()
         var projectType = ['Add Location', 'New', 'Migration', 'Transfer', 'Enh - General Enhancement', 'Enh - Branded Name Change', 'Internal Project', 'Corporate Only', 'Redesign']
         var package = ['Essential', 'Elite', 'Add - Existing Design', 'Expanded', 'Proven Path', 'New Package (combination)', 'Streamlined (retired)']
         let cft = db.cft.findAll({
@@ -142,83 +134,27 @@ module.exports = function (app, passport) {
                     }
                 }
                 // send over the projects lp_space_id to create links on page and moment to change the date 
-                res.render('pages/active_projects', { user: req.user, projects: results[1], cfts: results[0], projectType: projectType, package: package, lp_space_id: process.env.LPWorkspaceId, moment: moment, slug: 'active-projects' });
+                res.render('pages/active_projects', { user: req.user, projects: results[1], cfts: results[0], projectType: projectType, package: package, lp_space_id: process.env.LPWorkspaceId, moment: moment, slug: 'active-projects', month: month, year: year});
             })
     })
-    app.get('/reports/activations/month/:month/:year', checkAuthentication, function (req, res) {
-        //  get the first and last day of the month
-        let firstMonth = parseInt(req.params.month) - 1
-        let lastMonth = parseInt(req.params.month)
-        var first = new Date(req.params.year, firstMonth, 1);
-        var last = new Date(req.params.year, lastMonth, 0);
-        // get all locations that have been launched in the month and year
-        db.lbs.findAll({
-            attributes: ['location_name', 'total_mrr', 'gross_ps', 'net_ps', 'total_ps_discount', 'gross_cs', 'net_cs', 'total_cs_discount'],
-            include: [{
-                attributes: ['date_done'],
-                model: db.treeitem,
-                where: {
-                    'date_done': {
-                        between: [first, last]
-                    },
-                }
-            }]
-        }).then(results => {
-            res.send(results)
-        })
-    })
-    app.get('/reports/activations/quarter/:quarter/:year', checkAuthentication, function (req, res) {
-        //  get the first and last day of the month
-        let quarter = parseInt(req.params.quarter)
-        var year = req.params.year
-        var firstMonth = null
-        var lastMonth = null
-        switch (quarter) {
-            case 1:
-                firstMonth = 0
-                lastMonth = 3
-                break;
-            case 2:
-                firstMonth = 3
-                lastMonth = 6
-                break;
-            case 3:
-                firstMonth = 6
-                lastMonth = 9
-                break;
-            case 4:
-                firstMonth = 9
-                lastMonth = 12
-                break;
-            default:
-                firstMonth = null
-                lastMonth = null
-        }
-        var first = new Date(year, firstMonth, 1);
-        var last = new Date(year, lastMonth, 0);
-        // get all locations that have been launched in the month and year
-        db.lbs.findAll({
-            attributes: ['location_name', 'total_mrr', 'gross_ps', 'net_ps', 'total_ps_discount', 'gross_cs', 'net_cs', 'total_cs_discount'],
-            include: [{
-                attributes: ['date_done'],
-                model: db.treeitem,
-                where: {
-                    'date_done': {
-                        between: [first, last]
-                    },
-                }
-            }]
-        }).then(results => {
-            res.send(results)
-        })
-    })
-    app.get('/reports/teams/mrr', checkAuthentication, function (req, res) {
+    app.get('/reports/mrr/:month/:year/teams', checkAuthentication, function (req, res) {
         // get all LBS items launched this month and match to project and CFT and sum the totals for each team
-        var current_month_mrr = teamMrr.current_month()
+
+        var month = parseInt(req.params.month)
+        var year = parseInt(req.params.year)
+
+        var firstDay = new Date(year, month -1 , 0);
+        var lastDay = new Date(year, month, 0);
+
+        firstDay.setHours(23,59,59,999);
+        lastDay.setHours(23,59,59,999);
+
+        var mrr = teamMrr.month(firstDay, lastDay)
         var teams = cfts.getall()
         var non_assigned_mrr = teamMrr.non_associated_total()
 
-        Promise.all([current_month_mrr, teams, non_assigned_mrr]).then(results => {
+
+        Promise.all([mrr, teams, non_assigned_mrr]).then(results => {
             // set up an object with all teams and associated MRR
             var teamMrr = {}
             for (i = 0; i < results[1].length; i++) {
@@ -244,22 +180,33 @@ module.exports = function (app, passport) {
             
             teamMrr[0][2] = teamMrr[0][2] + results[2]
 
-            res.render('pages/team_mrr', { user: req.user, teamMrr: teamMrr, slug: 'mrr' });
+            res.render('pages/team_mrr', { user: req.user, teamMrr: teamMrr, month: month, year: year, slug: 'mrr', moment: moment });
         })
     })
-    app.get('/reports/teams/mrr/:teamid', checkAuthentication, function (req, res) {
-        teamid = parseInt(req.params.teamid)
-        if (teamid === 0) {
-           var no_team = teamMrr.non_associated()
+    app.get('/reports/mrr/:month/:year/teams/:teamid', checkAuthentication, function (req, res) {
+        id = parseInt(req.params.teamid)
+        var month = parseInt(req.params.month)
+        var year = parseInt(req.params.year)
+
+        var firstDay = new Date(year, month -1 , 0);
+        var lastDay = new Date(year, month, 0);
+
+        firstDay.setHours(23,59,59,999);
+        lastDay.setHours(23,59,59,999);
+        
+        if (id === 0) {
+           var no_team = teamMrr.non_associated_range(firstDay, lastDay)
+
            no_team.then(results => {
-
-
-            res.render('pages/no_team_mrr_detail', { user: req.user, results: results, slug: 'mrr', moment: moment });
+            res.render('pages/no_team_mrr_detail', { user: req.user, results: results, slug: 'mrr', moment: moment, month: month, year :year });
            })
         } else {
-           var no_team = teamMrr.non_associated()
-           no_team.then(results => {
-            res.render('pages/team_mrr_detail', { user: req.user, teamMrr: teamMrr, slug: 'mrr', moment: moment });
+           var lbs = teamMrr.month_id(firstDay, lastDay, id)
+           lbs.then(results => {
+               for (i = 0; i < results.length; i++) {
+                   results[i].total_mrr = results[i].lbs.reduce((prev, cur) => prev + cur.total_mrr, 0)
+               }
+            res.render('pages/team_mrr_detail', { user: req.user, projects: results, lp_space_id: process.env.LPWorkspaceId, slug: 'mrr', moment: moment, month: month, year :year  });
            })
         }
     })

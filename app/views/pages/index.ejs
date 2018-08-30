@@ -12,45 +12,6 @@
           </li>
         </ul>
       </div>
-      <div class="row">
-        <div class="col-md-4">
-          <div class="tile">
-            <h4 class="center">Total MRR</h4>
-            <p class="center"><%= total_mrr %></p>   
-          </div>
-        </div>
-        <div class="col-md-4">
-            <div class="tile">
-              <h4 class="center"><%= moment(date).format( 'MMMM') %> Backlog MRR</h4>
-              <p class="center">$ <%= backlog_mrr %></p>
-            </div>
-          </div>
-          <div class="col-md-4">
-              <div class="tile">
-                <h4 class="center"><%= moment(date).format( 'MMMM') %> Activated  MRR</h4>
-                <p class="center">$ <%= activatedMRR %></p>
-              </div>
-            </div>
-      </div>
-      <div class="row">
-          <div class="col-md-4">
-            <div class="tile">
-              <h4 class="center">PS MRR</h4>
-              <p class="center"><%= ps_MRR %></p>   
-            </div>
-          </div>
-          <div class="col-md-4">
-              <div class="tile">
-                <h4 class="center">SEM</h4>
-                <p class="center"><%= sem_mrr %></p>
-              </div>
-            </div>
-            <div class="col-md-4">
-                <div class="tile">
-                  <h4 class="center">DA</h4>
-                  <p class="center"><%= da_mrr %></p>
-                </div>
-              </div>
-        </div>
+      <% include ../partials/month_dashboard.ejs %>
     </main>
     <% include ../partials/footer.ejs %>

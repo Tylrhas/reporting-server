@@ -4,7 +4,7 @@
       <div class="app-title">
         <div>
           <h1>Team Based MRR</h1>
-          <p>All teams Activated MRR</p>
+          <p>All teams Activated MRR for  <%= moment(month + '/' + 1 +'/' + year) .format( 'MMM-YYYY') %></p>
         </div>
         <ul class="app-breadcrumb breadcrumb">
           <li class="breadcrumb-item">
@@ -18,7 +18,7 @@
           <% } %>
           <div class="col-md-4">
               <div class="tile">
-                <a href="/reports/teams/mrr/<%= teamMrr[i][0]  %>">
+                <a href="/reports/mrr/<%= month %>/<%= year %>/teams/<%= teamMrr[i][0]  %>">
                 <h4 class="center"><%= teamMrr[i][1]  %></h4>
                 <p class="center">$ <%= teamMrr[i][2] %></p> 
               </a>
