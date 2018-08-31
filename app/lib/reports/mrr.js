@@ -29,7 +29,7 @@ module.exports = {
 async function quarter_activated_total(quarter, year) {
   db.lbs.sum(total_mrr, {
     where: {
-
+      actual_go_live: 
     }
   })
   
