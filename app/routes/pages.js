@@ -180,7 +180,7 @@ module.exports = function (app, passport) {
             
             teamMrr[0][2] = teamMrr[0][2] + results[2]
 
-            res.render('pages/team_mrr', { user: req.user, teamMrr: teamMrr, month: month, year: year, slug: 'mrr', moment: moment });
+            res.render('pages/team_mrr', { user: req.user, teamMrr: teamMrr, month: month, year: year, lastDay: lastDay, slug: 'mrr', moment: moment });
         })
     })
     app.get('/reports/mrr/:month/:year/teams/:teamid', checkAuthentication, function (req, res) {
@@ -198,7 +198,7 @@ module.exports = function (app, passport) {
            var no_team = teamMrr.non_associated_range(firstDay, lastDay)
 
            no_team.then(results => {
-            res.render('pages/no_team_mrr_detail', { user: req.user, results: results, slug: 'mrr', moment: moment, month: month, year :year });
+            res.render('pages/no_team_mrr_detail', { user: req.user, results: results, slug: 'mrr', moment: moment, month: month, year :year, lastDay: lastDay });
            })
         } else {
            var lbs = teamMrr.month_id(firstDay, lastDay, id)
@@ -206,7 +206,7 @@ module.exports = function (app, passport) {
                for (i = 0; i < results.length; i++) {
                    results[i].total_mrr = results[i].lbs.reduce((prev, cur) => prev + cur.total_mrr, 0)
                }
-            res.render('pages/team_mrr_detail', { user: req.user, projects: results, lp_space_id: process.env.LPWorkspaceId, slug: 'mrr', moment: moment, month: month, year :year  });
+            res.render('pages/team_mrr_detail', { user: req.user, projects: results, lp_space_id: process.env.LPWorkspaceId, slug: 'mrr', moment: moment, month: month, year :year, lastDay: lastDay });
            })
         }
     })
