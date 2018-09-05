@@ -3,7 +3,7 @@
     <main class="app-content">
       <div class="app-title">
         <div>
-          <h1><%= projects[0].cft.name %></h1>
+          <h1><%= cftName %></h1>
           <p>Activated MRR for  <%= moment(lastDay) .format( 'MMM-YYYY') %> </p>
         </div>
         <ul class="app-breadcrumb breadcrumb">
@@ -13,7 +13,7 @@
             <li class="breadcrumb-item">Team Goals </li>
             <li class="breadcrumb-item"><a href="/reports/mrr/<%= month %>/<%= year %>/teams">MRR</a></li>
             <li class="breadcrumb-item active">
-              <a href="#"><%= projects[0].cft.name %></a>
+              <a href="#"><%= cftName %></a>
             </li>
           </ul>
       </div>

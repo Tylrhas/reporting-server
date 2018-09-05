@@ -48,6 +48,8 @@ var authRoute = require('./app/routes/auth.js')(app,passport);
 var adminRoute = require('./app/routes/admin.js')(app,passport);
 var apiRoute = require('./app/routes/api.js')(app,passport);
 var pages = require('./app/routes/pages.js')(app,passport);
+var mrr = require('./app/routes/reports/mrr')(app,passport);
+var projects = require('./app/routes/reports/project')(app,passport);
 var webhooks = require('./app/routes/lp_webhooks.js')(app,passport);
 
 

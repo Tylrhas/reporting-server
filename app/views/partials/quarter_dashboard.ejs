@@ -1,0 +1,42 @@
+<div class="row">
+  <div class="col-lg-12">
+    <div class="tile">
+      <h2 class="tile-header center">This Quarter</h2>
+      <div class="row row_title">
+        <table class="table center">
+          <thead>
+            <tr>
+              <th>Backlog</th>
+              <th>Activated</th>
+              <th class="border-right">Total</th>
+              <th>PS Activated</th>
+              <th>DA Activated</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>$
+                <%= quarter.backlog_mrr %>
+              </td>
+              <td>$
+                <%= quarter.activatedMRR %>
+              </td>
+              <td class="border-right">$
+                <%= quarter.total_mrr %>
+              </td>
+              
+                <td>
+                  <!-- <a href=" /reports/mrr/<%= date.month %>/<%= date.year %>/teams"> -->
+                    $<%= quarter.ps_MRR %>
+                  <!-- </a> -->
+                </td>
+              <td>$
+                <%= quarter.da_mrr %>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

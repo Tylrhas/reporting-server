@@ -1,55 +1,58 @@
 var db = require('../../models')
 var Sequelize = require("sequelize")
 const Op = Sequelize.Op
-var quater_month_map = {
-  q1: {
-    first: '01/01',
-    last: '03/31'
-  },
-  q2: {
-    first: '04/01',
-    last: '06/30'
-  },
-  q3 : {
-    first: '07/01',
-    last: '10/31'
-  },
-  q4 : {
-    first: '01/01',
-    last: '03/31'
-  }
-}
+
+
 module.exports = {
-  quarter_activated_total,
-  quarter_activated_ps_total,
-  quarter_activated_da_total
-  
+  activated_total,
+  activated_ps_total,
+  activated_da_total, 
+  backlog_total
 }
 
-async function quarter_activated_total(quarter, year) {
-  db.lbs.sum(total_mrr, {
+
+async function activated_total(firstDay, lastDay) {
+  return db.lbs.sum('total_mrr', {
     where: {
-      actual_go_live: 
+      actual_go_live: {
+        [Op.between]: [firstDay, lastDay]
+      }
+    }
+  })
+}
+async function activated_ps_total(firstDay, lastDay) {
+  return db.lbs.sum('total_mrr', {
+    where: {
+      actual_go_live: {
+        [Op.between]: [firstDay, lastDay]
+      },
+      project_type: {
+          [Op.notIn]: ["DA Rep & Social", "SEM Only", "Digital Advertising"]
+      }
+
     }
   })
   
 }
-async function quarter_activated_ps_total(quarter, year) {
-  db.lbs.sum(total_mrr, {
+async function activated_da_total(firstDay, lastDay) {
+  return db.lbs.sum('total_mrr', {
     where: {
-
+      actual_go_live: {
+        [Op.between]: [firstDay, lastDay]
+      },
+      project_type: ["DA Rep & Social", "SEM Only", "Digital Advertising"]
     }
   })
   
 }
-async function quarter_activated_da_total(quarter, year) {
-  db.lbs.sum(total_mrr, {
-    where: {
 
+async function backlog_total (firstDay, lastDay) {
+  return db.lbs.sum('total_mrr', {
+    where: {
+        estimated_go_live: {
+            [Op.between]: [firstDay, lastDay]
+        },
+        actual_go_live: null
     }
-  })
-  
-}
-async function year(year) {
-  
+})
 }

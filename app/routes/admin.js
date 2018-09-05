@@ -8,17 +8,21 @@ module.exports = function(app, passport) {
 
 
    app.get('/admin/users',isAdmin, function (req, res) {
-    var date = new Date();
-    var month = date.getMonth()
-    var year = date.getFullYear()
+    var d = new Date();
+    var date = {
+        month: d.getMonth() +1,
+        year: d.getFullYear()
+    }
     models.user.findAll().then(results => {
-        res.render('pages/users', { user: req.user, users: results, slug: "users", moment:moment, month: month +1, year: year });
+        res.render('pages/users', { user: req.user, users: results, slug: "users", moment:moment, date: date });
     })
    })
    app.get('/admin/update',isAdmin, function (req, res) {
-    var date = new Date();
-    var month = date.getMonth()
-    var year = date.getFullYear()
+    var d = new Date();
+    var date = {
+        month: d.getMonth() +1,
+        year: d.getFullYear()
+    }
     models.job.findAll().then(results => {
         // Transform the data
         let jobs = {}
@@ -29,7 +33,7 @@ module.exports = function(app, passport) {
                 status: results[i].status
             }
         }
-        res.render('pages/csv_upload', {slug: "update", user: req.user, jobs: jobs, moment:moment, month: month +1, year: year})
+        res.render('pages/csv_upload', {slug: "update", user: req.user, jobs: jobs, moment:moment, date: date})
     })
    })
 

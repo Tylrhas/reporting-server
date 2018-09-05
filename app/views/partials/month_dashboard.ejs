@@ -14,23 +14,26 @@
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>$
-                <%= backlog_mrr %>
-              </td>
-              <td>$
-                <%= activatedMRR %>
-              </td>
-              <td class="border-right">$
-                <%= total_mrr %>
-              </td>
-              
-                <td><a href=" /reports/mrr/<%= month %>/<%= year %>/teams">$<%= ps_MRR %></a>
-                </td>
-              <td>$
-                <%= da_mrr %>
-              </td>
-            </tr>
+              <tr>
+                  <td>$
+                    <%= month.backlog_mrr %>
+                  </td>
+                  <td>$
+                    <%= month.activatedMRR %>
+                  </td>
+                  <td class="border-right">$
+                    <%= month.total_mrr %>
+                  </td>
+                  
+                    <td>
+                      <!-- <a href=" /reports/mrr/<%= date.month %>/<%= date.year %>/teams"> -->
+                        $<%= month.ps_MRR %>
+                      <!-- </a> -->
+                    </td>
+                  <td>$
+                    <%= month.da_mrr %>
+                  </td>
+                </tr>
           </tbody>
         </table>
       </div>
