@@ -12,13 +12,14 @@ module.exports = function (app, passport) {
         // get todays month
         var month_detail = mrr.month_detail()
         var quarter_detail = mrr.quarter_detail()
+        var year_detail = mrr.year_detail()
         var d = new Date();
         var date = {
             month: d.getMonth() +1,
             year: d.getFullYear()
         }
 
-        Promise.all([month_detail, quarter_detail]).then(function (values) {
+        Promise.all([month_detail, quarter_detail, year_detail]).then(function (values) {
 
             let quarter = {
                 total_mrr: values[1][0] + values[1][3],
@@ -34,10 +35,18 @@ module.exports = function (app, passport) {
                 activatedMRR: values[0][0],
                 total_mrr: values[0][0] + values[0][3],
             }
+            let year = {
+                ps_MRR: values[2][1],
+                da_mrr: values[2][2],
+                backlog_mrr: values[2][3],
+                activatedMRR: values[2][0],
+                total_mrr: values[2][0] + values[2][3],
+            }
             month = checkValues(month)
             quarter = checkValues(quarter)
+            year = checkValues(year)
 
-            res.render('pages/index', { user: req.user, slug: 'home', date: date, moment: moment, month: month, quarter: quarter })
+            res.render('pages/index', { user: req.user, slug: 'home', date: date, moment: moment, month: month, quarter: quarter, year: year })
         })
         // res.render('pages/index', { user: req.user, slug: 'home', active_projects: 1 })
     })
@@ -57,7 +66,7 @@ function checkValues(object) {
         if (object[key] === null) {
             object[key] = 0
         }
-        object[key] = object[key].toFixed(2)
+        object[key] = object[key].toLocaleString()
     }
     return object
 }

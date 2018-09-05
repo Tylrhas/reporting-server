@@ -1,0 +1,42 @@
+<div class="row">
+    <div class="col-lg-12">
+      <div class="tile">
+        <h2 class="tile-header center">This Year</h2>
+        <div class="row row_title">
+          <table class="table center">
+            <thead>
+              <tr>
+                <th>Backlog</th>
+                <th>Activated</th>
+                <th class="border-right">Total</th>
+                <th>PS Activated</th>
+                <th>DA Activated</th>
+              </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>$
+                      <%= year.backlog_mrr %>
+                    </td>
+                    <td>$
+                      <%= year.activatedMRR %>
+                    </td>
+                    <td class="border-right">$
+                      <%= year.total_mrr %>
+                    </td>
+                    
+                      <td>
+                        <!-- <a href=" /reports/mrr/<%= date.month %>/<%= date.year %>/teams"> -->
+                          $<%= year.ps_MRR %>
+                        <!-- </a> -->
+                      </td>
+                    <td>$
+                      <%= year.da_mrr %>
+                    </td>
+                  </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
