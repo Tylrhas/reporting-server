@@ -30,11 +30,15 @@ async function month_detail (month, year) {
     var date = new Date();
     month = date.getMonth()
     year = date.getFullYear()
+    var day = date.getDate()
+    var firstDay = new Date(year, month, day-1)
+    var lastDay = new Date(year, month + 1, 0)
+  } else {
+    var firstDay = new Date(year, month, 0)
+    var lastDay = new Date(year, month + 1, 0)
   }
-  var firstDay = new Date(year, month, 0);
-  var lastDay = new Date(year, month + 1, 0);
-  firstDay.setHours(23, 59, 59, 999);
-  lastDay.setHours(23, 59, 59, 999);
+  firstDay.setHours(0, 0, 0, 0)
+  lastDay.setHours(23, 59, 59, 999)
 
   var month_activated = mrr.activated_total(firstDay, lastDay)
   var ps_month_activated = mrr.activated_ps_total(firstDay, lastDay)
@@ -49,10 +53,18 @@ async function quarter_detail (quarter, year) {
     // it is for the quarter month
     quarter = currentQuarter().quarter
     year = currentQuarter().year
-  }
-  // find the first and last day of the quarter
+    var date = new Date()
+    var day = date.getDate()
+    month = date.getMonth()
+    year = date.getFullYear()
+    var firstDay = new Date(year, month, day -1)
+  } else {
+      // find the first and last day of the quarter
   var firstDay = quater_month_map[quarter].first + '/' + year
-  var lastDay = quater_month_map[quarter].last + '/' + year
+  }
+  var lastDay = new Date(quater_month_map[quarter].last + '/' + year)
+  firstDay.setHours(0, 0, 0, 0)
+  lastDay.setHours(23, 59, 59, 999)
 
   var quarter_activated = mrr.activated_total(firstDay, lastDay)
   var ps_quater_activated = mrr.activated_ps_total(firstDay, lastDay)
