@@ -1,0 +1,52 @@
+<div class="row">
+  <div class="col-lg-12">
+    <div class="tile">
+      <h2 class="tile-header center"><%= quick_look_report.name %></h2>
+      <div class="row row_title">
+        <table class="table center border-right col-md-7">
+          <thead>
+            <tr>
+              <th>Backlog</th>
+              <th>Activated</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>$
+                <%= quick_look_report.backlog_mrr %>
+              </td>
+              <td>$
+                <%= quick_look_report.activatedMRR %>
+              </td>
+              <td>$
+                <%= quick_look_report.total_mrr %>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <table class="table center col-md-5">
+          <thead>
+            <tr>
+              <th>PS Activated</th>
+              <th>DA Activated</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <!-- <a href=" /reports/mrr/<%= date.month %>/<%= date.year %>/teams"> -->
+                $
+                <%= quick_look_report.ps_MRR %>
+                <!-- </a> -->
+              </td>
+              <td>$
+                <%= quick_look_report.da_mrr %>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

@@ -124,6 +124,6 @@ button.multiselect {
 body {
     text-transform: uppercase;
 }
-table .border-right {
+table.border-right {
 border-right: 2px solid #dee2e6 !important;
 }

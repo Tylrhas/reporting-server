@@ -21,21 +21,24 @@ module.exports = function (app, passport) {
 
         Promise.all([month_detail, quarter_detail, year_detail]).then(function (values) {
 
-            let quarter = {
-                total_mrr: values[1][0] + values[1][3],
-                ps_MRR: values[1][1],
-                da_mrr: values[1][2],
-                backlog_mrr: values[1][3],
-                activatedMRR: values[1][0]
-            }
             let month = {
+                name: 'This Month',
                 ps_MRR: values[0][1],
                 da_mrr: values[0][2],
                 backlog_mrr: values[0][3],
                 activatedMRR: values[0][0],
                 total_mrr: values[0][0] + values[0][3],
             }
+            let quarter = {
+                name: 'This Quarter',
+                total_mrr: values[1][0] + values[1][3],
+                ps_MRR: values[1][1],
+                da_mrr: values[1][2],
+                backlog_mrr: values[1][3],
+                activatedMRR: values[1][0]
+            }
             let year = {
+                name: 'This Year',
                 ps_MRR: values[2][1],
                 da_mrr: values[2][2],
                 backlog_mrr: values[2][3],
@@ -45,8 +48,9 @@ module.exports = function (app, passport) {
             month = checkValues(month)
             quarter = checkValues(quarter)
             year = checkValues(year)
+            let quick_look_reports = [ month, quarter, year]
 
-            res.render('pages/index', { user: req.user, slug: 'home', date: date, moment: moment, month: month, quarter: quarter, year: year })
+            res.render('pages/index', { user: req.user, slug: 'home', date: date, moment: moment, quick_look_reports, quick_look_reports })
         })
         // res.render('pages/index', { user: req.user, slug: 'home', active_projects: 1 })
     })
