@@ -3,8 +3,8 @@ module.exports = {
   non_associated,
   non_associated_total,
   month_id,
-  non_associated_range
-
+  non_associated_range,
+  archive_years
 }
 var db = require('../../models')
 var Sequelize = require("sequelize")
@@ -107,4 +107,17 @@ function non_associated_range (firstDay, lastDay) {
       }
     }
   })
+}
+
+function archive_years () {
+  let d = new Date()
+  // get all years from 2018 to current year
+  let start_year = 2018
+  // get current year
+  let ending_year = d.getFullYear()
+  let years = []
+  for (i = start_year; i <= ending_year; i++) {
+    years.push(i)
+  }
+  return years
 }

@@ -127,3 +127,37 @@ body {
 table.border-right {
 border-right: 2px solid #dee2e6 !important;
 }
+
+/* Child  Sub-Nav Styles */
+.treeview .dropdown-menu, .treeview .dropright:hover {
+    background: #0d1214;
+    /* background: #1d2123; */
+}
+.treeview .dropdown-menu .treeview-item:hover {
+    background: #1d2123;
+}
+.treeview.is-expanded, .app-sidebar {
+    overflow: visible;
+}
+ul.treeview-menu.has-children {
+    overflow: visible !important;
+}
+.treeview-menu .dropright {
+    position: relative;
+}
+.treeview-menu .dropright:hover {
+    position: relative;
+}
+.treeview-menu .dropright .dropdown-menu {
+    top:0;
+	left:100%
+}
+.treeview-menu .dropright:hover .dropdown-menu  {
+    display: block;
+}
+.treeview .treeview-menu {
+    display: none;
+}
+.treeview.is-expanded .treeview-menu {
+    display: block;
+}

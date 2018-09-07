@@ -1,10 +1,13 @@
+var express = require('express')
+var app = express()
+
 var Sequelize = require("sequelize")
 const Op = Sequelize.Op
 //Models
-var db = require("../../models")
+var db = require("../../../models")
 var moment = require('moment');
-var teamMrr = require('../../lib/reports/team_mrr')
-var cfts = require('../../lib/reports/cft')
+var teamMrr = require('../../../lib/reports/team_mrr')
+var cfts = require('../../../lib/reports/cft')
 
 module.exports = function (app, passport) {
     app.get('/reports/active-projects', checkAuthentication, function (req, res) {

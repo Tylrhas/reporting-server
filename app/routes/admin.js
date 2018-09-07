@@ -1,7 +1,7 @@
 var adminController = require('../controllers/admincontroller.js');
 var Sequelize = require("sequelize");
 var sequelize = new Sequelize(process.env.DATABASE_URL, {dialectOptions: {ssl: true}});
-var models = require('../models')
+var models = require('../models/index.js')
 var moment = require('moment');
 
 module.exports = function(app, passport) {

@@ -1,0 +1,18 @@
+<% include ../../partials/header.ejs %>
+  <% include ../../partials/nav.ejs %>
+    <main class="app-content">
+      <div class="app-title">
+        <div>
+          <h1>Professional Services Reporting Dashboard</h1>
+        </div>
+        <ul class="app-breadcrumb breadcrumb">
+          <li class="breadcrumb-item">
+            <i class="fa fa-home fa-lg"></i>
+          </li>
+        </ul>
+      </div>
+      <% for (i = 0; i < quick_look_reports.length; i++ ) { %>
+        <%- include('../../partials/quick_look_dashboard.ejs', {quick_look_report: quick_look_reports[i]}); %>
+      <%} %>
+    </main>
+    <% include ../../partials/footer.ejs %>
