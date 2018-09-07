@@ -2,7 +2,7 @@
   <div class="col-lg-12">
     <div class="tile">
       <h2 class="tile-header center"><%= quick_look_report.name %></h2>
-      <h4>Target: Number goes here</h4>
+      <h4 class="center">Target: $ <%= quick_look_report.target %></h4>
       <div class="row row_title">
         <table class="table center border-right col-md-7">
           <thead>
@@ -10,7 +10,7 @@
               <th>Backlog</th>
               <th>Activated</th>
               <th>Total</th>
-              <th>Varience</th>
+              <th>Variance</th>
             </tr>
           </thead>
           <tbody>
@@ -22,10 +22,10 @@
                 <%= quick_look_report.activatedMRR %>
               </td>
               <td>$
-                <%= quick_look_report.total_mrr %>
+                  <%= quick_look_report.total_mrr %>
               </td>
-              <td>$
-                  - $1000
+              <td>
+                  $<%= quick_look_report.variance %>
                 </td>
             </tr>
           </tbody>
@@ -40,7 +40,7 @@
           <tbody>
             <tr>
               <td>
-                <!-- <a href=" /reports/mrr/<%= date.month %>/<%= date.year %>/teams"> -->
+                <!-- <a href="ps/reports/mrr/teams/<%= link_data.date.year %>/<%= link_data.date.year %>"> -->
                 $
                 <%= quick_look_report.ps_MRR %>
                 <!-- </a> -->

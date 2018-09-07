@@ -41,17 +41,26 @@ module.exports = function (app, passport, express) {
         var mrr = teamMrr.month(firstDay, lastDay)
         var teams = cfts.getall()
         var non_assigned_mrr = teamMrr.non_associated_total(firstDay, lastDay)
+        var cft_mrr_goals = teamMrr.month_goals(month, year)
+
+        Promise.all([mrr, teams, non_assigned_mrr, cft_mrr_goals]).then(results => {
 
 
-        Promise.all([mrr, teams, non_assigned_mrr]).then(results => {
             // set up an object with all teams and associated MRR
             var teamMrr = {}
             for (i = 0; i < results[1].length; i++) {
                 let key = results[1][i].id
                 teamMrr[key] = {
                     name: results[1][i].name,
-                    mrr: 0
+                    mrr: 0,
+                    target:0
                 }
+            }
+            // map targets to the correct team
+            for (i3 = 0; i3 < results[3].length; i3++) {
+                var team = results[3][i3]
+                var team_id = team.cft_id
+                teamMrr[team_id].target = team.target  
             }
 
             for (i2 = 0; i2 < results[0].length; i2++) {
@@ -63,8 +72,9 @@ module.exports = function (app, passport, express) {
                 }
             }
 
+
             teamMrr = Object.keys(teamMrr).map(function (key) {
-                return [key, teamMrr[key].name, teamMrr[key].mrr]
+                return [key, teamMrr[key].name, teamMrr[key].mrr, teamMrr[key].target]
             })
 
             teamMrr[0][2] = teamMrr[0][2] + results[2]

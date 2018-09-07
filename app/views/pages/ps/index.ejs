@@ -12,7 +12,7 @@
         </ul>
       </div>
       <% for (i = 0; i < quick_look_reports.length; i++ ) { %>
-        <%- include('../../partials/quick_look_dashboard.ejs', {quick_look_report: quick_look_reports[i]}); %>
+        <%- include('./quick_look_dashboard.ejs', {quick_look_report: quick_look_reports[i]}); %>
       <%} %>
     </main>
     <% include ../../partials/footer.ejs %>

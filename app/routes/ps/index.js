@@ -14,8 +14,12 @@ module.exports = function (app, passport, express) {
     var year_detail = mrr.year_detail()
     let link_data = page_data()
 
+    // mrr targets
+    let month_targets = mrr.month_target(link_data.date.month, link_data.date.year)
+    let quarter_targets = mrr.quarter_target(link_data.quarter, link_data.date.year)
+    let year_targets = mrr.year_target(link_data.date.year)
 
-    Promise.all([month_detail, quarter_detail, year_detail]).then(function (values) {
+    Promise.all([month_detail, quarter_detail, year_detail, month_targets, quarter_targets, year_targets]).then(function (values) {
 
       let month = {
         name: 'This Month',
@@ -24,6 +28,8 @@ module.exports = function (app, passport, express) {
         backlog_mrr: values[0][3],
         activatedMRR: values[0][0],
         total_mrr: values[0][0] + values[0][3],
+        target: values[3],
+        variance: (values[0][0] + values[0][3]) - values[3]
       }
       let quarter = {
         name: 'This Quarter',
@@ -31,7 +37,9 @@ module.exports = function (app, passport, express) {
         ps_MRR: values[1][1],
         da_mrr: values[1][2],
         backlog_mrr: values[1][3],
-        activatedMRR: values[1][0]
+        activatedMRR: values[1][0],
+        target: values[4],
+        variance: (values[1][0] + values[1][3]) - values[4]
       }
       let year = {
         name: 'This Year',
@@ -40,6 +48,8 @@ module.exports = function (app, passport, express) {
         backlog_mrr: values[2][3],
         activatedMRR: values[2][0],
         total_mrr: values[2][0] + values[2][3],
+        target: values[5],
+        variance: (values[2][0] + values[2][3]) - values[5]
       }
       month = checkValues(month)
       quarter = checkValues(quarter)

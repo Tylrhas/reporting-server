@@ -4,7 +4,8 @@ module.exports = {
   non_associated_total,
   month_id,
   non_associated_range,
-  archive_years
+  archive_years,
+  month_goals
 }
 var db = require('../../models')
 var Sequelize = require("sequelize")
@@ -26,6 +27,44 @@ function month (firstDay, lastDay) {
     ]
   })
 }
+function month_goals (month, year) {
+  if (month == null || year == null) {
+    // this is for the current month
+    return db.cft.findAll({
+      attributes: ['id'],
+      where: {
+        id: {
+          [Op.not]: 0
+        }
+      }
+    }).then(cft_ids => {
+      console.log(cft_ids)
+    })
+  } else {
+    return db.cft.findAll({
+      where: {
+        id: {
+          [Op.not]: 0
+        }
+      },
+      attributes: ['id']
+    }).then(cft_ids => {
+      let cft_ids_array = []
+      for (i = 0; i < cft_ids.length; i++) {
+        cft_ids_array.push(cft_ids[i].id)
+      }
+      return db.mrr_targets.findAll({
+        where: {
+          cft_id: {
+            [Op.in]: cft_ids_array
+          },
+          month: month,
+          year: year
+        }
+      })
+    })
+  }
+}
 function month_id (firstDay, lastDay, id) {
   return db.lp_project.findAll({
     attributes: ['id', 'cft_id'],
@@ -41,7 +80,7 @@ function month_id (firstDay, lastDay, id) {
             [Op.between]: [firstDay, lastDay]
           }
         }
-      }, 
+      },
       {
         model: db.treeitem,
         attributes: ['name'],
@@ -56,7 +95,7 @@ function month_id (firstDay, lastDay, id) {
   })
 }
 function non_associated_total (firstDay, lastDay) {
-  return db.lbs.sum('total_mrr',{
+  return db.lbs.sum('total_mrr', {
     where: {
       project_id: null,
       total_mrr: {
@@ -66,7 +105,7 @@ function non_associated_total (firstDay, lastDay) {
         [Op.between]: [firstDay, lastDay]
       },
       project_type: {
-        [Op.notIn] : ["DA Rep & Social", "SEM Only", "Digital Advertising" ]
+        [Op.notIn]: ["DA Rep & Social", "SEM Only", "Digital Advertising"]
       }
     }
   })
@@ -87,7 +126,7 @@ function non_associated () {
         [Op.between]: [firstDay, lastDay]
       },
       project_type: {
-        [Op.notIn] : ["DA Rep & Social", "SEM Only", "Digital Advertising" ]
+        [Op.notIn]: ["DA Rep & Social", "SEM Only", "Digital Advertising"]
       }
     }
   })
@@ -103,7 +142,7 @@ function non_associated_range (firstDay, lastDay) {
         [Op.between]: [firstDay, lastDay]
       },
       project_type: {
-        [Op.notIn] : ["DA Rep & Social", "SEM Only", "Digital Advertising" ]
+        [Op.notIn]: ["DA Rep & Social", "SEM Only", "Digital Advertising"]
       }
     }
   })

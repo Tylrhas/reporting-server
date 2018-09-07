@@ -1,9 +1,14 @@
 mrr = require('../lib/reports/mrr')
-
+var db = require('../models')
+var Sequelize = require("sequelize")
+const Op = Sequelize.Op
 module.exports = {
   quarter_detail,
   month_detail,
   year_detail,
+  month_target,
+  quarter_target,
+  year_target
 }
 
 var quater_month_map = {
@@ -24,7 +29,53 @@ var quater_month_map = {
     last: '12/31'
   }
 }
+var quater_month_map_targets = {
+  1: {
+    months: [1,2,3],
+  },
+  2: {
+    months: [4,5,6]
+  },
+  3: {
+    months: [7,8,9]
+  },
+  4: {
+    months: [10,11,12]
+    }
+}
+function month_target (month, year) {
+  return db.mrr_targets.findAll({
+    where: {
+      month: month,
+      year: year,
+      cft_id: null
+    }
+  }).then(results => {
+    return results[0].target
+  })
 
+}
+function quarter_target (quarter, year) {
+  quarter = quater_month_map_targets[quarter]
+  console.log(quarter.months)
+  return db.mrr_targets.sum('target',{
+    where: {
+      year: year,
+      cft_id: null,
+      month: {
+        [Op.in]: quarter.months
+      }
+    }
+  })
+}
+function year_target (year) {
+  return db.mrr_targets.sum('target',{
+    where: {
+      year: year,
+      cft_id: null
+    }
+  })
+}
 async function month_detail (month, year) {
   if (month == null || year == null) {
     // it is for the current month
