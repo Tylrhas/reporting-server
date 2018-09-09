@@ -22,7 +22,7 @@ module.exports = function (app, passport, express) {
     Promise.all([month_detail, quarter_detail, year_detail, month_targets, quarter_targets, year_targets]).then(function (values) {
 
       let month = {
-        name: 'This Month',
+        name: moment(link_data.date.month + '/1/' + link_data.date.year).format( 'MMM - YYYY'),
         ps_MRR: values[0][1],
         da_mrr: values[0][2],
         backlog_mrr: values[0][3],
@@ -32,7 +32,7 @@ module.exports = function (app, passport, express) {
         variance: (values[0][0] + values[0][3]) - values[3]
       }
       let quarter = {
-        name: 'This Quarter',
+        name: 'Q' + link_data.quarter + ' ' + link_data.date.year,
         total_mrr: values[1][0] + values[1][3],
         ps_MRR: values[1][1],
         da_mrr: values[1][2],
@@ -42,7 +42,7 @@ module.exports = function (app, passport, express) {
         variance: (values[1][0] + values[1][3]) - values[4]
       }
       let year = {
-        name: 'This Year',
+        name: link_data.date.year,
         ps_MRR: values[2][1],
         da_mrr: values[2][2],
         backlog_mrr: values[2][3],
@@ -76,7 +76,9 @@ function checkValues (object) {
     if (object[key] === null) {
       object[key] = 0
     }
-    object[key] = object[key].toLocaleString()
+    if (key !== 'name') {
+      object[key] = object[key].toLocaleString()
+    }
   }
   return object
 }
@@ -87,7 +89,7 @@ function checkVariance (total, target) {
   let variancePercent = 100 * (total / target)
   if (variancePercent > 90) {
     return 'green'
-  } else if (variancePercent < 90 && variancePercent > 80) {
+  } else if (variancePercent < 90 && variancePercent > 75) {
     return 'yellow'
   } else {
     return 'red'
