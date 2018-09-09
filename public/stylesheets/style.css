@@ -161,3 +161,12 @@ ul.treeview-menu.has-children {
 .treeview.is-expanded .treeview-menu {
     display: block;
 }
+.red {
+    color: #e94f3d;
+}
+.green {
+    color: #22B04C;
+}
+.yellow {
+    color: #FFD602;
+}

@@ -54,6 +54,9 @@ module.exports = function (app, passport, express) {
       month = checkValues(month)
       quarter = checkValues(quarter)
       year = checkValues(year)
+      month.class = checkVariance(month.total_mrr, month.target)
+      quarter.class = checkVariance(quarter.total_mrr, quarter.target)
+      year.class = checkVariance(year.total_mrr, year.target)
       let quick_look_reports = [month, quarter, year]
 
       res.render('pages/ps/index', { user: req.user, slug: 'home', link_data: link_data, moment: moment, quick_look_reports, quick_look_reports })
@@ -67,13 +70,26 @@ module.exports = function (app, passport, express) {
   var reports = require('./reports/index')(app, passport, express)
 }
 
-function checkValues(object) {
+function checkValues (object) {
   for (i = 0; i < Object.keys(object).length; i++) {
-      let key = Object.keys(object)[i]
-      if (object[key] === null) {
-          object[key] = 0
-      }
-      object[key] = object[key].toLocaleString()
+    let key = Object.keys(object)[i]
+    if (object[key] === null) {
+      object[key] = 0
+    }
+    object[key] = object[key].toLocaleString()
   }
   return object
+}
+
+function checkVariance (total, target) {
+  total = parseFloat(total.replace(/,/g , ''))
+  target = parseFloat(target.replace(/,/g , ''))
+  let variancePercent = 100 * (total / target)
+  if (variancePercent > 90) {
+    return 'green'
+  } else if (variancePercent < 90 && variancePercent > 80) {
+    return 'yellow'
+  } else {
+    return 'red'
+  }
 }
