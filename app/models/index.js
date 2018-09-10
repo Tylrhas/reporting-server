@@ -5,14 +5,15 @@ var Sequelize = require("sequelize");
 require('sequelize-hierarchy')(Sequelize);
 var sequelize = new Sequelize(process.env.DATABASE_URL, {
   pool: {
-    max: 5,
-    min: 0,
-    idle: 20000,
-    acquire: 40000,
-    evict: 20000,
+    max: process.env.DATABASE_MAX_CONNECTIONS,
+    min: process.env.DATABASE_MIN_CONNECTIONS,
+    idle: process.env.DATABASE_IDLE,
+    acquire: process.env.DATABASE_AQUIRE,
+    evict: process.env.DATABASE_EVICT,
   },
   dialectOptions: {
-    ssl: true
+    // convert the string to a boolean
+    ssl: (process.env.DATABASE_SSL =="true")
   }
 }
 );

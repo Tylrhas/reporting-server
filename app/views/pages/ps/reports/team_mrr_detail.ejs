@@ -1,0 +1,54 @@
+<% include ../../../partials/header.ejs %>
+  <% include ../../../partials/nav.ejs %>
+    <main class="app-content">
+      <div class="app-title">
+        <div>
+          <h1><%= cftName %></h1>
+          <p>Activated MRR for  <%= moment(link_data.date.month +'/1/' +link_data.date.year).format( 'MMM-YYYY') %> </p>
+        </div>
+        <ul class="app-breadcrumb breadcrumb">
+            <li class="breadcrumb-item">
+              <i class="fa fa-home fa-lg"></i>
+            </li>
+            <li class="breadcrumb-item">PS</li>
+            <li class="breadcrumb-item">Team Goals </li>
+            <li class="breadcrumb-item"><a href="/ps/reports/mrr/teams">MRR</a></li>
+            <li class="breadcrumb-item"><%= moment(link_data.date.month +'/1/' +link_data.date.year).format('YYYY') %></li>
+            <li class="breadcrumb-item"><a href="/ps/reports/mrr/teams/<%= link_data.date.year %>/<%= link_data.date.month %>"><%= moment(link_data.date.month +'/1/' +link_data.date.year).format( 'MMM') %></a></li>
+            <li class="breadcrumb-item active">
+              <%= cftName %>
+            </li>
+          </ul>
+      </div>
+      <div class="row">
+          <div class="col">
+            <div class="tile">
+                <table class="table" id="active_projects">
+                  <thead>
+                    <tr>
+                      <th scope="col">Project Name</th>
+                      <th scope="col">Total MRR</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% for(var i=0; i < projects.length; i++) { %>
+                      <tr>
+                       
+                        <td>
+                          <a href="https://app.liquidplanner.com/space/<%= lp_space_id %>/projects/show/<%= projects[i].id %>" target="_blank">
+                          <%= projects[i].treeitems[0].name %>
+                        </a>
+                        </td>
+                        <td>
+                          <%= projects[i].total_mrr %>
+                        </td>
+                        <td>
+                      </tr>
+                      <% } %>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+    </main>
+    <% include ../../../partials/footer.ejs %>

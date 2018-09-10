@@ -1,0 +1,63 @@
+<div class="row">
+  <div class="col-lg-12">
+    <% if (quick_look_report.link != null) { %>
+      <a href="<%= quick_look_report.link %>">
+    <% } %>
+    <div class="tile">
+      <h2 class="tile-header center"><%= quick_look_report.name %></h2>
+      <h4 class="center">Target: $ <%= quick_look_report.target %></h4>
+      <div class="row row_title">
+        <table class="table center border-right col-md-7">
+          <thead>
+            <tr>
+              <th>Backlog</th>
+              <th>Activated</th>
+              <th>Total</th>
+              <th>Variance</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>$
+                <%= quick_look_report.backlog %>
+              </td>
+              <td>$
+                <%= quick_look_report.activatedMRR %>
+              </td>
+              <td>$
+                  <%= quick_look_report.totalMRR %>
+              </td>
+              <td class="<%= quick_look_report.class %> bold">
+                  $<%= quick_look_report.variance %>
+                </td>
+            </tr>
+          </tbody>
+        </table>
+        <table class="table center col-md-5">
+          <thead>
+            <tr>
+              <th>PS Activated</th>
+              <th>DA Activated</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <!-- <a href="ps/reports/mrr/teams/<%= link_data.date.year %>/<%= link_data.date.year %>"> -->
+                $
+                <%= quick_look_report.psActivated %>
+                <!-- </a> -->
+              </td>
+              <td>$
+                <%= quick_look_report.daActivated %>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <% if (quick_look_report.link != null) { %>
+        </a>
+    <% } %>
+  </div>
+</div>

@@ -1,0 +1,37 @@
+<% include ../../../partials/header.ejs %>
+<% include ../../../partials/nav.ejs %>
+<main class="app-content">
+  <div class="app-title">
+    <div>
+      <h1>Team MRR Archives</h1>
+    </div>
+    <ul class="app-breadcrumb breadcrumb">
+      <li class="breadcrumb-item">
+        <i class="fa fa-home fa-lg"></i>
+      </li>
+      <li class="breadcrumb-item">PS</li>
+      <li class="breadcrumb-item">Team Goals</li>
+      <li class="breadcrumb-item active "><a href="#">MRR</a></li>
+    </ul>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+        <% for (i = 0; i < years.length; i++) { %>
+      <div class="tile">
+        <h2 class="center"><%= years[i] %></h2>
+        <div class="row">
+          <% for (i2 = 0; i2 < months.length; i2++) { %>
+          <div class="col-md-1 center">
+            <a href="/ps/reports/mrr/teams/<%= years[i] %>/<%= months[i2] %>">
+              <%= moment(months[i2] + '/1/' + years[i]) .format( 'MMM') %>
+            </a>
+          </div>
+          <%} %>
+        </div>
+      </div>
+      <% } %>
+    </div>
+  </div>
+</main>
+<% include ../../../partials/footer.ejs %>

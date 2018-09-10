@@ -1,0 +1,70 @@
+<% include ../../../partials/header.ejs %>
+  <script type="text/javascript" src="/js/bootstrap-multiselect.js"></script>
+  <link rel="stylesheet" href="/stylesheets/bootstrap-multiselect.css" type="text/css" />
+  <% include ../../../partials/nav.ejs %>
+    <main class="app-content">
+
+      <div class="app-title">
+        <div>
+          <h1>LBS With No Team</h1>
+        </div>
+        <ul class="app-breadcrumb breadcrumb">
+          <li class="breadcrumb-item">
+            <i class="fa fa-home fa-lg"></i>
+          </li>
+          <li class="breadcrumb-item">PS</li>
+          <li class="breadcrumb-item">Team Goals</li>
+          <li class="breadcrumb-item"><a href="/ps/reports/mrr/teams/<%= link_data.date.year %>/<%= link_data.date.month %>">MRR</a></li>
+          <li class="breadcrumb-item active">
+            No Team
+          </li>
+        </ul>
+      </div>
+      <div class="row">
+        <div class="col">
+          <div class="tile">
+              <table class="table" id="active_projects">
+                <thead>
+                  <tr>
+                    <th scope="col">LBS ID</th>
+                    <th scope="col">Location Name</th>
+                    <th scope="col">Total MRR</th>
+                    <th scope="col">Estimated Go Live Date</th>
+                    <th scope="col">Go Live Date</th>
+                    <th scope="col">Project Type</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% for(var i=0; i < results.length; i++) { %>
+                    <tr>
+                     
+                      <td>
+                        <%= results[i].id %>
+                      </td>
+                      <td>
+                        <%= results[i].location_name %>
+                      </td>
+                      <td>
+                        <%= results[i].total_mrr %>
+                      </td>
+                      <td>
+                         <!-- activation Date -->
+                        <%= moment(results[i].estimated_go_live).format( 'MMM-DD-YYYY') %>
+                      </td>
+                      <td>
+                          <!-- activation Date -->
+                         <%= moment(results[i].actual_go_live).format( 'MMM-DD-YYYY') %>
+                       </td>
+                       <td>
+                          <!-- activation Date -->
+                         <%= results[i].project_type %>
+                       </td>
+                    </tr>
+                    <% } %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <% include ../../../partials/footer.ejs %>
+    </main>

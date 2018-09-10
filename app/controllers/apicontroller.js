@@ -1,22 +1,29 @@
 var exports = module.exports = {}
+var projects = require('../lib/controllers/projects')
 //require api functions
 lp_projects = require('./api/lp_projects');
 lp_lbs = require('./api/lp_lbs');
+backfill = require('../lib/controllers/backfill')
 client_time = require('./jobs/client_time');
 var Sequelize = require("sequelize")
 //Models
 var db = require("../models");
 const Op = Sequelize.Op
 
+const auth = "Basic " + new Buffer(process.env.LpUserName + ":" + process.env.LPPassword).toString("base64");
+
 var Papa = require("papaparse")
 var moment = require('moment')
 // import the config for throttled request
 var throttledRequest = require('../config/throttled_request')
-var rp = require('request-promise');
 
 //API Calls
 exports.updatelpLbsapi = function (req, res) {
     lp_lbs.updateapi(req, res);
+}
+
+exports.findLBSProjects = function (req, res) {
+    backfill.findMissingLBSProjects(req, res);
 }
 exports.updatelpprojectsapi = function (req, res) {
     lp_projects.updateProjectsapi(req, res);
@@ -159,24 +166,52 @@ exports.updateNsBacklog = function (req, res) {
     res.status(200)
     var updates = []
     var data = req.body.data
+    var row
     for (i = 0; i < data.length; i++) {
         if (data[i]['Internal ID'] !== undefined) {
-            let row = {
-                id: data[i]['Internal ID'],
-                location_name: null,
-                total_mrr: data[i]['Total MRR'],
-                gross_ps: data[i]['Gross Professional Services'],
-                net_ps: data[i]['Net Professional Services'],
-                total_ps_discount: data[i]['Total Professional Services Discount'],
-                gross_cs: data[i]['Gross Creative Services'],
-                net_cs: data[i]['Net Creative Services'],
-                total_cs_discount: data[i]['Total Creative Services Discount'],
-                opportunity_close_date: data[i]['Opportunity Close Date']
-            }
-            if (data[i]['Location'].split(/\s(.+)/).length > 1) {
-                row.location_name = data[i]['Location'].split(/\s(.+)/)[1]
+            if (data[i].hasOwnProperty('Go-Live Date (Day)')) {
+                row = {
+                    id: data[i]['Internal ID'],
+                    location_name: null,
+                    total_mrr: data[i]['Total MRR'],
+                    gross_ps: data[i]['Gross Professional Services'],
+                    net_ps: data[i]['Net Professional Services'],
+                    total_ps_discount: data[i]['Total Professional Services Discount'],
+                    gross_cs: data[i]['Gross Creative Services'],
+                    net_cs: data[i]['Net Creative Services'],
+                    total_cs_discount: data[i]['Total Creative Services Discount'],
+                    actual_go_live: data[i]['Go-Live Date (Day)'],
+                    project_type: data[i]['Project Type']
+                }
+                if (data[i]['Location'].split(/\s(.+)/).length > 1) {
+                    row.location_name = data[i]['Location'].split(/\s(.+)/)[1]
+                } else {
+                    row.location_name = data[i]['Location'].split(/\s(.+)/)[0]
+                }
             } else {
-                row.location_name = data[i]['Location'].split(/\s(.+)/)[0]
+                row = {
+                    id: data[i]['Internal ID'],
+                    location_name: null,
+                    total_mrr: data[i]['Total MRR'],
+                    gross_ps: data[i]['Gross Professional Services'],
+                    net_ps: data[i]['Net Professional Services'],
+                    total_ps_discount: data[i]['Total Professional Services Discount'],
+                    gross_cs: data[i]['Gross Creative Services'],
+                    net_cs: data[i]['Net Creative Services'],
+                    total_cs_discount: data[i]['Total Creative Services Discount'],
+                    estimated_go_live: data[i]['Estimated Go-Live Date (Day)'],
+                    project_type: data[i]['Project Type']
+                }
+                if (data[i]['Location'].split(/\s(.+)/).length > 1) {
+                    row.location_name = data[i]['Location'].split(/\s(.+)/)[1]
+                } else {
+                    row.location_name = data[i]['Location'].split(/\s(.+)/)[0]
+                }
+            }
+            if (data[i]['Opportunity Close Date'] != '') {
+                row.opportunity_close_date = data[i]['Opportunity Close Date']
+            } else {
+                row.opportunity_close_date = null
             }
 
             updates.push(db.lbs.upsert(row).then(results => {
@@ -208,50 +243,7 @@ exports.getAllProjects = function (req, res) {
 }
 
 exports.updateProjects = async function (req, res) {
-    console.log(process.env.production)
-    if (process.env.production === "false") {
-        let url = process.env.PRODUCTION_URL + '/api/treeitems'
-        let result = await rp.get({ url: url })
-        console.log(result)
-        // dump all new data
-        result = JSON.parse(result)
-        if (result.length) {
-            for (let i = 0; i < result.length; i++) {
-                // create promise all
-                await createTreeItem(result[i])
-                if (result[i].task_type === 'Location Service Billing' && result[i].child_type === 'task') {
-                    let splitName = result[i].name.split(/\s(.+)/, 2)
-                    let LBSId = splitName[0]
-                    let locationName = splitName[1]
-                    let lbsTask = await db.lbs.findOrCreate({ where: { id: LBSId }, defaults: { location_name: locationName, task_id: result[i].id } })
-                    lbsTask[0].update({ location_name: locationName, task_id: result[i].id })
-                }
-            }
-            res.send('200')
-            db.job.findAll({
-                where: {
-                    jobname: 'external_update'
-                }
-            }).then(results => {
-                results[0].update({
-                    lastrun: new Date(),
-                    lastrunstatus: 'complete'
-                })
-            })
-        }
-    } else {
-        res.send("only available on non-production Enviornments")
-        db.job.findAll({
-            where: {
-                jobname: 'external_update'
-            }
-        }).then(results => {
-            results[0].update({
-                lastrun: new Date(),
-                lastrunstatus: 'error'
-            })
-        })
-    }
+    backfill.remote(req, res)
 }
 
 exports.getTreeItems = function (req, res) {
@@ -342,35 +334,8 @@ exports.updateTeamProjects = function (req, res) {
                         })
                     }
                 })
-            // let updateAll = []
-            // let updates = []
-            // for (let i = 0; i < results.length; i++) {
-            //     var teamID = results[i].id
-            //     updateAll.push(getTeamProjects(teamID))
-            // }
-            // Promise.all(updateAll).then(() => {
-            //     res.send('done')
-            // })
 
         })
-}
-
-function getTeamProjects (teamID) {
-    const auth = "Basic " + new Buffer(process.env.LpUserName + ":" + process.env.LPPassword).toString("base64")
-    // let url = 'https://app.liquidplanner.com/api/workspaces/' + process.env.LPWorkspaceId  + '/treeitems/' + teamID +'?depth=1'
-    let url = 'https://app.liquidplanner.com/api/workspaces/' + process.env.LPWorkspaceId + '/projects?filter[]=parent_id=' + teamID
-    return rp.get({ url: url, headers: { "Authorization": auth } }).then(results => {
-        let body = JSON.parse(results)
-        // let projects = body.children
-        let projects = body
-        for (i2 = 0; i2 < projects.length; i2++) {
-            let project = projects[i2]
-            // find or create the project with the team id
-            if (project.type.toLowerCase() === 'folder' || project.type.toLowerCase() === 'milestone' || project.type.toLowerCase() === 'task' || project.type.toLowerCase() === 'project') {
-                updateProject(project, teamID)
-            }
-        }
-    })
 }
 
 function updateProject (project, teamID) {

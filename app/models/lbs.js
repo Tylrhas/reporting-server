@@ -13,8 +13,14 @@ module.exports = function (sequelize, Sequelize) {
     task_id: {
       type: Sequelize.INTEGER
     },
+    project_id: {
+      type: Sequelize.INTEGER
+    },
     master_project_id: {
       type: Sequelize.INTEGER
+    },
+    project_type: {
+      type: Sequelize.TEXT
     },
     total_mrr: {
       type: Sequelize.REAL
@@ -38,6 +44,12 @@ module.exports = function (sequelize, Sequelize) {
       type: Sequelize.REAL
     },
     opportunity_close_date: {
+      type: Sequelize.DATE
+    }, 
+    estimated_go_live: {
+      type: Sequelize.DATE
+    },
+    actual_go_live: {
       type: Sequelize.DATE
     }
   },

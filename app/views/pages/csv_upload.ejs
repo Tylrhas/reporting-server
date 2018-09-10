@@ -16,7 +16,7 @@
       <div class="row">
         <div class="col-md-4">
           <div class="tile center">
-              <h4>Add NetSuite Backlog</h4>
+              <h4>Add NetSuite Data</h4>
               <hp>Upload via CSV</hp>
               <p><b>Last Update: </b> <%= moment(jobs['ns_backlog'].lastRun).format( 'MMM-DD-YYYY hh:MM:SS A') %></p>
               <p><b>Last Run Status: </b> <%= jobs['ns_backlog'].lastRunStatus %></p>
@@ -30,16 +30,17 @@
               <p>Fetch Updated Data from the External Server</p>
               <p><b>Last Update: </b> <%= moment(jobs['external_update'].lastRun).format( 'MMM-DD-YYYY hh:MM:SS A') %></p>
               <p><b>Last Run Status: </b> <%= jobs['external_update'].lastRunStatus %></p>
+              <p><b>Status: </b> <%= jobs['external_update'].status %></p>
               <button id="update_lp" class="center">Update</button>
           </div>
         </div>
         <div class="col-md-4">
           <div class="tile center">
-              <h4>Backfill LP Data</h4>
-              <p>Fetch Project Team Assignments from LP</p>
+              <h4>Match LP LBS</h4>
+              <p>Look for LP LBS tasks that are not matched with a project</p>
               <p><b>Last Update: </b> <%= moment(jobs['backfill_lp'].lastRun).format( 'MMM-DD-YYYY hh:MM:SS A') %></p>
               <p><b>Last Run Status: </b> <%= jobs['backfill_lp'].lastRunStatus %></p>
-              <button id="backfill_lp" class="center">Backfill</button>
+              <button id="backfill_lp" class="center">Match</button>
           </div>
         </div>
       </div>
@@ -93,7 +94,7 @@
     $('#backfill_lp').click(function() {
       $.ajax({
           type: "get",
-          url: '/api/admin/teams/update',
+          url: '/api/admin/lbs/match',
           success: function (data) {
           },
           dataType: 'JSON'

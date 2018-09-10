@@ -1,0 +1,37 @@
+<% include ../../../partials/header.ejs %>
+  <% include ../../../partials/nav.ejs %>
+    <main class="app-content">
+      <div class="app-title">
+        <div>
+          <h1>Team Based MRR</h1>
+          <p>All teams Activated MRR for  <%= moment(link_data.date.month + '/1/' + link_data.date.year).format( 'MMM-YYYY') %></p>
+        </div>
+        <ul class="app-breadcrumb breadcrumb">
+            <li class="breadcrumb-item">
+              <i class="fa fa-home fa-lg"></i>
+            </li>
+            <li class="breadcrumb-item">PS</li>
+            <li class="breadcrumb-item">Team Goals </li>
+            <li class="breadcrumb-item"><a href="/ps/reports/mrr/teams">MRR</a></li>
+            <li class="breadcrumb-item"><%= moment(link_data.date.month + '/1/' + link_data.date.year).format( 'YYYY') %></li>
+            <li class="breadcrumb-item active"><%= moment(link_data.date.month + '/1/' + link_data.date.year).format( 'MMM') %></li>
+          </ul>
+      </div>
+      <% for(var i = 0; i < teamMrr.length; i++) { %>
+        <% if ( i === 0 || i === 3) { %>
+          <div class="row">
+          <% } %>
+          <div class="col-md-4">
+              <div class="tile">
+                <a href="/ps/reports/mrr/teams/<%= teamMrr[i][0] %>/<%= link_data.date.year %>/<%= link_data.date.month %>">
+                <h4 class="center"><%= teamMrr[i][1]  %></h4>
+                <p class="center">$ <%= teamMrr[i][2] %> / $ <%= teamMrr[i][3] %></p> 
+              </a>
+              </div>
+            </div>
+          <% if ( i === 2 || i === teamMrr.length -1 ) { %>
+          </div>
+            <% } %>
+      <% } %>
+    </main>
+    <% include ../../../partials/footer.ejs %>

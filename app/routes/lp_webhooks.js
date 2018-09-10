@@ -261,7 +261,6 @@ async function createProject (body) {
     launch_type: null,
     project_type: null,
     package: null,
-    services_activated: null,
     risk_level: null,
     ps_phase: null,
     vertical: null,

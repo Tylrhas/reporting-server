@@ -64,9 +64,6 @@ module.exports = function (sequelize, Sequelize) {
         project_impact: {
             type: Sequelize.TEXT,
         },
-        services_activated: {
-            type: Sequelize.BOOLEAN,
-        },
         launch_type: {
             type: Sequelize.TEXT,
         },
@@ -95,9 +92,11 @@ module.exports = function (sequelize, Sequelize) {
 
     LpProject.associate = function (models) {
         // associate project with children
-        models.lp_project.hasMany(models.treeitem, { foreignKey: 'id', sourceKey: 'id' });
+        models.lp_project.hasMany(models.treeitem, { foreignKey: 'project_id', sourceKey: 'id' });
         // associate project tasks
         models.lp_project.belongsTo(models.cft, { foreignKey: 'cft_id', sourceKey: 'id' });
+        // associate project with MRR
+        models.lp_project.hasMany(models.lbs, { foreignKey: 'project_id', sourceKey: 'id' });
     }
 
     return LpProject;

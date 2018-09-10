@@ -12571,7 +12571,7 @@ be a descendant of the grid when it is being dragged.
 
 .treeview-menu {
   max-height: 0;
-  overflow: hidden;
+  /* overflow: hidden; */
   -webkit-transition: max-height 0.3s ease;
   -o-transition: max-height 0.3s ease;
   transition: max-height 0.3s ease;

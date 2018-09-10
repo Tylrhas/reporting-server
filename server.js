@@ -22,11 +22,8 @@ if (process.env.production === true) {
     })
   }
 
-app.use(bodyParser({
-        extended: true,
-        limit: '2mb',
-        parameterLimit: 10000
-    }));
+  app.use(bodyParser.json({limit: '50mb'}))
+  app.use(bodyParser.urlencoded({limit: '50mb', extended: true, parameterLimit: 100000}))
 
 
 // For Passport
@@ -47,11 +44,7 @@ app.use(express.static(__dirname + '/public'))
 var models = require("./app/models");
 
 //Routes
-var authRoute = require('./app/routes/auth.js')(app,passport);
-var adminRoute = require('./app/routes/admin.js')(app,passport);
-var apiRoute = require('./app/routes/api.js')(app,passport);
-var pages = require('./app/routes/pages.js')(app,passport);
-var webhooks = require('./app/routes/lp_webhooks.js')(app,passport);
+var routes = require('./app/routes/index')(app,passport,express);
 
 
 //load passport strategies
