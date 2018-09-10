@@ -61,16 +61,16 @@ function year_view (year) {
     var details = []
     // transform the data to an object
     for (i = 0; i < results.length; i++) {
-      quarterNumber = i + 1
+       var quarterNumber = i + 1
       let quarter_details = {
         name: 'Q' + quarterNumber,
-        backlog: results[i][3],
-        activatedMRR: results[i][0],
-        totalMRR: results[i][3] + results[i][0],
-        variance: results[i][3] + results[i][0] - results[i][4],
-        psActivated: results[i][1],
-        daActivated: results[i][2],
-        target: results[i][4]
+        backlog: checkValue(results[i][3]),
+        activatedMRR: checkValue(results[i][0]),
+        totalMRR: checkValue((results[i][3] + results[i][0])),
+        variance: checkValue((results[i][3] + results[i][0] - results[i][4])),
+        psActivated: checkValue(results[i][1]),
+        daActivated: checkValue(results[i][2]),
+        target: checkValue(results[i][4])
       }
       details.push(quarter_details)
     }
@@ -93,13 +93,13 @@ function quarter_view (quarter, year) {
       month_array = months[i]
       let quarter_details = {
         name: moment(month_array + '/1/' + year).format('MMM - YYYY'),
-        backlog: results[i][3],
-        activatedMRR: results[i][0],
-        totalMRR: results[i][3] + results[i][0],
-        variance: results[i][3] + results[i][0] - results[i][4],
-        psActivated: results[i][1],
-        daActivated: results[i][2],
-        target: results[i][4]
+        backlog: checkValue(results[i][3]),
+        activatedMRR: checkValue(results[i][0]),
+        totalMRR:checkValue((results[i][3] + results[i][0])),
+        variance: checkValue((results[i][3] + results[i][0] - results[i][4])),
+        psActivated: checkValue(results[i][1]),
+        daActivated: checkValue(results[i][2]),
+        target: checkValue(results[i][4])
       }
       details.push(quarter_details)
     }
@@ -324,5 +324,13 @@ function checkVariance (total, target) {
     return 'yellow'
   } else {
     return 'red'
+  }
+}
+function checkValue (number) {
+  if (number === null) {
+    return 0
+  } 
+  else {
+    return number.toLocaleString()
   }
 }

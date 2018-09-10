@@ -43,7 +43,7 @@ module.exports = function (app, passport, express) {
                 year.class = reportController.checkVariance(year.totalMRR, year.target)
                 year_quicklooks.push(year)
             }
-            res.render('pages/ps/reports/mrr', { user: req.user, slug: 'mrr', moment: moment, link_data: link_data, quick_look_reports: year_quicklooks });        
+            res.render('pages/ps/reports/mrr', { user: req.user, slug: 'mrr', moment: moment, link_data: link_data, quick_look_reports: year_quicklooks, cols: 12 });        
         })
     })
     app.get(ps_mrr_reports + '/teams', auth.basic, function (req, res) {
@@ -154,7 +154,7 @@ module.exports = function (app, passport, express) {
                 results[0][i].link = '/ps/reports/mrr/' + link_data.date.year + '/' + quarter
                 results[0][i].class = reportController.checkVariance(results[0][i].totalMRR, results[0][i].target)
             }
-            res.render('pages/ps/reports/mrr', { user: req.user, slug: 'mrr', moment: moment, link_data: link_data, quick_look_reports: results[0] });
+            res.render('pages/ps/reports/mrr', { user: req.user, slug: 'mrr', moment: moment, link_data: link_data, quick_look_reports: results[0], cols: 3 });
         })
 
     })
@@ -173,7 +173,7 @@ module.exports = function (app, passport, express) {
             for (i = 0; i < results[0].length; i++) {
                 results[0][i].class = reportController.checkVariance(results[0][i].totalMRR, results[0][i].target)
             }
-            res.render('pages/ps/reports/mrr', { user: req.user, slug: 'mrr', moment: moment, link_data: link_data, quick_look_reports: results[0] });
+            res.render('pages/ps/reports/mrr', { user: req.user, slug: 'mrr', moment: moment, link_data: link_data, quick_look_reports: results[0], cols: 4 });
         })
     })
 }
