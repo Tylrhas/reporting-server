@@ -8,9 +8,13 @@ var db = require("../../../models")
 var moment = require('moment');
 var teamMrr = require('../../../lib/reports/team_mrr')
 var cfts = require('../../../lib/reports/cft')
+var ps_project_report_dir = '/ps/reports/projects'
+var page_data = require('../../../lib/page_links')
+
 
 module.exports = function (app, passport) {
-    app.get('/reports/active-projects', checkAuthentication, function (req, res) {
+    app.get(ps_project_report_dir + '/active', checkAuthentication, function (req, res) {
+        let link_data = page_data()
         var d = new Date();
         var date = {
             month: d.getMonth() +1,
@@ -78,7 +82,7 @@ module.exports = function (app, passport) {
                     }
                 }
                 // send over the projects lp_space_id to create links on page and moment to change the date 
-                res.render('pages/active_projects', { user: req.user, projects: results[1], cfts: results[0], projectType: projectType, package: package, lp_space_id: process.env.LPWorkspaceId, moment: moment, slug: 'active-projects', date: date });
+                res.render('pages/active_projects', { user: req.user, projects: results[1], cfts: results[0], projectType: projectType, package: package, lp_space_id: process.env.LPWorkspaceId, moment: moment, slug: 'active-projects', link_data: link_data });
             })
     })
     function checkAuthentication (req, res, next) {

@@ -25,7 +25,8 @@ module.exports = {
   month_target,
   quarter_target,
   year_target,
-  checkVariance
+  checkVariance,
+  archive_years
 }
 function month_target (month, year) {
   return db.mrr_targets.findAll({
@@ -123,4 +124,17 @@ function checkVariance (total, target) {
   } else {
     return 'red'
   }
+}
+
+function archive_years () {
+  let d = new Date()
+  // get all years from 2018 to current year
+  let start_year = 2018
+  // get current year
+  let ending_year = d.getFullYear()
+  let years = []
+  for (i = start_year; i <= ending_year; i++) {
+    years.push(i)
+  }
+  return years
 }

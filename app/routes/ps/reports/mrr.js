@@ -12,22 +12,47 @@ var cfts = require('../../../lib/reports/cft')
 var page_data = require('../../../lib/page_links')
 var mrr = require('../../../lib/reports/mrr')
 var reportController = require('../../../controllers/reportcontroller')
+ // set the sub dirs for the PS MRR Reporting Routes
+var ps_mrr_reports = '/ps/reports/mrr'
 
-module.exports = function (app, passport, express) {
-    var psMrrReportingRoutes = express.Router()
-    // set the sub dirs for the PS MRR Reporting Routes
-    app.use('/ps/reports/mrr', psMrrReportingRoutes)
-
-    psMrrReportingRoutes.get('/', auth.basic, function (req, res) {
-        res.send('there is no index page for mrr reports')
+module.exports = function (app, passport, express) {   
+   
+    app.get(ps_mrr_reports + '/', auth.basic, function (req, res) {
+        // get all years from 2018 - forward
+        let years = mrr.archive_years()
+        let link_data = page_data()
+        let year_details = []
+        for (i = 0 ; i < years.length; i++) {
+            year_details.push(reportController.year_detail(years[i]))
+        }
+        Promise.all(year_details).then(results => {
+            var year_quicklooks = []
+            for (i = 0 ; i < results.length; i++) {
+                let year_details = results[i]
+                let year = {
+                    name: year_details[5],
+                    backlog: year_details[3].toLocaleString(),
+                    activatedMRR: year_details[0].toLocaleString(),
+                    totalMRR: (year_details[3] + year_details[0]).toLocaleString(),
+                    variance:  (year_details[3] + year_details[0] - year_details[4]).toLocaleString(),
+                    psActivated: year_details[1].toLocaleString(),
+                    daActivated: year_details[2].toLocaleString(),
+                    target: year_details[4].toLocaleString(),
+                    link: '/ps/reports/mrr/' + year_details[5]
+                }
+                year.class = reportController.checkVariance(year.totalMRR, year.target)
+                year_quicklooks.push(year)
+            }
+            res.render('pages/ps/reports/mrr', { user: req.user, slug: 'mrr', moment: moment, link_data: link_data, quick_look_reports: year_quicklooks });        
+        })
     })
-    psMrrReportingRoutes.get('/teams', auth.basic, function (req, res) {
+    app.get(ps_mrr_reports + '/teams', auth.basic, function (req, res) {
         var months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
         let link_data = page_data()
         let years = teamMrr.archive_years()
         res.render('pages/ps/reports/team_mrr_goal_archive', { user: req.user, slug: 'mrr', moment: moment, link_data: link_data, years: years, months: months });
     })
-    psMrrReportingRoutes.get('/teams/:year/:month', auth.basic, function (req, res) {
+    app.get(ps_mrr_reports + '/teams/:year/:month', auth.basic, function (req, res) {
         // get all LBS items launched this month and match to project and CFT and sum the totals for each team
 
         var month = parseInt(req.params.month)
@@ -85,7 +110,7 @@ module.exports = function (app, passport, express) {
             res.render('pages/ps/reports/team_mrr', { user: req.user, teamMrr: teamMrr, link_data: link_data, slug: 'mrr', moment: moment });
         })
     })
-    psMrrReportingRoutes.get('/teams/:teamid/:year/:month', auth.basic, function (req, res) {
+    app.get(ps_mrr_reports + '/teams/:teamid/:year/:month', auth.basic, function (req, res) {
         var id = parseInt(req.params.teamid)
         var month = parseInt(req.params.month)
         var year = parseInt(req.params.year)
@@ -115,7 +140,7 @@ module.exports = function (app, passport, express) {
             })
         }
     })
-    psMrrReportingRoutes.get('/:year', auth.basic, function (req, res) {
+    app.get(ps_mrr_reports + '/:year', auth.basic, function (req, res) {
         var year = parseInt(req.params.year)
         // get the needed dates for links
         let link_data = page_data()
@@ -133,7 +158,7 @@ module.exports = function (app, passport, express) {
         })
 
     })
-    psMrrReportingRoutes.get('/:year/:quarter', auth.basic, function (req, res) {
+    app.get(ps_mrr_reports + '/:year/:quarter', auth.basic, function (req, res) {
         // parse the year and month params out of the URL 
         var quarter = parseInt(req.params.quarter)
         var year = parseInt(req.params.year)

@@ -3,21 +3,24 @@ var Sequelize = require("sequelize");
 var sequelize = new Sequelize(process.env.DATABASE_URL, { dialectOptions: { ssl: true } });
 var models = require('../models/index.js')
 var moment = require('moment');
+var page_data = require('../lib/page_links')
 
 module.exports = function (app, passport) {
 
 
     app.get('/admin/users', isAdmin, function (req, res) {
+        let link_data = page_data()
         var d = new Date();
         var date = {
             month: d.getMonth() + 1,
             year: d.getFullYear()
         }
         models.user.findAll().then(results => {
-            res.render('pages/users', { user: req.user, users: results, slug: "users", moment: moment, date: date });
+            res.render('pages/users', { user: req.user, users: results, slug: "users", moment: moment, link_data : link_data });
         })
     })
     app.get('/admin/update', isAdmin, function (req, res) {
+        let link_data = page_data()
         var d = new Date();
         var date = {
             month: d.getMonth() + 1,
@@ -33,7 +36,7 @@ module.exports = function (app, passport) {
                     status: results[i].status
                 }
             }
-            res.render('pages/csv_upload', { slug: "update", user: req.user, jobs: jobs, moment: moment, date: date })
+            res.render('pages/csv_upload', { slug: "update", user: req.user, jobs: jobs, moment: moment, link_data: link_data })
         })
     })
 

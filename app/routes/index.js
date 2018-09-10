@@ -15,7 +15,7 @@ module.exports = function (app, passport, express) {
   // Import all Admin routes
   var adminRoute = require('./admin.js')(app, passport)
   // Import all API routes
-  // var apiRoute = require('./api.js')(app,passport)
+  var apiRoute = require('./api.js')(app,passport)
   // Import all Webhook routes
   var webhooks = require('./lp_webhooks.js')(app, passport)
 }

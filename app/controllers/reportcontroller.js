@@ -246,8 +246,8 @@ async function quarter_detail (quarter, year) {
 }
 
 async function year_detail (year) {
+  var date = new Date()
   if (year == null) {
-    var date = new Date()
     year = date.getFullYear()
 
     let firstDay = new Date(year, 0, 1)
@@ -266,24 +266,38 @@ async function year_detail (year) {
     var ps_year_activated = mrr.activated_ps_total(firstDay, lastDay)
     var da_year_activated = mrr.activated_da_total(firstDay, lastDay)
     var year_backlog = mrr.backlog_total(backlogfirstDay, lastDay)
+    var year_target = mrr.year_target(year)
 
-  } else {
+  } else if (date.getFullYear() === year) {
     let firstDay = new Date(year, 0, 1)
     let lastDay = new Date(year, 11, 0)
     firstDay.setHours(0, 0, 0, 0)
     lastDay.setHours(23, 59, 59, 999)
-
+    month = date.getMonth()
+    var day = date.getDate()
     var backlogfirstDay = new Date(year, month, day)
     backlogfirstDay.setHours(0, 0, 0, 0)
 
     var year_activated = mrr.activated_total(firstDay, lastDay)
     var ps_year_activated = mrr.activated_ps_total(firstDay, lastDay)
     var da_year_activated = mrr.activated_da_total(firstDay, lastDay)
+    var year_backlog = mrr.backlog_total(backlogfirstDay, lastDay)
+    var year_target = mrr.year_target(year)
+  } else {
+    let firstDay = new Date(year, 0, 1)
+    let lastDay = new Date(year, 11, 0)
+    firstDay.setHours(0, 0, 0, 0)
+    lastDay.setHours(23, 59, 59, 999)
+
+    var year_activated = mrr.activated_total(firstDay, lastDay)
+    var ps_year_activated = mrr.activated_ps_total(firstDay, lastDay)
+    var da_year_activated = mrr.activated_da_total(firstDay, lastDay)
     var year_backlog = 0
+    var year_target = mrr.year_target(year)
 
   }
 
-  return Promise.all([year_activated, ps_year_activated, da_year_activated, year_backlog])
+  return Promise.all([year_activated, ps_year_activated, da_year_activated, year_backlog, year_target, year])
 }
 
 function currentQuarter () {
@@ -304,9 +318,9 @@ function checkVariance (total, target) {
     target = parseFloat(target.replace(/,/g, ''))
   }
   let variancePercent = 100 * (total / target)
-  if (variancePercent > 90) {
+  if (variancePercent > 97) {
     return 'green'
-  } else if (variancePercent < 90 && variancePercent > 75) {
+  } else if (variancePercent < 93 && variancePercent > 97) {
     return 'yellow'
   } else {
     return 'red'

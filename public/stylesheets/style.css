@@ -170,3 +170,6 @@ ul.treeview-menu.has-children {
 .yellow {
     color: #FFD602;
 }
+.bold {
+    font-weight: bold;
+}
