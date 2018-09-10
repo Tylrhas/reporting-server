@@ -2,13 +2,19 @@ mrr = require('../lib/reports/mrr')
 var db = require('../models')
 var Sequelize = require("sequelize")
 const Op = Sequelize.Op
+
+var moment = require('moment')
+
 module.exports = {
+  year_view,
+  quarter_view,
   quarter_detail,
   month_detail,
   year_detail,
   month_target,
   quarter_target,
-  year_target
+  year_target,
+  checkVariance
 }
 
 var quater_month_map = {
@@ -31,18 +37,76 @@ var quater_month_map = {
 }
 var quater_month_map_targets = {
   1: {
-    months: [1,2,3],
+    months: [1, 2, 3],
   },
   2: {
-    months: [4,5,6]
+    months: [4, 5, 6]
   },
   3: {
-    months: [7,8,9]
+    months: [7, 8, 9]
   },
   4: {
-    months: [10,11,12]
-    }
+    months: [10, 11, 12]
+  }
 }
+
+function year_view (year) {
+  // get details for all quarters
+  var q1 = quarter_detail(1, year)
+  var q2 = quarter_detail(2, year)
+  var q3 = quarter_detail(3, year)
+  var q4 = quarter_detail(4, year)
+
+  return Promise.all([q1, q2, q3, q4]).then(results => {
+    var details = []
+    // transform the data to an object
+    for (i = 0; i < results.length; i++) {
+      quarterNumber = i + 1
+      let quarter_details = {
+        name: 'Q' + quarterNumber,
+        backlog: results[i][3],
+        activatedMRR: results[i][0],
+        totalMRR: results[i][3] + results[i][0],
+        variance: results[i][3] + results[i][0] - results[i][4],
+        psActivated: results[i][1],
+        daActivated: results[i][2],
+        target: results[i][4]
+      }
+      details.push(quarter_details)
+    }
+    return details
+  })
+}
+function quarter_view (quarter, year) {
+  var month_promises = []
+  var months = quater_month_map_targets[quarter].months
+  for (i = 0; i < months.length; i++) {
+    let month = months[i] - 1
+    month_promises.push(month_detail(month, year))
+  }
+
+  return Promise.all(month_promises).then(results => {
+    var details = []
+    // transform the data to an object
+    for (i = 0; i < results.length; i++) {
+      quarterNumber = i + 1
+      month_array = months[i]
+      let quarter_details = {
+        name: moment(month_array + '/1/' + year).format('MMM - YYYY'),
+        backlog: results[i][3],
+        activatedMRR: results[i][0],
+        totalMRR: results[i][3] + results[i][0],
+        variance: results[i][3] + results[i][0] - results[i][4],
+        psActivated: results[i][1],
+        daActivated: results[i][2],
+        target: results[i][4]
+      }
+      details.push(quarter_details)
+    }
+    return details
+  })
+}
+
 function month_target (month, year) {
   return db.mrr_targets.findAll({
     where: {
@@ -58,7 +122,7 @@ function month_target (month, year) {
 function quarter_target (quarter, year) {
   quarter = quater_month_map_targets[quarter]
   console.log(quarter.months)
-  return db.mrr_targets.sum('target',{
+  return db.mrr_targets.sum('target', {
     where: {
       year: year,
       cft_id: null,
@@ -69,37 +133,57 @@ function quarter_target (quarter, year) {
   })
 }
 function year_target (year) {
-  return db.mrr_targets.sum('target',{
+  return db.mrr_targets.sum('target', {
     where: {
       year: year,
       cft_id: null
     }
   })
 }
-async function month_detail (month, year) {
+function month_detail (month, year) {
+  var date = new Date();
   if (month == null || year == null) {
     // it is for the current month
-    var date = new Date();
     month = date.getMonth()
     year = date.getFullYear()
     var day = date.getDate()
     var firstDay = new Date(year, month, 1)
+    var lastDay = new Date(year, month + 1, 0)
     var backlogfirstDay = new Date(year, month, day)
-    var lastDay = new Date(year, month + 1, 0)
     backlogfirstDay.setHours(0, 0, 0, 0)
-  } else {
-    var firstDay = new Date(year, month, 0)
+
+    var month_activated = mrr.activated_total(firstDay, lastDay)
+    var ps_month_activated = mrr.activated_ps_total(firstDay, lastDay)
+    var da_month_activated = mrr.activated_da_total(firstDay, lastDay)
+    var month_backlog = mrr.backlog_total(backlogfirstDay, lastDay)
+
+  } else if (month >= date.getMonth() && year >= date.getFullYear()) {
+    var firstDay = new Date(year, month, 1)
     var lastDay = new Date(year, month + 1, 0)
+    var day = date.getDate()
+    var backlogfirstDay = new Date(year, month, day)
+    backlogfirstDay.setHours(0, 0, 0, 0)
+
+    var month_activated = mrr.activated_total(firstDay, lastDay)
+    var ps_month_activated = mrr.activated_ps_total(firstDay, lastDay)
+    var da_month_activated = mrr.activated_da_total(firstDay, lastDay)
+    var month_backlog = mrr.backlog_total(backlogfirstDay, lastDay)
+
+  } else {
+    var firstDay = new Date(year, month, 1)
+    var lastDay = new Date(year, month + 1, 0)
+    var month_activated = mrr.activated_total(firstDay, lastDay)
+    var ps_month_activated = mrr.activated_ps_total(firstDay, lastDay)
+    var da_month_activated = mrr.activated_da_total(firstDay, lastDay)
+    var month_backlog = mrr.backlog_total(backlogfirstDay, lastDay)
   }
   firstDay.setHours(0, 0, 0, 0)
   lastDay.setHours(23, 59, 59, 999)
 
-  var month_activated = mrr.activated_total(firstDay, lastDay)
-  var ps_month_activated = mrr.activated_ps_total(firstDay, lastDay)
-  var da_month_activated = mrr.activated_da_total(firstDay, lastDay)
-  var month_backlog = mrr.backlog_total(backlogfirstDay, lastDay)
+  var target = mrr.month_target(month + 1, year)
 
-  return Promise.all([month_activated, ps_month_activated, da_month_activated, month_backlog])
+  return Promise.all([month_activated, ps_month_activated, da_month_activated, month_backlog, target])
+
 }
 
 async function quarter_detail (quarter, year) {
@@ -113,7 +197,6 @@ async function quarter_detail (quarter, year) {
     year = date.getFullYear()
     var backlogfirstDay = new Date(year, month, day)
     backlogfirstDay.setHours(0, 0, 0, 0)
-
     var firstDay = new Date(quater_month_map[quarter].first + '/' + year)
     var lastDay = new Date(quater_month_map[quarter].last + '/' + year)
     firstDay.setHours(0, 0, 0, 0)
@@ -123,8 +206,30 @@ async function quarter_detail (quarter, year) {
     var ps_quater_activated = mrr.activated_ps_total(firstDay, lastDay)
     var da_quarter_activated = mrr.activated_da_total(firstDay, lastDay)
     var quarter_backlog = mrr.backlog_total(backlogfirstDay, lastDay)
+    var quarter_target = mrr.quarter_target(quarter, year)
 
-  } else {
+  } else if (quarter >= currentQuarter().quarter && year >= currentQuarter().year) {
+
+    var date = new Date()
+    var day = date.getDate()
+    month = date.getMonth()
+    year = date.getFullYear()
+    var backlogfirstDay = new Date(year, month, day)
+    backlogfirstDay.setHours(0, 0, 0, 0)
+
+    var firstDay = new Date(quater_month_map[quarter].first + '/' + year)
+    var lastDay = new Date(quater_month_map[quarter].last + '/' + year)
+    firstDay.setHours(0, 0, 0, 0)
+    lastDay.setHours(23, 59, 59, 999)
+
+
+    var quarter_activated = mrr.activated_total(firstDay, lastDay)
+    var ps_quater_activated = mrr.activated_ps_total(firstDay, lastDay)
+    var da_quarter_activated = mrr.activated_da_total(firstDay, lastDay)
+    var quarter_backlog = mrr.backlog_total(backlogfirstDay, lastDay)
+    var quarter_target = mrr.quarter_target(quarter, year)
+  }
+  else {
 
     var firstDay = new Date(quater_month_map[quarter].first + '/' + year)
     var lastDay = new Date(quater_month_map[quarter].last + '/' + year)
@@ -134,9 +239,10 @@ async function quarter_detail (quarter, year) {
     var quarter_activated = mrr.activated_total(firstDay, lastDay)
     var ps_quater_activated = mrr.activated_ps_total(firstDay, lastDay)
     var da_quarter_activated = mrr.activated_da_total(firstDay, lastDay)
+    var quarter_target = mrr.quarter_target(quarter, year)
     var quarter_backlog = 0
   }
-  return Promise.all([quarter_activated, ps_quater_activated, da_quarter_activated, quarter_backlog])
+  return Promise.all([quarter_activated, ps_quater_activated, da_quarter_activated, quarter_backlog, quarter_target])
 }
 
 async function year_detail (year) {
@@ -144,8 +250,8 @@ async function year_detail (year) {
     var date = new Date()
     year = date.getFullYear()
 
-    let firstDay = new Date(year, 0,1)
-    let lastDay = new Date(year, 11,31)
+    let firstDay = new Date(year, 0, 1)
+    let lastDay = new Date(year, 11, 31)
 
     firstDay.setHours(0, 0, 0, 0)
     lastDay.setHours(23, 59, 59, 999)
@@ -155,21 +261,21 @@ async function year_detail (year) {
 
     var backlogfirstDay = new Date(year, month, day)
     backlogfirstDay.setHours(0, 0, 0, 0)
-  
+
     var year_activated = mrr.activated_total(firstDay, lastDay)
     var ps_year_activated = mrr.activated_ps_total(firstDay, lastDay)
     var da_year_activated = mrr.activated_da_total(firstDay, lastDay)
     var year_backlog = mrr.backlog_total(backlogfirstDay, lastDay)
 
   } else {
-    let firstDay = new Date(year, 0,1)
-    let lastDay = new Date(year, 11,0)
+    let firstDay = new Date(year, 0, 1)
+    let lastDay = new Date(year, 11, 0)
     firstDay.setHours(0, 0, 0, 0)
     lastDay.setHours(23, 59, 59, 999)
-  
+
     var backlogfirstDay = new Date(year, month, day)
     backlogfirstDay.setHours(0, 0, 0, 0)
-  
+
     var year_activated = mrr.activated_total(firstDay, lastDay)
     var ps_year_activated = mrr.activated_ps_total(firstDay, lastDay)
     var da_year_activated = mrr.activated_da_total(firstDay, lastDay)
@@ -187,5 +293,22 @@ function currentQuarter () {
   return {
     quarter: (Math.ceil(month / 3)),
     year: year
+  }
+}
+
+function checkVariance (total, target) {
+  if (typeof total === 'string') {
+    total = parseFloat(total.replace(/,/g, ''))
+  }
+  if (typeof target === 'string') {
+    target = parseFloat(target.replace(/,/g, ''))
+  }
+  let variancePercent = 100 * (total / target)
+  if (variancePercent > 90) {
+    return 'green'
+  } else if (variancePercent < 90 && variancePercent > 75) {
+    return 'yellow'
+  } else {
+    return 'red'
   }
 }

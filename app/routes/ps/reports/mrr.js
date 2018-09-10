@@ -10,11 +10,14 @@ var moment = require('moment');
 var teamMrr = require('../../../lib/reports/team_mrr')
 var cfts = require('../../../lib/reports/cft')
 var page_data = require('../../../lib/page_links')
+var mrr = require('../../../lib/reports/mrr')
+var reportController = require('../../../controllers/reportcontroller')
 
 module.exports = function (app, passport, express) {
     var psMrrReportingRoutes = express.Router()
     // set the sub dirs for the PS MRR Reporting Routes
     app.use('/ps/reports/mrr', psMrrReportingRoutes)
+
     psMrrReportingRoutes.get('/', auth.basic, function (req, res) {
         res.send('there is no index page for mrr reports')
     })
@@ -53,14 +56,14 @@ module.exports = function (app, passport, express) {
                 teamMrr[key] = {
                     name: results[1][i].name,
                     mrr: 0,
-                    target:0
+                    target: 0
                 }
             }
             // map targets to the correct team
             for (i3 = 0; i3 < results[3].length; i3++) {
                 var team = results[3][i3]
                 var team_id = team.cft_id
-                teamMrr[team_id].target = team.target  
+                teamMrr[team_id].target = team.target
             }
 
             for (i2 = 0; i2 < results[0].length; i2++) {
@@ -111,5 +114,41 @@ module.exports = function (app, passport, express) {
                 res.render('pages/ps/reports/team_mrr_detail', { user: req.user, projects: results[1], lp_space_id: process.env.LPWorkspaceId, slug: 'mrr', moment: moment, link_data: link_data, cftName: results[0][0].name });
             })
         }
+    })
+    psMrrReportingRoutes.get('/:year', auth.basic, function (req, res) {
+        var year = parseInt(req.params.year)
+        // get the needed dates for links
+        let link_data = page_data()
+
+        var year_details = reportController.year_view(year)
+
+        Promise.all([year_details]).then(results => {
+            
+            for (i = 0; i < results[0].length; i++) {
+                quarter = i + 1
+                results[0][i].link = '/ps/reports/mrr/' + link_data.date.year + '/' + quarter
+                results[0][i].class = reportController.checkVariance(results[0][i].totalMRR, results[0][i].target)
+            }
+            res.render('pages/ps/reports/mrr', { user: req.user, slug: 'mrr', moment: moment, link_data: link_data, quick_look_reports: results[0] });
+        })
+
+    })
+    psMrrReportingRoutes.get('/:year/:quarter', auth.basic, function (req, res) {
+        // parse the year and month params out of the URL 
+        var quarter = parseInt(req.params.quarter)
+        var year = parseInt(req.params.year)
+
+        // get the needed dates for links
+        let link_data = page_data()
+
+        var quarter_details = reportController.quarter_view(quarter, year)
+
+        Promise.all([quarter_details]).then(results => {
+
+            for (i = 0; i < results[0].length; i++) {
+                results[0][i].class = reportController.checkVariance(results[0][i].totalMRR, results[0][i].target)
+            }
+            res.render('pages/ps/reports/mrr', { user: req.user, slug: 'mrr', moment: moment, link_data: link_data, quick_look_reports: results[0] });
+        })
     })
 }

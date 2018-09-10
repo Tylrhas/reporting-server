@@ -23,40 +23,40 @@ module.exports = function (app, passport, express) {
 
       let month = {
         name: moment(link_data.date.month + '/1/' + link_data.date.year).format( 'MMM - YYYY'),
-        ps_MRR: values[0][1],
-        da_mrr: values[0][2],
-        backlog_mrr: values[0][3],
+        psActivated: values[0][1],
+        daActivated: values[0][2],
+        backlog: values[0][3],
         activatedMRR: values[0][0],
-        total_mrr: values[0][0] + values[0][3],
+        totalMRR: values[0][0] + values[0][3],
         target: values[3],
         variance: (values[0][0] + values[0][3]) - values[3]
       }
       let quarter = {
         name: 'Q' + link_data.quarter + ' ' + link_data.date.year,
-        total_mrr: values[1][0] + values[1][3],
-        ps_MRR: values[1][1],
-        da_mrr: values[1][2],
-        backlog_mrr: values[1][3],
+        totalMRR: values[1][0] + values[1][3],
+        psActivated: values[1][1],
+        daActivated: values[1][2],
+        backlog: values[1][3],
         activatedMRR: values[1][0],
         target: values[4],
         variance: (values[1][0] + values[1][3]) - values[4]
       }
       let year = {
         name: link_data.date.year,
-        ps_MRR: values[2][1],
-        da_mrr: values[2][2],
-        backlog_mrr: values[2][3],
+        psActivated: values[2][1],
+        daActivated: values[2][2],
+        backlog: values[2][3],
         activatedMRR: values[2][0],
-        total_mrr: values[2][0] + values[2][3],
+        totalMRR: values[2][0] + values[2][3],
         target: values[5],
         variance: (values[2][0] + values[2][3]) - values[5]
       }
       month = checkValues(month)
       quarter = checkValues(quarter)
       year = checkValues(year)
-      month.class = checkVariance(month.total_mrr, month.target)
-      quarter.class = checkVariance(quarter.total_mrr, quarter.target)
-      year.class = checkVariance(year.total_mrr, year.target)
+      month.class = checkVariance(month.totalMRR, month.target)
+      quarter.class = checkVariance(quarter.totalMRR, quarter.target)
+      year.class = checkVariance(year.totalMRR, year.target)
       let quick_look_reports = [month, quarter, year]
 
       res.render('pages/ps/index', { user: req.user, slug: 'home', link_data: link_data, moment: moment, quick_look_reports, quick_look_reports })
