@@ -5,11 +5,15 @@ module.exports = {
   month_id,
   non_associated_range,
   archive_years,
-  month_goals
+  month_goals,
+  current_backlog,
+  starting_backlog
 }
 var db = require('../../models')
 var Sequelize = require("sequelize")
 const Op = Sequelize.Op
+var cfts = require('./cft')
+
 
 function month (firstDay, lastDay) {
   return db.lp_project.findAll({
@@ -159,4 +163,82 @@ function archive_years () {
     years.push(i)
   }
   return years
+}
+async function current_backlog (firstDay, lastDay) {
+  let date = new Date()
+  lastDay = new Date(lastDay)
+
+  // check if the date is greater than current date 
+  if (lastDay >= date) {
+    // display the backlog
+    firstDay = date
+    firstDay.setHours(0, 0, 0, 0)
+    lastDay.setHours(23, 59, 59, 999)
+    return cfts.getall().then(teams => {
+      console.log(teams)
+      // get all projects and associated MRR
+
+      return db.lp_project.findAll({
+        attributes: ['cft_id', [db.sequelize.fn('sum', db.sequelize.col('lbs.total_mrr')), 'backlog']],
+        include: [
+          {
+            model: db.lbs,
+            attributes: [],
+            where: {
+              estimated_go_live: {
+                [Op.between]: [firstDay, lastDay]
+              },
+              actual_go_live: null
+            }
+          }
+        ],
+        group: ['lp_project.cft_id', 'lp_project.id']
+      }).then(results => {
+        var team_backlog = {}
+        for (i = 0; i < results.length; i++) {
+          // create the team if it doesnt exist in the object and add the MRR to the backlog
+          let team_id = results[i]['dataValues']['cft_id']
+          if (team_backlog.hasOwnProperty([team_id])) {
+            // add MRR
+            team_backlog[team_id].mrr = team_backlog[team_id].mrr + results[i]['dataValues']['backlog']
+          } else {
+            // create the key and add in MRR
+            team_backlog[team_id] = {
+              mrr: results[i]['dataValues']['backlog']
+            }
+          }
+        }
+        return team_backlog
+      })
+    })
+  } else {
+    backlog_totals = {}
+    let cfts = await cfts.getall()
+    for (i = 0; i < cfts.length; i++) {
+      backlog_totals[cfts[i]].backlog_total = 0
+    }
+    return backlog_totals
+  }
+}
+function starting_backlog (month, year) {
+  return db.mrr_backlog.findAll({
+    where: {
+      month: month,
+      year: year,
+      cft_id: {
+        [Op.not]: null
+      },
+    },
+    attributes: ['cft_id', 'backlog']
+  }).then(backlog => {
+    let starting_backlog = {
+
+    }
+    for (i = 0; i < backlog.length; i++) {
+      starting_backlog[backlog[i].dataValues.cft_id] = {
+        backlog: backlog[i].dataValues.backlog
+      }
+    }
+    return starting_backlog
+  })
 }

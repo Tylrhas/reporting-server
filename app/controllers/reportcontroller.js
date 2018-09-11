@@ -2,12 +2,15 @@ mrr = require('../lib/reports/mrr')
 var db = require('../models')
 var Sequelize = require("sequelize")
 const Op = Sequelize.Op
+var teamMrr = require('../lib/reports/team_mrr')
+var cfts = require('../lib/reports/cft')
 
 var moment = require('moment')
 
 module.exports = {
   year_view,
   quarter_view,
+  team_quick_look,
   quarter_detail,
   month_detail,
   year_detail,
@@ -61,7 +64,7 @@ function year_view (year) {
     var details = []
     // transform the data to an object
     for (i = 0; i < results.length; i++) {
-       var quarterNumber = i + 1
+      var quarterNumber = i + 1
       let quarter_details = {
         name: 'Q' + quarterNumber,
         backlog: checkValue(results[i][3]),
@@ -95,7 +98,7 @@ function quarter_view (quarter, year) {
         name: moment(month_array + '/1/' + year).format('MMM - YYYY'),
         backlog: checkValue(results[i][3]),
         activatedMRR: checkValue(results[i][0]),
-        totalMRR:checkValue((results[i][3] + results[i][0])),
+        totalMRR: checkValue((results[i][3] + results[i][0])),
         variance: checkValue((results[i][3] + results[i][0] - results[i][4])),
         psActivated: checkValue(results[i][1]),
         daActivated: checkValue(results[i][2]),
@@ -105,6 +108,71 @@ function quarter_view (quarter, year) {
     }
     return details
   })
+}
+
+function team_quick_look (month, year) {
+  // get all LBS items launched this month and match to project and CFT and sum the totals for each team
+
+  var firstDay = new Date(year, month - 1, 0);
+  var lastDay = new Date(year, month, 0);
+  var backlogfirstDay
+
+  firstDay.setHours(23, 59, 59, 999);
+  lastDay.setHours(23, 59, 59, 999);
+
+  var mrr = teamMrr.month(firstDay, lastDay)
+  var teams = cfts.getall()
+  var non_assigned_mrr = teamMrr.non_associated_total(firstDay, lastDay)
+  var cft_mrr_goals = teamMrr.month_goals(month, year)
+  var cft_backlog = teamMrr.current_backlog(firstDay, lastDay)
+  var cft_starting_backlog = teamMrr.starting_backlog(month, year)
+
+  return Promise.all([mrr, teams, non_assigned_mrr, cft_mrr_goals, cft_backlog, cft_starting_backlog]).then(results => {
+    // set up an object with all teams and associated MRR
+    var teamMrr = {}
+    for (i = 0; i < results[1].length; i++) {
+      let key = results[1][i].id
+      teamMrr[key] = {
+        name: results[1][i].name,
+        mrr: 0,
+        target: 0
+      }
+    }
+    // map targets to the correct team
+    for (i3 = 0; i3 < results[3].length; i3++) {
+      var team = results[3][i3]
+      var team_id = team.cft_id
+      teamMrr[team_id].target = team.target
+      teamMrr[team_id].current_backlog = results[4][team_id].mrr
+      teamMrr[team_id].starting_backlog = results[5][team_id].backlog
+    }
+
+    for (i2 = 0; i2 < results[0].length; i2++) {
+      let project = results[0][i2]
+      let cft_id = results[0][i2].cft_id
+      for (i3 = 0; i3 < project.lbs.length; i3++) {
+        let lbs_mrr = project.lbs[i3].total_mrr
+        teamMrr[cft_id].mrr = teamMrr[cft_id].mrr + lbs_mrr
+      }
+    }
+
+
+    teamMrr = Object.keys(teamMrr).map(function (key) {
+      if (teamMrr[key].mrr == null) {
+        teamMrr[key].mrr = 0
+      }
+      let target_percent = 100 * (teamMrr[key].mrr / teamMrr[key].target)
+      let backlog_percent = 100 * (teamMrr[key].mrr / teamMrr[key].starting_backlog)
+      teamMrr[key].backlog_percent = Math.round(backlog_percent * 100) / 100 
+      teamMrr[key].target_percent = Math.round(target_percent * 100) / 100 
+      return [key, teamMrr[key].name, teamMrr[key].mrr, teamMrr[key].target, teamMrr[key].current_backlog, teamMrr[key].backlog_percent, teamMrr[key].target_percent, teamMrr[key].starting_backlog]
+    })
+    teamMrr[0][2] = teamMrr[0][2] + results[2]
+    let not_associated = teamMrr.shift()
+    teamMrr.push(not_associated)
+    return teamMrr
+  })
+
 }
 
 function month_target (month, year) {
@@ -329,7 +397,7 @@ function checkVariance (total, target) {
 function checkValue (number) {
   if (number === null) {
     return 0
-  } 
+  }
   else {
     return number.toLocaleString()
   }
