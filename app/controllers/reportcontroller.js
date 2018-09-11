@@ -165,7 +165,8 @@ function team_quick_look (month, year) {
       let backlog_percent = 100 * (teamMrr[key].mrr / teamMrr[key].starting_backlog)
       teamMrr[key].backlog_percent = Math.round(backlog_percent * 100) / 100 
       teamMrr[key].target_percent = Math.round(target_percent * 100) / 100 
-      return [key, teamMrr[key].name, teamMrr[key].mrr, teamMrr[key].target, teamMrr[key].current_backlog, teamMrr[key].backlog_percent, teamMrr[key].target_percent, teamMrr[key].starting_backlog]
+      teamMrr[key].starting_backlog_class = checkVariance(teamMrr[key].mrr, teamMrr[key].starting_backlog)
+      return [key, teamMrr[key].name, teamMrr[key].mrr, teamMrr[key].target, teamMrr[key].current_backlog, teamMrr[key].backlog_percent, teamMrr[key].target_percent, teamMrr[key].starting_backlog, teamMrr[key].starting_backlog_class]
     })
     teamMrr[0][2] = teamMrr[0][2] + results[2]
     let not_associated = teamMrr.shift()
