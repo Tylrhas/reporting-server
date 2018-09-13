@@ -126,6 +126,24 @@ function team_quick_look (month, year) {
   var cft_mrr_goals = teamMrr.month_goals(month, year)
   var cft_backlog = teamMrr.current_backlog(firstDay, lastDay)
   var cft_starting_backlog = teamMrr.starting_backlog(month, year)
+  mrr.then(() => {
+    console.log('mrr')
+  })
+  teams.then(() => {
+    console.log('teams')
+  })
+  non_assigned_mrr.then(() => {
+    console.log('non_assigned_mrr')
+  })
+  cft_mrr_goals.then(() => {
+    console.log('cft_mrr_goals')
+  })
+  cft_backlog.then(() => {
+    console.log('cft_backlog')
+  })
+  cft_starting_backlog.then(() => {
+    console.log('cft_starting_backlog')
+  })
 
   return Promise.all([mrr, teams, non_assigned_mrr, cft_mrr_goals, cft_backlog, cft_starting_backlog]).then(results => {
     // set up an object with all teams and associated MRR

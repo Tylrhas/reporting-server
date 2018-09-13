@@ -212,12 +212,16 @@ async function current_backlog (firstDay, lastDay) {
       })
     })
   } else {
-    backlog_totals = {}
-    let cfts = await cfts.getall()
-    for (i = 0; i < cfts.length; i++) {
-      backlog_totals[cfts[i]].backlog_total = 0
-    }
-    return backlog_totals
+    return cfts.getall().then(cfts => {
+      var backlog_totals = {}
+      for (i = 0; i < cfts.length; i++) {
+        var cft_id = cfts[i].id
+        backlog_totals[cft_id] = {
+          backlog_total : 0
+        }
+      }
+      return backlog_totals
+    })
   }
 }
 function starting_backlog (month, year) {
