@@ -44,6 +44,17 @@
           </div>
         </div>
       </div>
+      <div class="row">
+        <div class="col-md-4">
+          <div class="tile center">
+              <h4>Update Archived Projects</h4>
+              <p>Update projects that are archived</p>
+              <p><b>Last Update: </b> <%= moment(jobs['backfill_lp'].lastRun).format( 'MMM-DD-YYYY hh:MM:SS A') %></p>
+              <p><b>Last Run Status: </b> <%= jobs['backfill_lp'].lastRunStatus %></p>
+              <button id="archived_projects" class="center">Update</button>
+          </div>
+        </div>
+      </div>
     </main>
     <script src="/js/plugins/papaparse.min.js"></script>
     <script>
@@ -81,6 +92,16 @@
       }
     </script>
     <script>
+    $('#archived_projects').click(function() {
+      $.ajax({
+          type: "post",
+          url: '/api/admin/update/projects/archived',
+          success: function (data) {
+
+          },
+          dataType: 'JSON'
+        })
+    })
     $('#update_lp').click(function() {
       $.ajax({
           type: "get",

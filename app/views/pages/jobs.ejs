@@ -82,6 +82,22 @@
                     </div>
                 </div>
             </div>
+            <div class="row jobs-row">
+                <div class="alert fade in alert-dismissable hide" role="alert">
+                </div>
+                <div class="col-md-3 job ">
+                    <h3>LP Tasks</h3>
+                    <div class="row">
+                        <p>Last Run: <%= jobs.lp_tasks.lastrun %></p>
+                    </div>
+                    <div class="row">
+                        <p>Status: <%= jobs.lp_tasks.lastrunstatus %></p>
+                    </div>
+                    <div class="row">
+                        <button class="btn btn-ghost" id="archived_projects">Update LP Tasks</button>
+                    </div>
+                </div>
+            </div>
         </div>
         </div>
         </div>
