@@ -1,6 +1,7 @@
 var adminController = require('../controllers/admincontroller.js');
 var Sequelize = require("sequelize");
-var sequelize = new Sequelize(process.env.DATABASE_URL, { dialectOptions: { ssl: true } });
+// var sequelize = new Sequelize(process.env.DATABASE_URL, { dialectOptions: { ssl: true } });
+const Op = Sequelize.Op
 var models = require('../models/index.js')
 var moment = require('moment');
 var page_data = require('../lib/page_links')
@@ -40,22 +41,40 @@ module.exports = function (app, passport) {
         })
     })
 
-    app.post('/admin/goals/update', async function (req, res) {
+    app.post('/api/goals/update', async function (req, res) {
         let body = req.body
-        let targets = await models.mrr_targets.findOrCreate({
+        if ('id' in body) {
+            let targets = await models.mrr_targets.upsert(body)
+        } else {
+            try {
+                await models.mrr_targets.create(body)
+            } catch (err) {
+                console.log(err)
+            }
+        }
+        res.send(200)
+    })
+    app.get('/admin/goals/update', isAdmin, async function (req, res) {
+         let link_data = page_data()
+         let cft_targets = await models.mrr_targets.findAll({
             where: {
-                cft_id: body.cft_id,
-                month: body.month,
-                year: body.year
+                cft_id: {
+                    [Op.not]: null
+                }
             },
-            defaults: { 
-                cft_id: body.cft_id,
-                month: body.month,
-                year: body.year,
-                target: body.target
+            order: [
+                ['year', 'DESC'],
+                ['month', 'DESC'],
+                ['cft_id', 'DESC']
+            ]
+        })
+        let dept_targets = await models.mrr_targets.findAll({
+            where: {
+                cft_id: null
             }
         })
-        res.send('Goals Updated')
+        res.render('pages/goals', { user: req.user, slug: "goals", moment: moment, link_data : link_data, dept_targets: dept_targets, cft_targets: cft_targets });
+
     })
 
 

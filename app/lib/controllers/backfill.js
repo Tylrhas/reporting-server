@@ -82,18 +82,20 @@ async function backFillRemoteData (req, res) {
 async function updateArchivedProjects (req, res) {
   res.send(200)
   // set the job status to running
-  db.job.findAll({
+  var job = db.job.findAll({
     where: {
       jobname: 'archived_projects'
     }
-  }).then(results => {
-    results[0].update({
-      lastrun: new Date(),
-      status: 'running'
-    })
   })
-  archive_projects (req, res)
-  
+  await job[0].update({
+    lastrun: new Date(),
+    status: 'running'
+  })
+  await archive_projects (req, res)
+  await job[0].update({
+    lastrun: new Date(),
+    status: 'running'
+  })
 }
 
 function throttledRequestPromise (args) {
@@ -223,6 +225,9 @@ async function archive_projects (req, res) {
       findChildren(projectRequest)
     }))
   }
+  return Promise.all(projectUpdates).then(results => {
+    return true
+  })
 }
 
 function findChildren (treeItem) {
@@ -349,6 +354,16 @@ async function createTreeItem (body) {
 
 async function findMissingLBSProjects (req, res) {
   res.send(200)
+  // start the job
+  var job = await db.job.findAll({
+    where: {
+      jobname: 'match_lbs'
+    }
+  })
+  await job[0].update({
+    lastrun: new Date(),
+    status: 'running'
+  })
   // get all non_associated MRR LBS and see if there is a project in LP for them
   var non_associated_lbs = await teamMrr.non_associated()
 
@@ -369,4 +384,9 @@ async function findMissingLBSProjects (req, res) {
       }
     }
   }
+
+  await job[0].update({
+    status: 'active',
+    lastrunstatus: 'complete'
+  })
 }
