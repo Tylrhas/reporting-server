@@ -1,0 +1,156 @@
+<% include ../../../partials/header.ejs %>
+<% include ../../../partials/nav.ejs %>
+<main class="app-content">
+  <div class="app-title">
+    <div>
+      <h1>El Coco Loco Milestone Times</h1>
+    </div>
+    <ul class="app-breadcrumb breadcrumb">
+      <li class="breadcrumb-item">
+        <i class="fa fa-home fa-lg"></i>
+      </li>
+      <li class="breadcrumb-item">PS</li>
+      <li class="breadcrumb-item">Reports</li>
+      <li class="breadcrumb-item">Projects</li>
+      <li class="breadcrumb-item">Timeline</li>
+      <li class="breadcrumb-item active">El Coco Loco</li>
+    </ul>
+  </div>
+  <div class="col">
+    <div class="tile">
+      <div class="row">
+        <div class="col">
+          <h2>Milestones</h2>
+        </div>
+        <div class="col"><button class="btn btn-primary btn-right" id="download_milestones">Download CSV</button></div>
+      </div>
+      <table class="table" id="milstone_reports">
+        <thead>
+          <tr>
+            <th scope="col">Report Date</th>
+            <th scope="col">Milestones</th>
+            <th scope="col">Number of Days</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% for(var i=0; i < Object.keys(averageTime.milestones).length; i++) { 
+                        key = Object.keys(averageTime.milestones)[i]%>
+          <tr>
+            <td>
+              <%= averageTime.date %>
+            </td>
+            <td>
+              <%= averageTime.milestoneMap[key] %>
+            </td>
+            <td>
+              <%= Math.round(100*averageTime.milestones[key])/100 %>
+            </td>
+            <td>
+          </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+    <div class="tile">
+        <div class="row">
+            <div class="col">
+              <h2>Defective Projects</h2>
+              <p>
+                  <%= Math.round(((averageTime.milestoneData.rejected / averageTime.milestoneData.total) * 100)*100)/100  %> % of
+                  milestones are defective</p>
+            </div>
+            <div class="col"><button class="btn btn-primary btn-right" id="download_defective">Download CSV</button></div>
+          </div>
+      <table class="table" id="rejected_projects">
+        <thead>
+          <tr>
+            <th scope="col">Report Date</th>
+            <th scope="col">Project Id</th>
+            <th scope="col">Milestone</th>
+            <th scope="col">Number of days</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% for(var i=0; i < averageTime.rejectedProjects.length; i++) { %>
+          <tr>
+            <td>
+              <%= averageTime.date %>
+            </td>
+            <td>
+              <a href="https://app.liquidplanner.com/space/<%= lp_space_id %>/projects/show/<%= averageTime.rejectedProjects[i].project_id  %>"
+                target="_blank">
+                <%= averageTime.rejectedProjects[i].project_id %>
+              </a>
+            </td>
+            <td>
+              <%= averageTime.rejectedProjects[i].milestone %>
+            </td>
+            <td>
+              <%= averageTime.rejectedProjects[i].days %>
+            </td>
+
+          </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+<script type="text/javascript" src="/js/plugins/papaparse.min.js"></script>
+<script>
+  $('#download_milestones').click(function () {
+  // gather all visable rows in the table
+  let headers = $('table#milstone_reports thead tr').get().map(function (row) {
+    return $(row).find('th').get().map(function (cell) {
+      return $(cell).text().trim();
+    })
+  })
+  let data = $('table#milstone_reports tbody tr').get().map(function (row) {
+    return $(row).find('td').get().map(function (cell) {
+      return $(cell).text().trim();
+    })
+  })
+  data = headers.concat(data)
+  var csv = Papa.unparse(data);
+  // construct and download CSV
+  var blob = new Blob([csv]);
+  if (window.navigator.msSaveOrOpenBlob)  // IE hack; see http://msdn.microsoft.com/en-us/library/ie/hh779016.aspx
+    window.navigator.msSaveBlob(blob, "milstone_reports.csv");
+  else {
+    var a = window.document.createElement("a");
+    a.href = window.URL.createObjectURL(blob, { type: "text/plain" });
+    a.download = "milstone_reports.csv";
+    document.body.appendChild(a);
+    a.click();  // IE: "Access is denied"; see: https://connect.microsoft.com/IE/feedback/details/797361/ie-10-treats-blob-url-as-cross-origin-and-denies-access
+    document.body.removeChild(a);
+  }
+  })
+  $('#download_defective').click(function () {
+    // gather all visable rows in the table
+  let headers = $('table#rejected_projects thead tr').get().map(function (row) {
+    return $(row).find('th').get().map(function (cell) {
+      return $(cell).text().trim();
+    })
+  })
+  let data = $('table#rejected_projects tbody tr').get().map(function (row) {
+    return $(row).find('td').get().map(function (cell) {
+      return $(cell).text().trim();
+    })
+  })
+  data = headers.concat(data)
+  var csv = Papa.unparse(data);
+  // construct and download CSV
+  var blob = new Blob([csv]);
+  if (window.navigator.msSaveOrOpenBlob)  // IE hack; see http://msdn.microsoft.com/en-us/library/ie/hh779016.aspx
+    window.navigator.msSaveBlob(blob, "rejected_projects.csv");
+  else {
+    var a = window.document.createElement("a");
+    a.href = window.URL.createObjectURL(blob, { type: "text/plain" });
+    a.download = "rejected_projects.csv";
+    document.body.appendChild(a);
+    a.click();  // IE: "Access is denied"; see: https://connect.microsoft.com/IE/feedback/details/797361/ie-10-treats-blob-url-as-cross-origin-and-denies-access
+    document.body.removeChild(a);
+  }
+  })
+</script>
+<% include ../../../partials/footer.ejs %>

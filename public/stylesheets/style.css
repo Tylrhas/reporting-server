@@ -173,3 +173,6 @@ ul.treeview-menu.has-children {
 .bold {
     font-weight: bold;
 }
+.btn-right {
+    float: right;
+}
