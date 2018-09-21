@@ -8,7 +8,6 @@ const Op = Sequelize.Op
 var db = require("../../../models")
 var moment = require('moment');
 var teamMrr = require('../../../lib/reports/team_mrr')
-var cfts = require('../../../lib/reports/cft')
 var page_data = require('../../../lib/page_links')
 var mrr = require('../../../lib/reports/mrr')
 var reportController = require('../../../controllers/reportcontroller')
@@ -59,55 +58,10 @@ module.exports = function (app, passport, express) {
         var year = parseInt(req.params.year)
 
         let link_data = page_data(month, year)
+        var team_dashboard = reportController.team_quick_look(month, year)
 
-        var firstDay = new Date(year, month - 1, 0);
-        var lastDay = new Date(year, month, 0);
-
-        firstDay.setHours(23, 59, 59, 999);
-        lastDay.setHours(23, 59, 59, 999);
-
-        var mrr = teamMrr.month(firstDay, lastDay)
-        var teams = cfts.getall()
-        var non_assigned_mrr = teamMrr.non_associated_total(firstDay, lastDay)
-        var cft_mrr_goals = teamMrr.month_goals(month, year)
-
-        Promise.all([mrr, teams, non_assigned_mrr, cft_mrr_goals]).then(results => {
-
-
-            // set up an object with all teams and associated MRR
-            var teamMrr = {}
-            for (i = 0; i < results[1].length; i++) {
-                let key = results[1][i].id
-                teamMrr[key] = {
-                    name: results[1][i].name,
-                    mrr: 0,
-                    target: 0
-                }
-            }
-            // map targets to the correct team
-            for (i3 = 0; i3 < results[3].length; i3++) {
-                var team = results[3][i3]
-                var team_id = team.cft_id
-                teamMrr[team_id].target = team.target
-            }
-
-            for (i2 = 0; i2 < results[0].length; i2++) {
-                let project = results[0][i2]
-                let cft_id = results[0][i2].cft_id
-                for (i3 = 0; i3 < project.lbs.length; i3++) {
-                    let lbs_mrr = project.lbs[i3].total_mrr
-                    teamMrr[cft_id].mrr = teamMrr[cft_id].mrr + lbs_mrr
-                }
-            }
-
-
-            teamMrr = Object.keys(teamMrr).map(function (key) {
-                return [key, teamMrr[key].name, teamMrr[key].mrr, teamMrr[key].target]
-            })
-
-            teamMrr[0][2] = teamMrr[0][2] + results[2]
-
-            res.render('pages/ps/reports/team_mrr', { user: req.user, teamMrr: teamMrr, link_data: link_data, slug: 'mrr', moment: moment });
+        Promise.all([team_dashboard]).then(results => {
+            res.render('pages/ps/reports/team_mrr', { user: req.user, teamMrr: results[0], link_data: link_data, slug: 'mrr', moment: moment });
         })
     })
     app.get(ps_mrr_reports + '/teams/:teamid/:year/:month', auth.basic, function (req, res) {

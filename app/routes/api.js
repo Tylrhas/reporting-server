@@ -11,6 +11,7 @@ module.exports = function (app, passport) {
     app.get('/api/projects', apiController.getAllProjects)
     app.post('/api/csv/netsuitebacklog/update',isAdmin, apiController.updateNsBacklog)
     app.post('/api/admin/user/update',isAdmin, apiController.updateUser);
+    app.post('/api/admin/update/projects/archived', apiController.updateArchivedProjects)
     // app.get('/api/admin/teams/update', isAdmin, apiController.updateTeamProjects)
 
     app.get('/api/admin/lbs/match', isAdmin, apiController.findLBSProjects)

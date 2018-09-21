@@ -1,0 +1,77 @@
+<% include ../partials/header.ejs %>
+<!-- Inclued extra css files -->
+<% include ../partials/nav.ejs %>
+<main class="app-content">
+  <div class="app-title">
+    <div>
+      <h1>Goals</h1>
+      <p>Update Team and Department Goals</p>
+    </div>
+    <ul class="app-breadcrumb breadcrumb">
+      <li class="breadcrumb-item">
+        <i class="fa fa-home fa-lg"></i>
+      </li>
+    </ul>
+  </div>
+  <div class="tile center">
+    <div class="bs-component">
+      <ul class="nav nav-tabs">
+        <li class="nav-item"><a class="nav-link active show" data-toggle="tab" href="#cft">CFT Goals</a></li>
+        <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#dept">Department Goals</a></li>
+      </ul>
+      <div class="tab-content" id="myTabContent">
+        <div class="tab-pane fade active show" id="cft">
+          <table id="cft_goals" class="table center border-right col-md-7">
+            <thead>
+              <tr>
+                <th>CFT</th>
+                <th>Month</th>
+                <th>Year</th>
+                <th>Goal ( $ )</th>
+                <th><button id="addRow" class="btn btn-success">Add Row</button></th>
+              </tr>
+            </thead>
+            <tbody>
+                <% for (i = 0; i < cft_targets.length; i++ ) { %>
+              <tr class="goal">
+                <td class="form-group">
+                  <select class="form-control team">
+                    <option value="46132814"<% if (cft_targets[i].cft_id === 46132814) { %>selected<% } %>>Violeta</option>
+                    <option value="46132817"<% if (cft_targets[i].cft_id === 46132817) { %>selected<% } %>>Touch of Grey</option>
+                    <option value="46132815"<% if (cft_targets[i].cft_id === 46132815) { %>selected<% } %>>The Gold Standard</option>
+                    <option value="46132816"<% if (cft_targets[i].cft_id === 46132816) { %>selected<% } %>>Stored Up FTFU</option>
+                    <option value="46132813"<% if (cft_targets[i].cft_id === 46132813) { %>selected<% } %>>Run Like the Winded</option>
+                    <option value="44790301"<% if (cft_targets[i].cft_id === 44790301) { %>selected<% } %>>El Coco Loco</option>
+                  </select>
+                <td>
+                  <select class="form-control month">
+                    <option value="1"<% if (cft_targets[i].month === 1) { %>selected<% } %>>1</option>
+                    <option value="2"<% if (cft_targets[i].month === 2) { %>selected<% } %>>2</option>
+                    <option value="3"<% if (cft_targets[i].month === 3) { %>selected<% } %>>3</option>
+                    <option value="4"<% if (cft_targets[i].month === 4) { %>selected<% } %>>4</option>
+                    <option value="5"<% if (cft_targets[i].month === 5) { %>selected<% } %>>5</option>
+                    <option value="6"<% if (cft_targets[i].month === 6) { %>selected<% } %>>6</option>
+                    <option value="7"<% if (cft_targets[i].month === 7) { %>selected<% } %>>7</option>
+                    <option value="8"<% if (cft_targets[i].month === 8) { %>selected<% } %>>8</option>
+                    <option value="9"<% if (cft_targets[i].month === 9) { %>selected<% } %>>9</option>
+                    <option value="10"<% if (cft_targets[i].month === 10) { %>selected<% } %>>10</option>
+                    <option value="11"<% if (cft_targets[i].month === 11) { %>selected<% } %>>11</option>
+                    <option value="12"<% if (cft_targets[i].month === 12) { %>selected<% } %>>12</option>
+                  </select>
+                </td>
+                <td><input class="year" type="text" value="<%= cft_targets[i].year %>"/></td>
+                <td><input class="goal" type="text" value="<%= cft_targets[i].target %>"/></td>
+                <td><button goal_id="<%=cft_targets[i].id %>" class="btn btn-success updateGoal">Update</button></td>
+              </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+        <div class="tab-pane fade" id="dept">
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+<script type="text/javascript" src="/js/update.js"></script>
+<% include ../partials/footer.ejs %>

@@ -32,13 +32,6 @@ exports.updatelpprojectsapi = function (req, res) {
 exports.updatelptasksapi = function (req, res) {
     lp_tasks.updateAllTasks(req, res);
 }
-
-exports.test_view = function (req, res) {
-    db.Sequelize.query("SELECT * FROM test_view", { type: db.Sequelize.QueryTypes.SELECT })
-        .then(data => {
-            res.send(data);
-        })
-}
 exports.at_risk_CSV = function (req, res) {
 
     var queryObject = {
@@ -244,6 +237,9 @@ exports.getAllProjects = function (req, res) {
 
 exports.updateProjects = async function (req, res) {
     backfill.remote(req, res)
+}
+exports.updateArchivedProjects = async function (req, res) {
+    backfill.archivedProjects(req,res)
 }
 
 exports.getTreeItems = function (req, res) {

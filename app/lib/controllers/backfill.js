@@ -12,6 +12,7 @@ var status = 'complete'
 
 exports.remote = backFillRemoteData
 exports.findMissingLBSProjects = findMissingLBSProjects
+exports.archivedProjects = updateArchivedProjects
 
 async function backFillRemoteData (req, res) {
   res.send(200)
@@ -47,7 +48,7 @@ async function backFillRemoteData (req, res) {
     projectUpdates = []
     for (let i = 0; i < body.length; i++) {
       // for each project create the treeitem as well as creating the project in the project table
-      projectUpdates.push(upsertProject(body[i]).then(projectRequest => {
+      projectUpdates.push(upsertProject(body[i], true).then(projectRequest => {
         findChildren(projectRequest)
       }))
     }
@@ -78,6 +79,24 @@ async function backFillRemoteData (req, res) {
     })
   })
 }
+async function updateArchivedProjects (req, res) {
+  res.send(200)
+  // set the job status to running
+  var job = db.job.findAll({
+    where: {
+      jobname: 'archived_projects'
+    }
+  })
+  await job[0].update({
+    lastrun: new Date(),
+    status: 'running'
+  })
+  await archive_projects (req, res)
+  await job[0].update({
+    lastrun: new Date(),
+    status: 'running'
+  })
+}
 
 function throttledRequestPromise (args) {
   return new Promise(function (resolve, reject) {
@@ -96,7 +115,7 @@ function throttledRequestPromise (args) {
 
 }
 
-async function upsertProject (project) {
+async function upsertProject (project, update_cft) {
   return new Promise(async function (resolve, reject) {
     // get the project and its children from LP
     let projectId = project.key
@@ -137,11 +156,13 @@ async function upsertProject (project) {
       }
     }
     // get the CFT_ID for the project
-    try {
-      update_object.cft_id = await get_cft_id(projectRequest)
-    }
-    catch (error) {
-      slack.sendError(update_object, error)
+    if (update_cft) {
+      try {
+        update_object.cft_id = await get_cft_id(projectRequest)
+      }
+      catch (error) {
+        slack.sendError(update_object, error)
+      }
     }
     var lp_project = await db.lp_project.findAll({
       where: {
@@ -189,6 +210,23 @@ async function upsertProject (project) {
       child_type: projectRequest.type.toLowerCase()
     })
     resolve(projectRequest)
+  })
+}
+
+async function archive_projects (req, res) {
+  var url = process.env.LP_ARCHIVE_PROJECTS
+  var archive_projects = await throttledRequestPromise({ url: url, method: 'GET', headers: { "Authorization": auth } })
+  archive_projects = archive_projects.rows
+  // get the array of active projects
+  for (i = 0; i < archive_projects.length; i++) {
+    // update all projects
+    projectUpdates = []
+    projectUpdates.push(upsertProject(archive_projects[i], false).then(projectRequest => {
+      findChildren(projectRequest)
+    }))
+  }
+  return Promise.all(projectUpdates).then(results => {
+    return true
   })
 }
 
@@ -316,6 +354,16 @@ async function createTreeItem (body) {
 
 async function findMissingLBSProjects (req, res) {
   res.send(200)
+  // start the job
+  var job = await db.job.findAll({
+    where: {
+      jobname: 'match_lbs'
+    }
+  })
+  await job[0].update({
+    lastrun: new Date(),
+    status: 'running'
+  })
   // get all non_associated MRR LBS and see if there is a project in LP for them
   var non_associated_lbs = await teamMrr.non_associated()
 
@@ -331,9 +379,14 @@ async function findMissingLBSProjects (req, res) {
         await db.lbs.upsert({ id: non_associated_lbs[i].id, project_id: lplbs[0].project_id })
       } else {
         // insert the project then update the LBS
-        await upsertProject({ key: lplbs[0].project_id })
+        await upsertProject({ key: lplbs[0].project_id}, true)
         await db.lbs.upsert({ id: non_associated_lbs[i].id, project_id: lplbs[0].project_id })
       }
     }
   }
+
+  await job[0].update({
+    status: 'active',
+    lastrunstatus: 'complete'
+  })
 }
