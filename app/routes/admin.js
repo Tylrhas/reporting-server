@@ -71,7 +71,11 @@ module.exports = function (app, passport) {
         let dept_targets = await models.mrr_targets.findAll({
             where: {
                 cft_id: null
-            }
+            },
+            order: [
+                ['year', 'DESC'],
+                ['month', 'DESC']
+            ]
         })
         res.render('pages/goals', { user: req.user, slug: "goals", moment: moment, link_data : link_data, dept_targets: dept_targets, cft_targets: cft_targets });
 
