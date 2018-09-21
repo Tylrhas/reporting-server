@@ -68,6 +68,41 @@
           </table>
         </div>
         <div class="tab-pane fade" id="dept">
+            <table id="dept_goals" class="table center border-right col-md-7">
+                <thead>
+                  <tr>
+                    <th>Month</th>
+                    <th>Year</th>
+                    <th>Goal ( $ )</th>
+                    <th><button id="addRow_dept" class="btn btn-success">Add Row</button></th>
+                  </tr>
+                </thead>
+                <tbody>
+                    <% for (i = 0; i < dept_targets.length; i++ ) { %>
+                  <tr class="goal">
+                    <td>
+                      <select class="form-control month">
+                        <option value="1"<% if (dept_targets[i].month === 1) { %>selected<% } %>>1</option>
+                        <option value="2"<% if (dept_targets[i].month === 2) { %>selected<% } %>>2</option>
+                        <option value="3"<% if (dept_targets[i].month === 3) { %>selected<% } %>>3</option>
+                        <option value="4"<% if (dept_targets[i].month === 4) { %>selected<% } %>>4</option>
+                        <option value="5"<% if (dept_targets[i].month === 5) { %>selected<% } %>>5</option>
+                        <option value="6"<% if (dept_targets[i].month === 6) { %>selected<% } %>>6</option>
+                        <option value="7"<% if (dept_targets[i].month === 7) { %>selected<% } %>>7</option>
+                        <option value="8"<% if (dept_targets[i].month === 8) { %>selected<% } %>>8</option>
+                        <option value="9"<% if (dept_targets[i].month === 9) { %>selected<% } %>>9</option>
+                        <option value="10"<% if (dept_targets[i].month === 10) { %>selected<% } %>>10</option>
+                        <option value="11"<% if (dept_targets[i].month === 11) { %>selected<% } %>>11</option>
+                        <option value="12"<% if (dept_targets[i].month === 12) { %>selected<% } %>>12</option>
+                      </select>
+                    </td>
+                    <td><input class="year" type="text" value="<%= dept_targets[i].year %>"/></td>
+                    <td><input class="goal" type="text" value="<%= dept_targets[i].target %>"/></td>
+                    <td><button goal_id="<%=dept_targets[i].id %>" class="btn btn-success updateGoal">Update</button></td>
+                  </tr>
+                  <% } %>
+                </tbody>
+              </table>
         </div>
       </div>
     </div>
