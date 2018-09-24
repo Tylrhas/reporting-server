@@ -126,26 +126,9 @@ function team_quick_look (month, year) {
   var cft_mrr_goals = teamMrr.month_goals(month, year)
   var cft_backlog = teamMrr.current_backlog(firstDay, lastDay)
   var cft_starting_backlog = teamMrr.starting_backlog(month, year)
-  mrr.then(() => {
-    console.log('mrr')
-  })
-  teams.then(() => {
-    console.log('teams')
-  })
-  non_assigned_mrr.then(() => {
-    console.log('non_assigned_mrr')
-  })
-  cft_mrr_goals.then(() => {
-    console.log('cft_mrr_goals')
-  })
-  cft_backlog.then(() => {
-    console.log('cft_backlog')
-  })
-  cft_starting_backlog.then(() => {
-    console.log('cft_starting_backlog')
-  })
+  var no_team_backlog = teamMrr.team_backlog_detail(0, lastDay)
 
-  return Promise.all([mrr, teams, non_assigned_mrr, cft_mrr_goals, cft_backlog, cft_starting_backlog]).then(results => {
+  return Promise.all([mrr, teams, non_assigned_mrr, cft_mrr_goals, cft_backlog, cft_starting_backlog, no_team_backlog]).then(results => {
     // set up an object with all teams and associated MRR
     var teamMrr = {}
     for (i = 0; i < results[1].length; i++) {
@@ -173,16 +156,18 @@ function team_quick_look (month, year) {
         teamMrr[cft_id].mrr = teamMrr[cft_id].mrr + lbs_mrr
       }
     }
-
-
+    no_team_backlog_mrr = results[6].map(function (value, label) {
+      return value.total_mrr
+    })
+    teamMrr['0'].current_backlog = no_team_backlog_mrr.reduce(getSum)
     teamMrr = Object.keys(teamMrr).map(function (key) {
       if (teamMrr[key].mrr == null) {
         teamMrr[key].mrr = 0
       }
       let target_percent = 100 * (teamMrr[key].mrr / teamMrr[key].target)
       let backlog_percent = 100 * (teamMrr[key].mrr / teamMrr[key].starting_backlog)
-      teamMrr[key].backlog_percent = Math.round(backlog_percent * 100) / 100 
-      teamMrr[key].target_percent = Math.round(target_percent * 100) / 100 
+      teamMrr[key].backlog_percent = Math.round(backlog_percent * 100) / 100
+      teamMrr[key].target_percent = Math.round(target_percent * 100) / 100
       teamMrr[key].target_class = checkVariance(teamMrr[key].mrr, teamMrr[key].target)
       teamMrr[key].starting_backlog_class = checkVariance(teamMrr[key].mrr, teamMrr[key].starting_backlog)
       return [key, teamMrr[key].name, teamMrr[key].mrr, teamMrr[key].target, teamMrr[key].current_backlog, teamMrr[key].backlog_percent, teamMrr[key].target_percent, teamMrr[key].starting_backlog, teamMrr[key].starting_backlog_class, teamMrr[key].target_class]
@@ -421,4 +406,7 @@ function checkValue (number) {
   else {
     return number.toLocaleString()
   }
+}
+function getSum (total, num) {
+  return total + num;
 }

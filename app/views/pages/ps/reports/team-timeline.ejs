@@ -33,8 +33,11 @@
           </tr>
         </thead>
         <tbody>
-          <% for(var i=0; i < Object.keys(averageTime.milestones).length; i++) { 
-                        key = Object.keys(averageTime.milestones)[i]%>
+          <%var total = 0 
+          for(var i=0; i < Object.keys(averageTime.milestones).length; i++) { 
+                        key = Object.keys(averageTime.milestones)[i]
+                        total = total + Math.round(100*averageTime.milestones[key])/100
+                        %>
           <tr>
             <td>
               <%= averageTime.date %>
@@ -49,6 +52,13 @@
           </tr>
           <% } %>
         </tbody>
+        <tfoot>
+          <tr>
+            <td></td>
+            <td></td>
+            <td><%= total %></td>
+          </tr>
+        </tfoot>
       </table>
     </div>
     <div class="tile">

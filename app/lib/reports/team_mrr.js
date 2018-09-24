@@ -7,7 +7,8 @@ module.exports = {
   archive_years,
   month_goals,
   current_backlog,
-  starting_backlog
+  starting_backlog,
+  team_backlog_detail
 }
 var db = require('../../models')
 var Sequelize = require("sequelize")
@@ -146,7 +147,7 @@ function non_associated_range (firstDay, lastDay) {
         [Op.between]: [firstDay, lastDay]
       },
       project_type: {
-        [Op.notIn]: [ "SEM Only", "Digital Advertising"]
+        [Op.notIn]: ["SEM Only", "Digital Advertising"]
       }
     }
   })
@@ -217,13 +218,14 @@ async function current_backlog (firstDay, lastDay) {
       for (i = 0; i < cfts.length; i++) {
         var cft_id = cfts[i].id
         backlog_totals[cft_id] = {
-          backlog_total : 0
+          backlog_total: 0
         }
       }
       return backlog_totals
     })
   }
 }
+
 function starting_backlog (month, year) {
   return db.mrr_backlog.findAll({
     where: {
@@ -245,4 +247,55 @@ function starting_backlog (month, year) {
     }
     return starting_backlog
   })
+}
+async function team_backlog_detail (cft_id, lastDay) {
+  let date = new Date()
+  lastDay = new Date(lastDay)
+  
+
+  if (lastDay >= date) {
+    var firstDay = date
+    if (cft_id === 0) {
+      let lbs = await db.lbs.findAll({
+        where: {
+          project_id: null,
+          task_id: null,
+          estimated_go_live: {
+            [Op.between]: [firstDay, lastDay]
+          },
+          project_type: {
+            [Op.notIn]: ["SEM Only", "Digital Advertising"]
+          }
+        }
+      })
+      return lbs 
+    } else {
+      let lbs = await db.lp_project.findAll({
+        where: {
+          cft_id: cft_id
+        },
+        include: [
+          {
+            model: db.lbs,
+            // attributes: ['total_mrr'],
+            where: {
+              estimated_go_live: {
+                [Op.between]: [firstDay, lastDay]
+              },
+              actual_go_live: null
+            }
+          }
+        ]
+      })
+      //  parse the object to get all of the LBS for this team
+      lbs_array = []
+      for (i = 0; i < lbs.length; i++) {
+        lbs_array = lbs_array.concat(lbs[i].lbs)
+      }
+      console.log(lbs)
+      return lbs_array
+    }
+  } else {
+    return null
+  }
 }

@@ -213,7 +213,6 @@ exports.updateNsBacklog = function (req, res) {
         }
     }
     Promise.all(updates).then(() => {
-        res.status(200)
         db.job.findAll({
             where: {
                 jobname: 'ns_backlog'

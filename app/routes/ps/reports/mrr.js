@@ -94,6 +94,17 @@ module.exports = function (app, passport, express) {
             })
         }
     })
+    app.get(ps_mrr_reports + '/teams/backlog/:teamid/:year/:month', auth.basic, async function (req, res) {
+        var id = parseInt(req.params.teamid)
+        var month = parseInt(req.params.month)
+        var year = parseInt(req.params.year)
+        var lastDay = new Date(year, month, 0)
+        let link_data = page_data(month, year)
+        // get the backlog for the team
+        lbs = await teamMrr.team_backlog_detail(id, lastDay)
+        cftName = await db.cft.findAll({ where: { id: id } })
+        res.render('pages/ps/reports/team_backlog', { user: req.user, lbs: lbs, slug: 'team_backlog', moment: moment, link_data: link_data, cftName: cftName });
+    })
     app.get(ps_mrr_reports + '/:year', auth.basic, function (req, res) {
         var year = parseInt(req.params.year)
         // get the needed dates for links
