@@ -101,9 +101,9 @@ module.exports = function (app, passport, express) {
         var lastDay = new Date(year, month, 0)
         let link_data = page_data(month, year)
         // get the backlog for the team
-        lbs = await teamMrr.team_backlog_detail(id, lastDay)
-        cftName = await db.cft.findAll({ where: { id: id } })
-        res.render('pages/ps/reports/team_backlog', { user: req.user, lbs: lbs, slug: 'team_backlog', moment: moment, link_data: link_data, cftName: cftName });
+        let lbs = await teamMrr.team_backlog_detail(id, lastDay)
+        let cftName = await db.cft.findAll({ where: { id: id } })
+        res.render('pages/ps/reports/team_backlog', { user: req.user, lbs: lbs, slug: 'team_backlog', moment: moment, link_data: link_data, cftName: cftName[0] });
     })
     app.get(ps_mrr_reports + '/:year', auth.basic, function (req, res) {
         var year = parseInt(req.params.year)

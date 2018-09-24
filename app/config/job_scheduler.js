@@ -33,6 +33,6 @@ schedule.scheduleJob('0 * * * *', function() {
 // match LBS once a day 
 schedule.scheduleJob('0 1 * * *', function() {
   console.log('updating LP data')
-  apiController.updateProjects(null,null)
+  apiController.findLBSProjects(null,null)
 })
 // check for archived projects once a day
