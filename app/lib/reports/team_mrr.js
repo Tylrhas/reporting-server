@@ -109,7 +109,7 @@ function non_associated_total (firstDay, lastDay) {
         [Op.between]: [firstDay, lastDay]
       },
       project_type: {
-        [Op.notIn]: ["DA Rep & Social", "SEM Only", "Digital Advertising"]
+        [Op.notIn]: ["SEM Only", "Digital Advertising"]
       }
     }
   })
@@ -146,7 +146,7 @@ function non_associated_range (firstDay, lastDay) {
         [Op.between]: [firstDay, lastDay]
       },
       project_type: {
-        [Op.notIn]: ["DA Rep & Social", "SEM Only", "Digital Advertising"]
+        [Op.notIn]: [ "SEM Only", "Digital Advertising"]
       }
     }
   })
