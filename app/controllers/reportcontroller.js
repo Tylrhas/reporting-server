@@ -144,7 +144,11 @@ function team_quick_look (month, year) {
       var team = results[3][i3]
       var team_id = team.cft_id
       teamMrr[team_id].target = team.target
-      teamMrr[team_id].current_backlog = results[4][team_id].mrr
+      if (team_id in results[4]) {
+        teamMrr[team_id].current_backlog = results[4][team_id].mrr
+      } else {
+        teamMrr[team_id].current_backlog = 0
+      }
       teamMrr[team_id].starting_backlog = results[5][team_id].backlog
     }
 
