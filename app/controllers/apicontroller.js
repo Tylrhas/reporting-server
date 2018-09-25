@@ -185,6 +185,7 @@ exports.updateNsBacklog = function (req, res) {
                 row = {
                     id: data[i]['Internal ID'],
                     location_name: null,
+                    master_project_id: data[i]['Master Project ID'],
                     total_mrr: data[i]['Total MRR'],
                     gross_ps: data[i]['Gross Professional Services'],
                     net_ps: data[i]['Net Professional Services'],
