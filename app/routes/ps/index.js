@@ -2,6 +2,7 @@ var auth = require('../../lib/auth/auth_check')
 var mrr = require('../../controllers/reportcontroller')
 var moment = require('moment')
 var page_data = require('../../lib/page_links')
+var reportcontroller = require('../../controllers/reportcontroller')
 
 var auth = require('../../lib/auth/auth_check')
 // index rout for /ps
@@ -54,9 +55,9 @@ module.exports = function (app, passport, express) {
       month = checkValues(month)
       quarter = checkValues(quarter)
       year = checkValues(year)
-      month.class = checkVariance(month.totalMRR, month.target)
-      quarter.class = checkVariance(quarter.totalMRR, quarter.target)
-      year.class = checkVariance(year.totalMRR, year.target)
+      month.class = reportcontroller.checkVariance(month.totalMRR, month.target)
+      quarter.class = reportcontroller.checkVariance(quarter.totalMRR, quarter.target)
+      year.class = reportcontroller.checkVariance(year.totalMRR, year.target)
       let quick_look_reports = [month, quarter, year]
 
       res.render('pages/ps/index', { user: req.user, slug: 'home', link_data: link_data, moment: moment, quick_look_reports, quick_look_reports })
@@ -81,17 +82,4 @@ function checkValues (object) {
     }
   }
   return object
-}
-
-function checkVariance (total, target) {
-  total = parseFloat(total.replace(/,/g , ''))
-  target = parseFloat(target.replace(/,/g , ''))
-  let variancePercent = 100 * (total / target)
-  if (variancePercent > 90) {
-    return 'green'
-  } else if (variancePercent < 90 && variancePercent > 75) {
-    return 'yellow'
-  } else {
-    return 'red'
-  }
 }

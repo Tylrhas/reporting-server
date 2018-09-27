@@ -347,7 +347,7 @@ async function year_detail (year) {
 
   } else if (date.getFullYear() === year) {
     let firstDay = new Date(year, 0, 1)
-    let lastDay = new Date(year, 11, 0)
+    let lastDay = new Date(year, 11, 31)
     firstDay.setHours(0, 0, 0, 0)
     lastDay.setHours(23, 59, 59, 999)
     month = date.getMonth()
