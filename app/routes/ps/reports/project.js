@@ -101,6 +101,9 @@ module.exports = function (app, passport) {
                     where: {
                         name: {
                             [Op.or]: [{ [Op.like]: '%Implementation Ready%' }, { [Op.like]: '%SEO Checklist Review%' }, { [Op.like]: '%Build Ready' }, { [Op.like]: 'Peer Review%' }, { [Op.like]: '%SEO Staging Review%' }, { [Op.like]: 'PM Review%' }, { [Op.like]: '%Staging Quality Control%' }, { [Op.like]: '%Staging Links Delivered%' }]
+                        },
+                        child_type: {
+                            [Op.in]: ['task', 'milestone']
                         }
                     }
                 }
