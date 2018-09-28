@@ -53,7 +53,7 @@ var quater_month_map_targets = {
   }
 }
 
-function year_view (year) {
+function year_view(year) {
   // get details for all quarters
   var q1 = quarter_detail(1, year)
   var q2 = quarter_detail(2, year)
@@ -80,7 +80,7 @@ function year_view (year) {
     return details
   })
 }
-function quarter_view (quarter, year) {
+function quarter_view(quarter, year) {
   var month_promises = []
   var months = quater_month_map_targets[quarter].months
   for (i = 0; i < months.length; i++) {
@@ -110,7 +110,7 @@ function quarter_view (quarter, year) {
   })
 }
 
-function team_quick_look (month, year) {
+function team_quick_look(month, year) {
   // get all LBS items launched this month and match to project and CFT and sum the totals for each team
 
   var firstDay = new Date(year, month - 1, 0);
@@ -138,17 +138,17 @@ function team_quick_look (month, year) {
         mrr: 0,
         target: 0
       }
+      if (key in results[4]) {
+        teamMrr[key].current_backlog = results[4][key].mrr
+      } else {
+        teamMrr[key].current_backlog = 0
+      }
     }
     // map targets to the correct team
     for (i3 = 0; i3 < results[3].length; i3++) {
       var team = results[3][i3]
       var team_id = team.cft_id
       teamMrr[team_id].target = team.target
-      if (team_id in results[4]) {
-        teamMrr[team_id].current_backlog = results[4][team_id].mrr
-      } else {
-        teamMrr[team_id].current_backlog = 0
-      }
       teamMrr[team_id].starting_backlog = results[5][team_id].backlog
     }
 
@@ -184,7 +184,7 @@ function team_quick_look (month, year) {
 
 }
 
-function month_target (month, year) {
+function month_target(month, year) {
   return db.mrr_targets.findAll({
     where: {
       month: month,
@@ -196,7 +196,7 @@ function month_target (month, year) {
   })
 
 }
-function quarter_target (quarter, year) {
+function quarter_target(quarter, year) {
   quarter = quater_month_map_targets[quarter]
   console.log(quarter.months)
   return db.mrr_targets.sum('target', {
@@ -209,7 +209,7 @@ function quarter_target (quarter, year) {
     }
   })
 }
-function year_target (year) {
+function year_target(year) {
   return db.mrr_targets.sum('target', {
     where: {
       year: year,
@@ -217,7 +217,7 @@ function year_target (year) {
     }
   })
 }
-function month_detail (month, year) {
+function month_detail(month, year) {
   var date = new Date();
   if (month == null || year == null) {
     // it is for the current month
@@ -263,7 +263,7 @@ function month_detail (month, year) {
 
 }
 
-async function quarter_detail (quarter, year) {
+async function quarter_detail(quarter, year) {
   if (quarter == null || year == null) {
     // it is for the quarter month
     quarter = currentQuarter().quarter
@@ -322,7 +322,7 @@ async function quarter_detail (quarter, year) {
   return Promise.all([quarter_activated, ps_quater_activated, da_quarter_activated, quarter_backlog, quarter_target])
 }
 
-async function year_detail (year) {
+async function year_detail(year) {
   var date = new Date()
   if (year == null) {
     year = date.getFullYear()
@@ -377,7 +377,7 @@ async function year_detail (year) {
   return Promise.all([year_activated, ps_year_activated, da_year_activated, year_backlog, year_target, year])
 }
 
-function currentQuarter () {
+function currentQuarter() {
   var d = new Date();
   var month = d.getMonth() + 1;
   var year = d.getFullYear()
@@ -387,7 +387,7 @@ function currentQuarter () {
   }
 }
 
-function checkVariance (total, target) {
+function checkVariance(total, target) {
   if (typeof total === 'string') {
     total = parseFloat(total.replace(/,/g, ''))
   }
@@ -403,7 +403,7 @@ function checkVariance (total, target) {
     return 'red'
   }
 }
-function checkValue (number) {
+function checkValue(number) {
   if (number === null) {
     return 0
   }
@@ -411,6 +411,6 @@ function checkValue (number) {
     return number.toLocaleString()
   }
 }
-function getSum (total, num) {
+function getSum(total, num) {
   return total + num;
 }

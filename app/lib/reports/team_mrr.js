@@ -171,8 +171,10 @@ async function current_backlog (firstDay, lastDay) {
 
   // check if the date is greater than current date 
   if (lastDay >= date) {
+    if (firstDay <= date) {
+      firstDay = date
+    }
     // display the backlog
-    firstDay = date
     firstDay.setHours(0, 0, 0, 0)
     lastDay.setHours(23, 59, 59, 999)
     return cfts.getall().then(teams => {
