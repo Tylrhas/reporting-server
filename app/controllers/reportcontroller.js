@@ -160,9 +160,13 @@ function team_quick_look(month, year) {
         teamMrr[cft_id].mrr = teamMrr[cft_id].mrr + lbs_mrr
       }
     }
-    no_team_backlog_mrr = results[6].map(function (value, label) {
-      return value.total_mrr
-    })
+    if (results[6] !== null) {
+      no_team_backlog_mrr = results[6].map(function (value, label) {
+        return value.total_mrr
+      })
+    } else {
+      no_team_backlog_mrr = [0]
+    }
     teamMrr['0'].current_backlog = no_team_backlog_mrr.reduce(getSum)
     teamMrr = Object.keys(teamMrr).map(function (key) {
       if (teamMrr[key].mrr == null) {
