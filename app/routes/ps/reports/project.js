@@ -100,7 +100,7 @@ module.exports = function (app, passport) {
                     model: db.treeitem,
                     where: {
                         name: {
-                            [Op.or]: [{ [Op.like]: '%Implementation Ready%' }, { [Op.like]: '%SEO Checklist Review%' }, { [Op.like]: '%Build Ready' }, { [Op.like]: 'Peer Review%' }, { [Op.like]: '%SEO Staging Review%' }, { [Op.like]: 'PM Review%' }, { [Op.like]: '%Staging Quality Control%' }, { [Op.like]: '%Staging Links Delivered%' }]
+                            [Op.or]: [{ [Op.like]: '%Implementation Ready%' }, { [Op.like]: '%SEO Checklist Review%' }, { [Op.like]: 'Copy Solution Phase%' }, { [Op.like]: '%Build Ready' }, { [Op.like]: 'Peer Review%' }, { [Op.like]: '%SEO Staging Review%' }, { [Op.like]: 'PM Review%' }, { [Op.like]: '%Staging Quality Control%' }, { [Op.like]: '%Staging Links Delivered%' }]
                         },
                         child_type: {
                             [Op.in]: ['task', 'milestone']
@@ -116,7 +116,8 @@ module.exports = function (app, passport) {
             milestone4: [],
             milestone5: [],
             milestone6: [],
-            milestone7: []
+            milestone7: [],
+            milestone8: []
         }
         var milestones = {
             total: 0,
@@ -127,6 +128,7 @@ module.exports = function (app, passport) {
             var project = projects[i].dataValues.treeitems
             var impReady = null
             var seoChecklist = null
+            var copySolution = null
             var buildReady = null
             var peerReview = null
             var seoStaging = null
@@ -139,6 +141,8 @@ module.exports = function (app, passport) {
                     impReady = project[pi].date_done
                 } else if (project_name.includes('SEO Checklist')) {
                     seoChecklist = project[pi].date_done
+                } else if (project_name.includes('Copy Solution')) {
+                    copySolution = project[pi].date_done
                 } else if (project_name.includes('Build Ready')) {
                     buildReady = project[pi].date_done
                 } else if (project_name.includes('Peer Review')) {
@@ -166,15 +170,26 @@ module.exports = function (app, passport) {
                     averageTime.milestone1.push(datedif);
                 }
             }
-            if (seoChecklist && buildReady) {
+            if (seoChecklist && copySolution) {
                 milestones.total++
-                let datedif = moment(buildReady).diff(seoChecklist, 'days')
+                let datedif = moment(copySolution).diff(seoChecklist, 'days')
                 if (datedif < 0) {
                     milestones.rejected++
-                    rejectedProjects.push({project_id: projects[i].id,  milestone: 'SEO Checklist to Build Ready',  days: datedif})
+                    rejectedProjects.push({project_id: projects[i].id,  milestone: 'SEO Checklist to Copy Solution',  days: datedif})
                     console.log(projects[i].id)
                 } else {
                     averageTime.milestone2.push(datedif);
+                }
+            }
+            if (copySolution && buildReady) {
+                milestones.total++
+                let datedif = moment(buildReady).diff(copySolution, 'days')
+                if (datedif < 0) {
+                    milestones.rejected++
+                    rejectedProjects.push({project_id: projects[i].id,  milestone: 'Copy Solution to Build Ready',  days: datedif})
+                    console.log(projects[i].id)
+                } else {
+                    averageTime.milestone3.push(datedif);
                 }
             }
             if (buildReady && peerReview) {
@@ -185,7 +200,7 @@ module.exports = function (app, passport) {
                     rejectedProjects.push({project_id: projects[i].id, milestone: 'Build Ready to Peer Review', days: datedif})
                     console.log(projects[i].id)
                 } else {
-                    averageTime.milestone3.push(datedif);
+                    averageTime.milestone4.push(datedif);
                 }
             }
             if (peerReview && seoStaging) {
@@ -196,7 +211,7 @@ module.exports = function (app, passport) {
                     rejectedProjects.push({project_id: projects[i].id,  milestone: 'Peer Review to SEO Staging',days: datedif})
                     console.log(projects[i].id)
                 } else {
-                    averageTime.milestone4.push(datedif);
+                    averageTime.milestone5.push(datedif);
                 }
             }
             if (seoStaging && pmRevew) {
@@ -207,7 +222,7 @@ module.exports = function (app, passport) {
                     rejectedProjects.push({project_id: projects[i].id,  milestone: 'SEO Staging to PM Review', days: datedif})
                     console.log(projects[i].id)
                 } else {
-                    averageTime.milestone5.push(datedif);
+                    averageTime.milestone6.push(datedif);
                 }
             }
             if (pmRevew && stagingQC) {
@@ -218,7 +233,7 @@ module.exports = function (app, passport) {
                     rejectedProjects.push({project_id: projects[i].id,  milestone: 'PM Review to Staging QC', days: datedif})
                     console.log(projects[i].id)
                 } else {
-                    averageTime.milestone6.push(datedif);
+                    averageTime.milestone7.push(datedif);
                 }
             }
             if (stagingQC && linksDelivered) {
@@ -229,7 +244,7 @@ module.exports = function (app, passport) {
                     rejectedProjects.push({project_id: projects[i].id,  milestone: 'Staging QC to Links Delivered', days: datedif})
                     console.log(projects[i].id)
                 } else {
-                    averageTime.milestone7.push(datedif);
+                    averageTime.milestone8.push(datedif);
                 }
             }
         }
@@ -246,12 +261,13 @@ module.exports = function (app, passport) {
             milestones: averageTime,
             milestoneMap: {
                 milestone1: 'Implementation Ready to SEO Checklist',
-                milestone2: 'SEO Checklist to Build Ready',
-                milestone3: 'Build Ready to Peer Review',
-                milestone4: 'Peer Review to SEO Staging',
-                milestone5: 'SEO Staging to PM Review',
-                milestone6: 'PM Review to Staging QC',
-                milestone7: 'Staging QC to Links Delivered'
+                milestone2: 'SEO Checklist to Copy Solution',
+                milestone3: 'Copy Solution to Build Ready',
+                milestone4: 'Build Ready to Peer Review',
+                milestone5: 'Peer Review to SEO Staging',
+                milestone6: 'SEO Staging to PM Review',
+                milestone7: 'PM Review to Staging QC',
+                milestone8: 'Staging QC to Links Delivered'
             },
             date: todaysDate,
             milestoneData: milestones
