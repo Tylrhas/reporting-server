@@ -36,7 +36,11 @@
           <%var total = 0 
           for(var i=0; i < Object.keys(averageTime.milestones).length; i++) { 
                         key = Object.keys(averageTime.milestones)[i]
-                        total = total + Math.round(100*averageTime.milestones[key])/100
+                        if (i === 2 || i === 3) {
+                          total = total + 0
+                        } else {
+                          total = total + Math.round(100*averageTime.milestones[key])/100
+                        }
                         %>
           <tr>
             <td>

@@ -117,7 +117,8 @@ module.exports = function (app, passport) {
             milestone5: [],
             milestone6: [],
             milestone7: [],
-            milestone8: []
+            milestone8: [],
+            milestone9: []
         }
         var milestones = {
             total: 0,
@@ -164,10 +165,21 @@ module.exports = function (app, passport) {
                 let datedif = moment(seoChecklist).diff(impReady, 'days')
                 if (datedif < 0) {
                     milestones.rejected++
-                    rejectedProjects.push({project_id: projects[i].id, milestone: 'Implementation to SEO Checklist', days: datedif})
+                    rejectedProjects.push({project_id: projects[i].id, milestone: 'Implementation to SEO Checklist (SEO Review)', days: datedif})
                     console.log(projects[i].id)
                 } else {
                     averageTime.milestone1.push(datedif);
+                }
+            }
+            if (seoChecklist && buildReady) {
+                milestones.total++
+                let datedif = moment(buildReady).diff(seoChecklist, 'days')
+                if (datedif < 0) {
+                    milestones.rejected++
+                    rejectedProjects.push({project_id: projects[i].id,  milestone: 'SEO Checklist to Build Ready (Copy and Build Prep)',  days: datedif})
+                    console.log(projects[i].id)
+                } else {
+                    averageTime.milestone2.push(datedif);
                 }
             }
             if (seoChecklist && copySolution) {
@@ -175,10 +187,10 @@ module.exports = function (app, passport) {
                 let datedif = moment(copySolution).diff(seoChecklist, 'days')
                 if (datedif < 0) {
                     milestones.rejected++
-                    rejectedProjects.push({project_id: projects[i].id,  milestone: 'SEO Checklist to Copy Solution',  days: datedif})
+                    rejectedProjects.push({project_id: projects[i].id,  milestone: 'SEO Checklist to Copy Solution (Copy)',  days: datedif})
                     console.log(projects[i].id)
                 } else {
-                    averageTime.milestone2.push(datedif);
+                    averageTime.milestone3.push(datedif);
                 }
             }
             if (copySolution && buildReady) {
@@ -186,10 +198,10 @@ module.exports = function (app, passport) {
                 let datedif = moment(buildReady).diff(copySolution, 'days')
                 if (datedif < 0) {
                     milestones.rejected++
-                    rejectedProjects.push({project_id: projects[i].id,  milestone: 'Copy Solution to Build Ready',  days: datedif})
+                    rejectedProjects.push({project_id: projects[i].id,  milestone: 'Copy Solution to Build Ready (Build Prep)',  days: datedif})
                     console.log(projects[i].id)
                 } else {
-                    averageTime.milestone3.push(datedif);
+                    averageTime.milestone4.push(datedif);
                 }
             }
             if (buildReady && peerReview) {
@@ -197,10 +209,10 @@ module.exports = function (app, passport) {
                 let datedif = moment(peerReview).diff(buildReady, 'days')
                 if (datedif < 0) {
                     milestones.rejected++
-                    rejectedProjects.push({project_id: projects[i].id, milestone: 'Build Ready to Peer Review', days: datedif})
+                    rejectedProjects.push({project_id: projects[i].id, milestone: 'Build Ready to Peer Review (Build)', days: datedif})
                     console.log(projects[i].id)
                 } else {
-                    averageTime.milestone4.push(datedif);
+                    averageTime.milestone5.push(datedif);
                 }
             }
             if (peerReview && seoStaging) {
@@ -208,10 +220,10 @@ module.exports = function (app, passport) {
                 let datedif = moment(seoStaging).diff(peerReview, 'days')
                 if (datedif < 0) {
                     milestones.rejected++
-                    rejectedProjects.push({project_id: projects[i].id,  milestone: 'Peer Review to SEO Staging',days: datedif})
+                    rejectedProjects.push({project_id: projects[i].id,  milestone: 'Peer Review to SEO Staging (SEO Staging)',days: datedif})
                     console.log(projects[i].id)
                 } else {
-                    averageTime.milestone5.push(datedif);
+                    averageTime.milestone6.push(datedif);
                 }
             }
             if (seoStaging && pmRevew) {
@@ -219,10 +231,10 @@ module.exports = function (app, passport) {
                 let datedif = moment(pmRevew).diff(seoStaging, 'days')
                 if (datedif < 0) {
                     milestones.rejected++
-                    rejectedProjects.push({project_id: projects[i].id,  milestone: 'SEO Staging to PM Review', days: datedif})
+                    rejectedProjects.push({project_id: projects[i].id,  milestone: 'SEO Staging to PM Review (PM Review)', days: datedif})
                     console.log(projects[i].id)
                 } else {
-                    averageTime.milestone6.push(datedif);
+                    averageTime.milestone7.push(datedif);
                 }
             }
             if (pmRevew && stagingQC) {
@@ -230,10 +242,10 @@ module.exports = function (app, passport) {
                 let datedif = moment(stagingQC).diff(pmRevew, 'days')
                 if (datedif < 0) {
                     milestones.rejected++
-                    rejectedProjects.push({project_id: projects[i].id,  milestone: 'PM Review to Staging QC', days: datedif})
+                    rejectedProjects.push({project_id: projects[i].id,  milestone: 'PM Review to Staging QC (Staging QC)', days: datedif})
                     console.log(projects[i].id)
                 } else {
-                    averageTime.milestone7.push(datedif);
+                    averageTime.milestone8.push(datedif);
                 }
             }
             if (stagingQC && linksDelivered) {
@@ -241,10 +253,10 @@ module.exports = function (app, passport) {
                 let datedif = moment(linksDelivered).diff(stagingQC, 'days')
                 if (datedif < 0) {
                     milestones.rejected++
-                    rejectedProjects.push({project_id: projects[i].id,  milestone: 'Staging QC to Links Delivered', days: datedif})
+                    rejectedProjects.push({project_id: projects[i].id,  milestone: 'Staging QC to Links Delivered (Links Delivered)', days: datedif})
                     console.log(projects[i].id)
                 } else {
-                    averageTime.milestone8.push(datedif);
+                    averageTime.milestone9.push(datedif);
                 }
             }
         }
@@ -260,14 +272,15 @@ module.exports = function (app, passport) {
             rejectedProjects: rejectedProjects,
             milestones: averageTime,
             milestoneMap: {
-                milestone1: 'Implementation Ready to SEO Checklist',
-                milestone2: 'SEO Checklist to Copy Solution',
-                milestone3: 'Copy Solution to Build Ready',
-                milestone4: 'Build Ready to Peer Review',
-                milestone5: 'Peer Review to SEO Staging',
-                milestone6: 'SEO Staging to PM Review',
-                milestone7: 'PM Review to Staging QC',
-                milestone8: 'Staging QC to Links Delivered'
+                milestone1: 'Implementation Ready to SEO Checklist (SEO Review)',
+                milestone2: 'SEO Checklist to Build Ready (Copy and Build Prep)',
+                milestone3: 'SEO Checklist to Copy Solution (Copy Solution)',
+                milestone4: 'Copy Solution to Build Ready (Build Prep)',
+                milestone5: 'Build Ready to Peer Review (Build)',
+                milestone6: 'Peer Review to SEO Staging (SEO Staging)',
+                milestone7: 'SEO Staging to PM Review (PM Review)',
+                milestone8: 'PM Review to Staging QC (Staging QC)',
+                milestone9: 'Staging QC to Links Delivered (Links Delivered)'
             },
             date: todaysDate,
             milestoneData: milestones
