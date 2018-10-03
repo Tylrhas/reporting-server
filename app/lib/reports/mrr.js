@@ -84,7 +84,6 @@ async function activated_ps_total(firstDay, lastDay) {
 
     }
   })
-  
 }
 async function activated_da_total(firstDay, lastDay) {
   return db.lbs.sum('total_mrr', {
