@@ -13,13 +13,12 @@ module.exports = function (sequelize, Sequelize) {
 
     last_name: {
       type: Sequelize.STRING
-    },
-    team: {
-      type: Sequelize.ENUM('SEO', 'QC', 'PM', 'WIS', 'null'),
-      defaultValue: 'null'
-  }
-
+    }
   })
+  lp_user.associate = function (models) {
+    // associate project tasks
+    models.lp_user.hasMany(models.lbs, {foreignKey: 'pm_id', sourceKey: 'id'});
+  }
 
   return lp_user
 }

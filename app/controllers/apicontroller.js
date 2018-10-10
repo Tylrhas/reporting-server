@@ -6,10 +6,10 @@ lp_lbs = require('./api/lp_lbs');
 backfill = require('../lib/controllers/backfill')
 client_time = require('./jobs/client_time');
 var Sequelize = require("sequelize")
+var lp_users = require('../controllers/lp_users')
 //Models
 var db = require("../models");
 const Op = Sequelize.Op
-
 const auth = "Basic " + new Buffer(process.env.LpUserName + ":" + process.env.LPPassword).toString("base64");
 
 var Papa = require("papaparse")
@@ -155,18 +155,30 @@ exports.getProject = function (req, res) {
     })
 }
 
-exports.updateNsBacklog = function (req, res) {
+exports.updateNsBacklog = async function (req, res) {
     res.status(200)
     var updates = []
     var data = req.body.data
     var row
+    // get the list of users in LP
+    var users = await lp_users.get_all()
     for (i = 0; i < data.length; i++) {
         if (data[i]['Internal ID'] !== undefined) {
             if (data[i].hasOwnProperty('Go-Live Date (Day)')) {
+                // parse the PM name
+                pmName = data[i]['PM'].trim().toLowerCase()
+                pmName = pmName.replace(/ /g, "_")
+                if (pmName in users) {
+                    pmID = users[pmName].id
+                } else {
+                    pmID = null
+                }
                 row = {
                     id: data[i]['Internal ID'],
                     location_name: null,
                     total_mrr: data[i]['Total MRR'],
+                    master_project_id: parseInt(data[i]['Master Project ID']),
+                    pm_id: pmID,
                     gross_ps: data[i]['Gross Professional Services'],
                     net_ps: data[i]['Net Professional Services'],
                     total_ps_discount: data[i]['Total Professional Services Discount'],
@@ -182,10 +194,20 @@ exports.updateNsBacklog = function (req, res) {
                     row.location_name = data[i]['Location'].split(/\s(.+)/)[0]
                 }
             } else {
+                // parse the PM name
+                pmName = data[i]['PM'].trim().toLowerCase()
+                pmName = pmName.replace(/ /g, "_")
+                if (pmName in users) {
+                    pmID = users[pmName].id
+                } else {
+                    pmID = null
+                }
+
                 row = {
                     id: data[i]['Internal ID'],
                     location_name: null,
-                    master_project_id: data[i]['Master Project ID'],
+                    master_project_id: parseInt(data[i]['Master Project ID']),
+                    pm_id: pmID,
                     total_mrr: data[i]['Total MRR'],
                     gross_ps: data[i]['Gross Professional Services'],
                     net_ps: data[i]['Net Professional Services'],
@@ -239,7 +261,7 @@ exports.updateProjects = async function (req, res) {
     backfill.remote(req, res)
 }
 exports.updateArchivedProjects = async function (req, res) {
-    backfill.archivedProjects(req,res)
+    backfill.archivedProjects(req, res)
 }
 
 exports.getTreeItems = function (req, res) {
@@ -334,7 +356,7 @@ exports.updateTeamProjects = function (req, res) {
         })
 }
 
-function updateProject (project, teamID) {
+function updateProject(project, teamID) {
     return db.treeitem.findOrCreate({
         where: {
             id: project.id
@@ -356,7 +378,7 @@ function updateProject (project, teamID) {
         })
     })
 }
-async function createTreeItem (body) {
+async function createTreeItem(body) {
     return db.treeitem.findOrCreate({
         where: {
             id: body.id
