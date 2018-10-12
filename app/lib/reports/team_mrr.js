@@ -285,17 +285,29 @@ async function team_backlog_detail (cft_id, lastDay) {
                 [Op.between]: [firstDay, lastDay]
               },
               actual_go_live: null
+            }, include: [
+              {
+                model: db.lp_user,
+                attributes:['first_name', 'last_name']
+              }
+            ]
+          },
+          {
+            model: db.treeitem,
+            // attributes: ['total_mrr'],
+            where: {
+              child_type: 'project'
             }
           }
         ]
       })
       //  parse the object to get all of the LBS for this team
-      lbs_array = []
+      lbs_locations_array = []
       for (i = 0; i < lbs.length; i++) {
-        lbs_array = lbs_array.concat(lbs[i].lbs)
+        lbs_locations_array = lbs_locations_array.concat(lbs[i].lbs)
       }
       console.log(lbs)
-      return lbs_array
+      return { locations: lbs_locations_array, projects: lbs}
     }
   } else {
     return null

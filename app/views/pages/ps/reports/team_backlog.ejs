@@ -1,27 +1,71 @@
 <% include ../../../partials/header.ejs %>
-  <% include ../../../partials/nav.ejs %>
-    <main class="app-content">
+<% include ../../../partials/nav.ejs %>
+<main class="app-content">
 
-      <div class="app-title">
-        <div>
-          <h1> <%= cftName.name %> Backlog</h1>
-        </div>
-        <ul class="app-breadcrumb breadcrumb">
-          <li class="breadcrumb-item">
-            <i class="fa fa-home fa-lg"></i>
-          </li>
-          <li class="breadcrumb-item">PS</li>
-          <li class="breadcrumb-item">Team Goals</li>
-          <li class="breadcrumb-item">Backlog</li>
-          <li class="breadcrumb-item"><a href="/ps/reports/mrr/teams/<%= link_data.date.year %>/<%= link_data.date.month %>">MRR</a></li>
-          <li class="breadcrumb-item active">
-            <%= cftName.name %>
-          </li>
-        </ul>
-      </div>
-      <div class="row">
-        <div class="col">
-          <div class="tile">
+  <div class="app-title">
+    <div>
+      <h1>
+        <%= cftName.name %> Backlog</h1>
+    </div>
+    <ul class="app-breadcrumb breadcrumb">
+      <li class="breadcrumb-item">
+        <i class="fa fa-home fa-lg"></i>
+      </li>
+      <li class="breadcrumb-item">PS</li>
+      <li class="breadcrumb-item">Team Goals</li>
+      <li class="breadcrumb-item">Backlog</li>
+      <li class="breadcrumb-item"><a href="/ps/reports/mrr/teams/<%= link_data.date.year %>/<%= link_data.date.month %>">MRR</a></li>
+      <li class="breadcrumb-item active">
+        <%= cftName.name %>
+      </li>
+    </ul>
+  </div>
+  <div class="row">
+    <div class="col">
+      <div class="tile">
+        <div class="bs-component">
+          <ul class="nav nav-tabs">
+            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#project">Projects</a></li>
+            <li class="nav-item"><a class="nav-link active show" data-toggle="tab" href="#location">Locations</a></li>
+          </ul>
+          <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade" id="project">
+              <table class="table" id="active_projects">
+                <thead>
+                  <tr>
+                    <th scope="col">Project Name</th>
+                    <th scope="col">PM</th>
+                    <th scope="col">Total MRR</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% for(var i=0; i < lbs.projects.length; i++) { %>
+                  <tr>
+                    <td>
+                        <a href="<%= 'https://app.liquidplanner.com/space/' + lp_space_id +'/projects/show/' + lbs.projects[i].id %>" target="_blank">
+                        <%= lbs.projects[i].treeitems[0].name %>
+                        </a>
+                      </td>
+                    <td>
+                      <% if (lbs.projects[i].lbs[0].lp_user !== null) { %>
+                      <%= lbs.projects[i].lbs[0].lp_user.first_name + ' ' +  lbs.projects[i].lbs[0].lp_user.last_name %>
+                      <% } %>
+                    </td>
+                    <td>
+                    </td>
+                    <td>
+                      <% var project_total_mrr = 0
+                      for ( i2 =0; i2 < lbs.projects[i].lbs.length; i2++) { 
+                        project_total_mrr = project_total_mrr +  lbs.projects[i].lbs[i2].total_mrr
+                      } %>
+                      <%= project_total_mrr %>
+                    </td>
+                  </tr>
+                  <% } %>
+                </tbody>
+              </table>
+            </div>
+            <div class="tab-pane fade active show" id="location">
               <table class="table" id="active_projects">
                 <thead>
                   <tr>
@@ -33,34 +77,38 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <% for(var i=0; i < lbs.length; i++) { %>
-                    <tr>
-                     
-                      <td>
-                        <a href="https://system.na2.netsuite.com/app/accounting/project/project.nl?id=<%= lbs[i].id %>&whence=" target="_blank">
-                        <%= lbs[i].id %>
+                  <% for(var i=0; i < lbs.locations.length; i++) { %>
+                  <tr>
+
+                    <td>
+                      <a href="https://system.na2.netsuite.com/app/accounting/project/project.nl?id=<%= lbs.locations.id %>&whence="
+                        target="_blank">
+                        <%= lbs.locations[i].id %>
                       </a>
-                      </td>
-                      <td>
-                        <%= lbs[i].location_name %>
-                      </td>
-                      <td>
-                        <%= lbs[i].total_mrr %>
-                      </td>
-                      <td>
-                         <!-- activation Date -->
-                        <%= moment(lbs[i].estimated_go_live).format( 'MMM-DD-YYYY') %>
-                      </td>
-                       <td>
-                          <!-- activation Date -->
-                         <%= lbs[i].project_type %>
-                       </td>
-                    </tr>
-                    <% } %>
+                    </td>
+                    <td>
+                      <%= lbs.locations[i].location_name %>
+                    </td>
+                    <td>
+                      <%= lbs.locations[i].total_mrr %>
+                    </td>
+                    <td>
+                      <!-- activation Date -->
+                      <%= moment(lbs.locations[i].estimated_go_live).format( 'MMM-DD-YYYY') %>
+                    </td>
+                    <td>
+                      <!-- activation Date -->
+                      <%= lbs.locations[i].project_type %>
+                    </td>
+                  </tr>
+                  <% } %>
                 </tbody>
               </table>
             </div>
           </div>
         </div>
-        <% include ../../../partials/footer.ejs %>
-    </main>
+      </div>
+    </div>
+  </div>
+  <% include ../../../partials/footer.ejs %>
+</main>
