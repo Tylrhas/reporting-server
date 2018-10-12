@@ -4,7 +4,6 @@ var apiController = require('../controllers/apicontroller.js')
 module.exports = function (app, passport) {
 
     app.get('/api/jobs/updatetasks', checkAuthentication, apiController.updatelptasksapi)
-    app.get('/api/download/at-risk-projects', checkAuthentication,  apiController.at_risk_CSV)
     app.get('/api/projects/update', apiController.updateProjects)
     app.get('/api/treeitems', apiController.getTreeItems)
     app.get('/api/projects/:project_id', apiController.getProject)
