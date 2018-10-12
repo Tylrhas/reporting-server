@@ -149,7 +149,13 @@ function non_associated_range (firstDay, lastDay) {
       project_type: {
         [Op.notIn]: ["SEM Only", "Digital Advertising"]
       }
-    }
+    },
+    include: [
+      {
+        model: db.lp_user,
+        attributes:['first_name', 'last_name']
+      }
+    ]
   })
 }
 
@@ -268,9 +274,18 @@ async function team_backlog_detail (cft_id, lastDay) {
           project_type: {
             [Op.notIn]: ["SEM Only", "Digital Advertising"]
           }
-        }
+        },
+        include: [
+          {
+            model: db.lp_user,
+            attributes:['first_name', 'last_name']
+          }
+        ]
       })
-      return lbs 
+      return {
+        locations: lbs,
+        projects: null
+      }  
     } else {
       let lbs = await db.lp_project.findAll({
         where: {
