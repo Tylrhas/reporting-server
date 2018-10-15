@@ -1,4 +1,3 @@
-var adminController = require('../controllers/admincontroller.js');
 var Sequelize = require("sequelize");
 // var sequelize = new Sequelize(process.env.DATABASE_URL, { dialectOptions: { ssl: true } });
 const Op = Sequelize.Op
