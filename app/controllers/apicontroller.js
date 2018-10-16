@@ -95,7 +95,6 @@ exports.updateNsBacklog = async function (req, res) {
      row.location_name = data[i]['Location'].split(/\s(.+)/)[0]
     }
    } else {
-
     // parse the PM name
     pmName = data[i]['PM'].trim().toLowerCase()
     pmName = pmName.replace(/ /g, "_")
@@ -138,48 +137,38 @@ exports.updateNsBacklog = async function (req, res) {
   }
  }
  Promise.all(updates).then(() => {
-  // get the first day of the month from this backlog
-  var backlogDate = new Date(data[0]['Estimated Go-Live Date (Day)'])
-  var today = new Date()
-  var year = backlogDate.getFullYear()
-  var month = backlogDate.getMonth()
-  var firstDay = new Date(year, month, 1)
-  var lastDay = new Date(year, month + 1, 0)
+  if (data[0].hasOwnProperty('Estimated Go-Live Date (Day)')) {
+   // get the first day of the month from this backlog
+   var backlogDate = new Date(data[0]['Estimated Go-Live Date (Day)'])
+   var today = new Date()
+   var year = backlogDate.getFullYear()
+   var month = backlogDate.getMonth()
+   var firstDay = new Date(year, month, 1)
+   var lastDay = new Date(year, month + 1, 0)
 
-  // find all LBS tasks that are in this month and not updated today
-  db.lbs.findAll({
-   where: {
-    estimated_go_live: {
-     [Op.between]: [firstDay, lastDay]
-    },
-    updatedAt: {
-     [Op.lt]: today.setHours(0, 0, 0, 0)
-    },
-    actual_go_live: null
-   }
-  }).then(nsLocation => {
-   updates = []
-   for (let i2 = 0; i2 < nsLocation.length; i2++) {
-    updates.push(nsLocation[i2].update({ estimated_go_live: null }))
-   }
-   Promise.all(updates).then(() => {
-    // update that the job is complete once all updates are cone
-    db.job.findAll({
-     where: {
-      jobname: 'ns_backlog'
-     }
-    }).then(results => {
-     results[0].update({
-      lastrun: new Date(),
-      lastrunstatus: 'complete'
-     })
+   // find all LBS tasks that are in this month and not updated today
+   db.lbs.findAll({
+    where: {
+     estimated_go_live: {
+      [Op.between]: [firstDay, lastDay]
+     },
+     updatedAt: {
+      [Op.lt]: today.setHours(0, 0, 0, 0)
+     },
+     actual_go_live: null
+    }
+   }).then(nsLocation => {
+    updates = []
+    for (let i2 = 0; i2 < nsLocation.length; i2++) {
+     updates.push(nsLocation[i2].update({ estimated_go_live: null }))
+    }
+    Promise.all([updates]).then(() => {
+     updateJob('ns_backlog', 'complete')
     })
    })
-  })
-  // 
-  // 
-  // find all locations with an estimated go-live of this month that were not updated today
-
+  } else {
+   updateJob('ns_backlog', 'complete')
+  }
  })
 }
 
@@ -344,4 +333,22 @@ async function createTreeItem(body) {
     task_type: body.task_type
    })
   })
+}
+/**
+ *
+ *
+ * @param {string} jobName
+ * @param {string} status
+ */
+function updateJob(jobName, status) {
+ db.job.findAll({
+  where: {
+   jobname: jobName
+  }
+ }).then(results => {
+  results[0].update({
+   lastrun: new Date(),
+   lastrunstatus: status
+  })
+ })
 }
