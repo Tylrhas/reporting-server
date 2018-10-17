@@ -22,7 +22,7 @@ async function createProject(body) {
 
 function active() {
  // get current active projects
- return db.lp_projects.findAll({
+ return db.lp_project.findAll({
   where: {
    is_done: false,
    is_archived: false,
