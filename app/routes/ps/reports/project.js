@@ -288,11 +288,11 @@ module.exports = function (app, passport) {
   }
   res.render('pages/ps/reports/team-timeline', { user: req.user, lp_space_id: process.env.LPWorkspaceId, moment: moment, slug: 'coco-timeline', link_data: link_data, averageTime: averageTime });
  })
- app.get(ps_project_report_dir + '/scheduledimplementation', async function (req, res) {
+ app.get(ps_project_report_dir + '/scheduledimplementation', checkAuthentication, async function (req, res) {
   let queue = await scheduledimplementation.getQueue()
   let link_data = page_data()
-  // res.render('pages/ps/reports/team-timeline', { user: req.user, lp_space_id: process.env.LPWorkspaceId, moment: moment, slug: 'coco-timeline', link_data: link_data, averageTime: averageTime });
-  res.json(queue)
+  res.render('pages/scheduledimp.ejs', { user: req.user, lp_space_id: process.env.LPWorkspaceId, moment: moment, slug: 'queue', link_data: link_data, queue: queue });
+  // res.json(queue)
  })
  function getSum(total, num) {
   return total + num;

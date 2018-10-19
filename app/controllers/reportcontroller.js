@@ -167,7 +167,11 @@ function team_quick_look(month, year) {
     } else {
       no_team_backlog_mrr = [0]
     }
-    teamMrr['0'].current_backlog = no_team_backlog_mrr.reduce(getSum)
+    if (teamMrr['0'].current_backlog !== 0) {
+     teamMrr['0'].current_backlog = no_team_backlog_mrr.reduce(getSum)
+    } else {
+     no_team_backlog_mrr = 0
+    }
     teamMrr = Object.keys(teamMrr).map(function (key) {
       if (teamMrr[key].mrr == null) {
         teamMrr[key].mrr = 0

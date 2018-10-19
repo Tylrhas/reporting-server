@@ -15,7 +15,9 @@ exports.findMissingLBSProjects = findMissingLBSProjects
 exports.archivedProjects = updateArchivedProjects
 
 async function backFillRemoteData(req, res) {
- res.send(200)
+ if (req) {
+  res.send(200)
+ }
  // set the job status to running
  db.job.findAll({
   where: {
@@ -80,7 +82,9 @@ async function backFillRemoteData(req, res) {
  })
 }
 async function updateArchivedProjects(req, res) {
- res.send(200)
+ if (req) {
+  res.send(200)
+ }
  // set the job status to running
  var job = await db.job.findAll({
   where: {
