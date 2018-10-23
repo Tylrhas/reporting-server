@@ -29,10 +29,12 @@
        <th scope="col">Project Name (Coming Soon)</th>
        <th scope="col">Team</th>
        <th scope="col"># of Locations</th>
-       <th scope="col">LP Project Start Date</th>
        <th scope="col">Stage</th>
        <th scope="col">Total MRR</th>
        <th scope="col">Milestone Done</th>
+       <th scope="col">Days in Queue</th>
+       <th scope="col">Next Milestone</th>
+       <th scope="col">Next Milestone Date</th>
       </tr>
      </thead>
      <tbody>
@@ -41,17 +43,22 @@
          <td><%= queue[i].id%></td>
          <td><%= queue[i].cft.name %></td>
          <td><%= queue[i].lbs.length %></td>
-         <td><%= moment(queue[i].started_on).format('MMM-DD-YYYY') %></td>
-         <!-- <td><%= queue[i].started_on %></td> -->
          <td><%= queue[i].dataValues.lastCompletedMilestone.name %></td>
          <td><%= queue[i].dataValues.total_mrr %></td>
          <td><%= moment(queue[i].dataValues.lastCompletedMilestone.date_done).format('MMM-DD-YYYY') %></td>
+         <td>10</td>
+         <td>Build Ready</td>
+         <td>10/10/18</td>
        </tr>
       <% } %>
      </tbody>
      <tfoot>
       <tr>
-
+       <!-- Count for total projects -->
+       <!-- coumnt fot total mrr -->
+       <!-- add sorting for dates -->
+       <!-- add sorting for MRR -->
+       <!-- make report exportable -->
       </tr>
      </tfoot>
     </table>

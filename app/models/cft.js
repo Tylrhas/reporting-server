@@ -11,5 +11,9 @@ module.exports = function (sequelize, Sequelize) {
       type: Sequelize.TEXT
     }
   })
+  cft.associate = function (models) {
+   // associate project with MRR
+   models.cft.hasMany(models.lp_project, { foreignKey: 'cft_id', sourceKey: 'id' });
+}
   return cft
 }
