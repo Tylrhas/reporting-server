@@ -71,26 +71,23 @@ module.exports = function (app, passport, express) {
   var scheduledProjects = await projects.scheduledProjects({ is_done: false, is_archived: false, is_on_hold: false })
   // get wip limit for each team
   var wipLimits = {
-   0: {
-    limit: 10
-   },
    44790301: {
-    limit: 18
+    limit: 15
    },
    46132813: {
     limit: 12
    },
    46132814: {
-    limit: 11
+    limit: 12
    },
    46132815: {
-    limit: 9
+    limit: 12
    },
    46132816: {
-    limit: 18
+    limit: 12
    },
    46132817: {
-    limit: 13
+    limit: 12
    }
   }
   status = {}
@@ -108,9 +105,19 @@ module.exports = function (app, passport, express) {
     status[activeProjects[i].id].activeProjects = activeProjects[i].lp_projects.length
    }
   }
+
   // transform and combine all of the data into one object
 
   // res.json(builder)
   res.render('pages/ps/reports/team_workload.ejs', { user: req.user, slug: 'team_wordload', lp_space_id: process.env.LPWorkspaceId, moment: moment, link_data: link_data, pods: status })
+ })
+ app.get(ps_workload_reports + '/cft/:teamID/active', auth.basic, async function (req, res) {
+  var cft_id = parseInt(req.params.teamID)
+  // get all active project for a team
+  let link_data = page_data()
+  // get all teams
+  var pods = await cft.getall()
+
+  var activeProjects = await projects.activeCount({ is_done: false, is_archived: false, is_on_hold: false, cft_id: cft_id })
  })
 }

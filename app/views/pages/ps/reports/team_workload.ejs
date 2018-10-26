@@ -34,14 +34,19 @@
      </thead>
      <tbody>
       <tr>
-       <td><%= pods[key].activeProjects %>
-       </td>
-       <td>
-        <%= pods[key].scheduledProjects %>
-       </td>
-       <td>
-         <%= pods[key].wipLimit %>
+        <td>
+          <a href="/ps/reports/workload/cft/<%= key %>/active">
+         <%= pods[key].activeProjects %>
+        </a>
         </td>
+        <td>
+          <a href="/ps/reports/workload/cft/<%= key %>/scheduled">
+         <%= pods[key].scheduledProjects %>
+        </a>
+        </td>
+       <td>
+        <%= pods[key].wipLimit %>
+       </td>
       </tr>
      </tbody>
     </table>
