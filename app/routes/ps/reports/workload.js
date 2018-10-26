@@ -66,34 +66,12 @@ module.exports = function (app, passport, express) {
   // get all teams
   var pods = await cft.getall()
   // get number of active projects per teams
-  var activeProjects = await projects.count({ is_done: false, is_archived: false, is_on_hold: false })
+  var activeProjects = await projects.activeCount({ is_done: false, is_archived: false, is_on_hold: false })
   // get number of scheduled projects per team
-  var scheduledProjects = {
-   0: {
-    projects: 2
-   },
-   44790301: {
-    projects: 3
-   },
-   46132813: {
-    projects: 3
-   },
-   46132814: {
-    projects: 4
-   },
-   46132815: {
-    projects: 2
-   },
-   46132816: {
-    projects: 6
-   },
-   46132817: {
-    projects: 4
-   }
-  }
+  var scheduledProjects = await projects.scheduledProjects({ is_done: false, is_archived: false, is_on_hold: false })
   // get wip limit for each team
   var wipLimits = {
-   0 : {
+   0: {
     limit: 10
    },
    44790301: {
@@ -115,10 +93,24 @@ module.exports = function (app, passport, express) {
     limit: 13
    }
   }
-
+  status = {}
+  for (let i = 0; i < pods.length; i++) {
+   status[pods[i].id] = {
+    scheduledProjects: 0,
+    activeProjects: 0,
+    wipLimit: 0,
+    name: pods[i].name
+   }
+  }
+  console.log(activeProjects)
+  if (activeProjects != undefined) {
+   for (let i = 0; i < activeProjects.length; i++) {
+    status[activeProjects[i].id].activeProjects = activeProjects[i].lp_projects.length
+   }
+  }
   // transform and combine all of the data into one object
 
   // res.json(builder)
-  res.render('pages/ps/reports/team_workload.ejs', { user: req.user, slug: 'team_wordload', lp_space_id: process.env.LPWorkspaceId, moment: moment, link_data: link_data, pods: pods, activeProjects: activeProjects, scheduledProjects: scheduledProjects, wipLimits: wipLimits })
+  res.render('pages/ps/reports/team_workload.ejs', { user: req.user, slug: 'team_wordload', lp_space_id: process.env.LPWorkspaceId, moment: moment, link_data: link_data, pods: status })
  })
 }

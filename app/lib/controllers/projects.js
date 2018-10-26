@@ -4,7 +4,7 @@ var exports = module.exports = {
  mrr: mrr,
  createAPIProject: createProject,
  scheduledProjects: scheduledProjects,
- count: count
+ activeCount: activeCount
 }
 //Models
 var db = require("../../models")
@@ -33,7 +33,7 @@ function active() {
  })
 }
 
-function count(where) {
+function activeCount(where) {
  return db.cft.findAll({
   include: [
    {
@@ -46,7 +46,9 @@ function count(where) {
       name: {
        [Op.like]: '%Implementation Start%'
       },
-      // is_done: true
+      date_done: {
+       [Op.not]: null
+      }
      }
     }
     ]
@@ -93,25 +95,21 @@ function status(project) {
  })
 }
 
-function scheduledProjects() {
+function scheduledProjects(where) {
  // find all projects that do not have the implementation start milestone
- return db.lp_project.findAll({
-  where: {
-   is_done: false,
-   is_archived: false,
-   is_on_hold: false,
-   cft_id: 0
-  },
-  include: [
-   {
-    model: db.treeitem,
-    where: {
-     // name is like implementation start
-     // is not complete
-    }
-   }
-  ]
- })
+ return db.sequelize.query(`SELECT * FROM lp_projects where lp_projects.id IN 
+ ( SELECT project_id 
+   FROM treeitem 
+   WHERE child_type = 'milestone' 
+   AND name like '%Implementation Start%' 
+   and date_done is NUll 
+  ) 
+ AND lp_projects.id IN ( SELECT project_id 
+   FROM treeitem 
+   WHERE child_type = 'milestone' 
+   AND name like '%Implementation Ready%' 
+   and date_done is not NUll
+  )`, { type: db.Sequelize.QueryTypes.SELECT })
 }
 
 exports.createAPIProject = createProject
