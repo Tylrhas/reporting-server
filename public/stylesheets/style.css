@@ -176,3 +176,6 @@ ul.treeview-menu.has-children {
 .btn-right {
     float: right;
 }
+.table tfoot tr td{
+    border-top: 3px solid  #dee2e6;
+}

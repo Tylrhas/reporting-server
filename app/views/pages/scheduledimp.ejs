@@ -1,0 +1,71 @@
+<% include ../partials/header.ejs %>
+<script type="text/javascript" src="/js/bootstrap-multiselect.js"></script>
+<link rel="stylesheet" href="/stylesheets/bootstrap-multiselect.css" type="text/css" />
+<% include ../partials/nav.ejs %>
+<main class="app-content">
+
+ <div class="app-title">
+  <div>
+   <h1>Scheduled Implementation</h1>
+  </div>
+  <ul class="app-breadcrumb breadcrumb">
+   <li class="breadcrumb-item">
+    <i class="fa fa-home fa-lg"></i>
+   </li>
+   <li class="breadcrumb-item">Project Status</li>
+   <li class="breadcrumb-item active">
+    <a href="#">Scheduled Implementation</a>
+   </li>
+  </ul>
+ </div>
+ <div class="row">
+  <div class="col">
+   <div class="tile">
+    <div class="filters">
+    </div>
+    <table class="table" id="active_projects">
+     <thead>
+      <tr>
+       <th scope="col">Project Name (Coming Soon)</th>
+       <th scope="col">Team</th>
+       <th scope="col"># of Locations</th>
+       <th scope="col">Stage</th>
+       <th scope="col">Total MRR</th>
+       <th scope="col">Milestone Done</th>
+       <th scope="col">Days in Queue</th>
+       <th scope="col">Next Milestone</th>
+       <th scope="col">Next Milestone Date</th>
+      </tr>
+     </thead>
+     <tbody>
+      <% for (let i=0; i < queue.length; i++) {%>
+       <tr>
+         <td><%= queue[i].id%></td>
+         <td><%= queue[i].cft.name %></td>
+         <td><%= queue[i].lbs.length %></td>
+         <td><%= queue[i].dataValues.lastCompletedMilestone.name %></td>
+         <td><%= queue[i].dataValues.total_mrr %></td>
+         <td><%= moment(queue[i].dataValues.lastCompletedMilestone.date_done).format('MMM-DD-YYYY') %></td>
+         <td>10</td>
+         <td>Build Ready</td>
+         <td>10/10/18</td>
+       </tr>
+      <% } %>
+     </tbody>
+     <tfoot>
+      <tr>
+       <!-- Count for total projects -->
+       <!-- coumnt fot total mrr -->
+       <!-- add sorting for dates -->
+       <!-- add sorting for MRR -->
+       <!-- make report exportable -->
+      </tr>
+     </tfoot>
+    </table>
+   </div>
+  </div>
+ </div>
+ <script type="text/javascript" src="/js/pages/active_projects.js"></script>
+ <script type="text/javascript" src="/js/plugins/papaparse.min.js"></script>
+ <% include ../partials/footer.ejs %>
+</main>

@@ -1,0 +1,60 @@
+<% include ../../../partials/header.ejs %>
+<% include ../../../partials/nav.ejs %>
+<main class="app-content">
+ <div class="app-title">
+  <div>
+   <h1>Current CFT Workload</h1>
+   <p>Project level WIP for teams</p>
+  </div>
+  <ul class="app-breadcrumb breadcrumb">
+   <li class="breadcrumb-item">
+    <i class="fa fa-home fa-lg"></i>
+   </li>
+   <li class="breadcrumb-item">PS</li>
+   <li class="breadcrumb-item active">Team Workload </li>
+  </ul>
+ </div>
+ <% for(var i = 0; i < Object.keys(pods).length; i++) { key = Object.keys(pods)[i] %>
+ <% if ( i === 0 || i === 3) { %>
+ <div class="row">
+  <% } %>
+  <div class="col-md-4">
+   <div class="tile">
+    <h4 class="center">
+     <%= pods[key].name %>
+    </h4>
+    <table class="table center col-md-12 center">
+     <thead>
+      <tr>
+       <th>Active Projects
+       </th>
+       <th>Scheduled Projects</th>
+       <th>WIP Limit</th>
+      </tr>
+     </thead>
+     <tbody>
+      <tr>
+        <td>
+          <a href="/ps/reports/workload/cft/<%= key %>/active">
+         <%= pods[key].activeProjects %>
+        </a>
+        </td>
+        <td>
+          <a href="/ps/reports/workload/cft/<%= key %>/scheduled">
+         <%= pods[key].scheduledProjects %>
+        </a>
+        </td>
+       <td>
+        <%= pods[key].wipLimit %>
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </div>
+  <% if ( i === 2 || i === Object.keys(pods).length -1 ) { %>
+ </div>
+ <% } %>
+ <% } %>
+</main>
+<% include ../../../partials/footer.ejs %>
