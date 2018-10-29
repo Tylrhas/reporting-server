@@ -13,12 +13,7 @@ module.exports = function (sequelize, Sequelize) {
 
     last_name: {
       type: Sequelize.STRING
-    },
-    team: {
-      type: Sequelize.ENUM('SEO', 'QC', 'PM', 'WIS', 'null'),
-      defaultValue: 'null'
-  }
-
+    }
   })
 
   return lp_user

@@ -1,0 +1,89 @@
+<% include ../../../partials/header.ejs %>
+<% include ../../../partials/nav.ejs %>
+<main class="app-content">
+
+ <div class="app-title">
+  <div>
+   <h1>
+    PS Workload
+  </div>
+  <ul class="app-breadcrumb breadcrumb">
+   <li class="breadcrumb-item">
+    <i class="fa fa-home fa-lg"></i>
+   </li>
+   <li class="breadcrumb-item">PS</li>
+   <li class="breadcrumb-item">Workload</li>
+  </ul>
+ </div>
+ <div class="row">
+  <div class="col">
+   <div class="tile">
+    <div class="bs-component">
+     <ul class="nav nav-tabs">
+      <li class="nav-item"><a class="nav-link active show" data-toggle="tab" href="#project">Builder</a></li>
+      <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#location">PM</a></li>
+      <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#location">SEO</a></li>
+      <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#location">QC</a></li>
+     </ul>
+     <div class="tab-content" id="myTabContent">
+      <div class="tab-pane fade active show" id="project">
+        <table class="table">
+        <thead>
+         <th>
+           Total Available Hours
+         </th>
+         <th>
+           Hours Available
+         </th>
+         <th>
+           Needs Scheduled
+         </th>
+         <th>
+           Total Logged Hours
+         </th>
+         </thead>
+         <tbody>
+          <td><%= Math.round(10*builder.total_availableHours)/10 %></td>
+          <td><%= Math.round(10*builder.remaining.total_hours)/10 %></td>
+          <td><%= Math.round(10*builder.remaining.needs_scheduled)/10 %></td>
+          <td><%= Math.round(10*builder.logged.total_hours)/10 %></td>
+         </tbody>
+       </table>
+       <div class="col-md-4">
+        <!-- pie Chart -->
+        <canvas id="builderPie"></canvas>
+       </div>
+       <!-- builder Data -->
+      </div>
+      <div class="tab-pane fade" id="location">
+       <!-- pm data -->
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+ </div>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+ <script>
+ var ctx = document.getElementById('builderPie').getContext('2d');
+ var availableHours = Math.round(10*<%= builder.remaining.total_hours %>)/10
+ var unassignedHours = Math.round(10*<%= builder.remaining.needs_scheduled %>)/10
+ var chart = new Chart(ctx, {
+    // The type of chart we want to create
+    type: 'pie',
+
+    // The data for our dataset
+    data: {
+        labels: ["Available", "Unassigned"],
+        datasets: [{
+            data: [availableHours, unassignedHours],
+            backgroundColor: ['#7a97ab','#0d2240']
+        }]
+    },
+
+    // Configuration options go here
+    options: {}
+});
+ </script>
+ <% include ../../../partials/footer.ejs %>
+</main>
