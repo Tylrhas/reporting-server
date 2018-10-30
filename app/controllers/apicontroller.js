@@ -171,6 +171,22 @@ exports.updateNsBacklog = async function (req, res) {
   }
  })
 }
+exports.getLBSLocations = async function (req, res) {
+ var locations
+ var startDate
+ var csv
+ if (req.body.startDate) {
+  startDate = req.body.startDate
+ }
+ if (startDate) {
+  locations = await findLBSLocations(startDate)
+ } else {
+  locations = await findLBSLocations(null)
+ }
+ // create CSV from json object and return it
+ csv = Papa.unparse(locations)
+ res.send(csv)
+}
 
 exports.getAllProjects = function (req, res) {
  db.treeitem.findAll({
@@ -351,4 +367,47 @@ function updateJob(jobName, status) {
    lastrunstatus: status
   })
  })
+}
+/**
+ *
+ *
+ * @param {string} startDate
+ * @returns {object}
+ */
+function findLBSLocations(startDate) {
+ if (startDate != null) {
+  return db.lbs.findAll({
+   // add additional fields
+   attributes: ['id', 'estimated_go_live', 'actual_go_live', 'original_estimated_go_live', 'website_launch_date', 'start_date','project_lost_date', 'stage'],
+   where: {
+    updatedAt: {
+     [db.Sequelize.Op.gte]: startDate
+    }
+   }
+  }).spread(function (item, created) {
+   return item.get({
+    plain: true
+   })
+  })
+
+ } else {
+  return db.lbs.findAll({
+   // add additional fields
+   attributes: ['id', 'estimated_go_live', 'actual_go_live', 'original_estimated_go_live', 'website_launch_date', 'start_date']
+  }).spread(function (item, created) {
+   return item.get({
+    plain: true
+   })
+  })
+ }
+}
+
+function downloadLBSProject(startDate) {
+ // format the project so if all project are complete the project is complete 
+ // if all locations are on hold the project is on hold 
+ // if one location is started then the project is started
+
+ // the current estimated go-live date is the furthest away date from the location level
+ // activation date last go-live date
+ // website golive last date go-live date
 }
