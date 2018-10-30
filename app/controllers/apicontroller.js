@@ -187,6 +187,9 @@ exports.getLBSLocations = async function (req, res) {
  for (let i = 0; i < locations.length; i++) {
   csv.push(locations[i].dataValues)
  }
+ // TODO !!!!!!!!!!!!!!!!!!!!
+ // transform headers first 
+
  csv = Papa.unparse(csv)
 
  res.send(csv)
