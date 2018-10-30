@@ -174,7 +174,7 @@ exports.updateNsBacklog = async function (req, res) {
 exports.getLBSLocations = async function (req, res) {
  var locations
  var startDate
- var csv
+ var csv = []
  if (req.body.startDate) {
   startDate = req.body.startDate
  }
@@ -184,7 +184,11 @@ exports.getLBSLocations = async function (req, res) {
   locations = await findLBSLocations(null)
  }
  // create CSV from json object and return it
- csv = Papa.unparse(locations)
+ for (let i = 0; i < locations.length; i++) {
+  csv.push(locations[i].dataValues)
+ }
+ csv = Papa.unparse(csv)
+
  res.send(csv)
 }
 
@@ -378,26 +382,17 @@ function findLBSLocations(startDate) {
  if (startDate != null) {
   return db.lbs.findAll({
    // add additional fields
-   attributes: ['id', 'estimated_go_live', 'actual_go_live', 'original_estimated_go_live', 'website_launch_date', 'start_date','project_lost_date', 'stage'],
+   attributes: ['id', 'estimated_go_live', 'actual_go_live', 'original_estimated_go_live', 'website_launch_date', 'start_date', 'project_lost_date', 'stage'],
    where: {
     updatedAt: {
      [db.Sequelize.Op.gte]: startDate
     }
    }
-  }).spread(function (item, created) {
-   return item.get({
-    plain: true
-   })
   })
-
  } else {
   return db.lbs.findAll({
    // add additional fields
-   attributes: ['id', 'estimated_go_live', 'actual_go_live', 'original_estimated_go_live', 'website_launch_date', 'start_date']
-  }).spread(function (item, created) {
-   return item.get({
-    plain: true
-   })
+   attributes: ['id', 'estimated_go_live', 'actual_go_live', 'original_estimated_go_live', 'website_launch_date', 'start_date', 'project_lost_date', 'stage'],
   })
  }
 }
