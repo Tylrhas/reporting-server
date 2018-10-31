@@ -256,6 +256,7 @@ function starting_backlog(month, year) {
 async function team_backlog_detail(cft_id, lastDay) {
  let date = new Date()
  lastDay = new Date(lastDay)
+ lastDay.setHours(23, 59, 59, 59)
 
 
  if (lastDay >= date) {
@@ -322,6 +323,9 @@ async function team_backlog_detail(cft_id, lastDay) {
    return { locations: lbs_locations_array, projects: lbs }
   }
  } else {
-  return null
+  return {
+   locations: null,
+   projects: null
+  }
  }
 }
