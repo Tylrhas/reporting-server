@@ -7,6 +7,7 @@ backfill = require('../lib/controllers/backfill')
 client_time = require('./jobs/client_time');
 var Sequelize = require("sequelize")
 var lp_users = require('../controllers/lp_users')
+var lbs = require('../controllers/location_billing_service')
 //Models
 var db = require("../models");
 const Op = Sequelize.Op
@@ -179,9 +180,14 @@ exports.getLBSLocations = async function (req, res) {
   startDate = req.body.startDate
  }
  if (startDate) {
-  locations = await findLBSLocations(startDate)
+  let where =  {
+   updatedAt: {
+    [db.Sequelize.Op.gte] : startDate
+   }
+  }
+  locations = await lbs.getNSUpdate(where)
  } else {
-  locations = await findLBSLocations(null)
+  locations = await lbs.getNSUpdate()
  }
  // create CSV from json object and return it
  for (let i = 0; i < locations.length; i++) {
@@ -383,20 +389,9 @@ function updateJob(jobName, status) {
  */
 function findLBSLocations(startDate) {
  if (startDate != null) {
-  return db.lbs.findAll({
-   // add additional fields
-   attributes: ['id', 'estimated_go_live', 'actual_go_live', 'original_estimated_go_live', 'website_launch_date', 'start_date', 'project_lost_date', 'stage'],
-   where: {
-    updatedAt: {
-     [db.Sequelize.Op.gte]: startDate
-    }
-   }
-  })
+
  } else {
-  return db.lbs.findAll({
-   // add additional fields
-   attributes: ['id', 'estimated_go_live', 'actual_go_live', 'original_estimated_go_live', 'website_launch_date', 'start_date', 'project_lost_date', 'stage'],
-  })
+
  }
 }
 
