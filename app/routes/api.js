@@ -12,6 +12,7 @@ module.exports = function (app, passport) {
     app.post('/api/admin/user/update',isAdmin, apiController.updateUser);
     app.post('/api/admin/update/projects/archived', apiController.updateArchivedProjects)
     app.post('/api/admin/lbs/locations/csv', apiController.getLBSLocations)
+    app.post('/api/admin/lbs/projects/csv',apiController.getLBSProjects)
     // app.get('/api/admin/teams/update', isAdmin, apiController.updateTeamProjects)
 
     app.get('/api/admin/lbs/match', isAdmin, apiController.findLBSProjects)

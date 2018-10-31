@@ -6,7 +6,8 @@ module.exports = {
  getAnalyticsReport,
  update,
  get,
- getNSUpdate
+ getNSUpdate,
+ getNSProjectUpdate
 }
 
 function getAnalyticsReport (startDate) {
@@ -43,6 +44,21 @@ function getNSUpdate (where) {
  } else {
   return db.lbs.findAll({
    attributes: [['id','Internal ID'], ['estimated_go_live', 'Current Estimated Go-Live Date'], ['actual_go_live', 'Actual Go-Live Date'], ['original_estimated_go_live','Original Estimated Go-live'], ['website_launch_date', 'Website Launch Date'], ['start_date', 'Start Date'], ['project_lost_date', 'Project Lost date'], ['stage', 'Stage']],
+  })
+ }
+}
+
+function getNSProjectUpdate (where) {
+ if (where) {
+  return db.lbs.findAll({
+   attributes: [['master_project_id','Internal ID'], ['estimated_go_live', 'Current Estimated Go-Live Date'], ['actual_go_live', 'Actual Go-Live Date'], ['original_estimated_go_live','Original Estimated Go-live'], ['website_launch_date', 'Website Launch Date'], ['start_date', 'Start Date'], ['project_lost_date', 'Project Lost date'], ['stage', 'Stage']],
+   where: where,
+   order: ['master_project_id']
+  })
+ } else {
+  return db.lbs.findAll({
+   attributes: [['master_project_id','Internal ID'], ['estimated_go_live', 'Current Estimated Go-Live Date'], ['actual_go_live', 'Actual Go-Live Date'], ['original_estimated_go_live','Original Estimated Go-live'], ['website_launch_date', 'Website Launch Date'], ['start_date', 'Start Date'], ['project_lost_date', 'Project Lost date'], ['stage', 'Stage']],
+   order: ['master_project_id']
   })
  }
 }

@@ -180,9 +180,9 @@ exports.getLBSLocations = async function (req, res) {
   startDate = req.body.startDate
  }
  if (startDate) {
-  let where =  {
+  let where = {
    updatedAt: {
-    [db.Sequelize.Op.gte] : startDate
+    [db.Sequelize.Op.gte]: startDate
    }
   }
   locations = await lbs.getNSUpdate(where)
@@ -193,8 +193,34 @@ exports.getLBSLocations = async function (req, res) {
  for (let i = 0; i < locations.length; i++) {
   csv.push(locations[i].dataValues)
  }
- // TODO !!!!!!!!!!!!!!!!!!!!
- // transform headers first 
+
+ csv = Papa.unparse(csv)
+
+ res.send(csv)
+}
+
+exports.getLBSProjects = async function (req, res) {
+ var locations
+ var startDate
+ var csv = []
+ if (req.body.startDate) {
+  startDate = req.body.startDate
+ }
+ if (startDate) {
+  let where = {
+   updatedAt: {
+    [db.Sequelize.Op.gte]: startDate
+   }
+  }
+  locations = await lbs.getNSProjectUpdate(where)
+ } else {
+  locations = await lbs.getNSProjectUpdate()
+ }
+ // create CSV from json object and return it
+ for (let i = 0; i < locations.length; i++) {
+  // set current project id and check the current against it
+  csv.push(locations[i].dataValues)
+ }
 
  csv = Papa.unparse(csv)
 

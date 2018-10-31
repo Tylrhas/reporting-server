@@ -255,6 +255,7 @@ function starting_backlog(month, year) {
 }
 async function team_backlog_detail(cft_id, lastDay) {
  let date = new Date()
+ date.setHours(0, 0, 0, 0)
  lastDay = new Date(lastDay)
  lastDay.setHours(23, 59, 59, 59)
 
