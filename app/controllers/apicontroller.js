@@ -207,19 +207,18 @@ exports.getLBSProjects = async function (req, res) {
   startDate = req.body.startDate
  }
  if (startDate) {
-  let where = {
-   updatedAt: {
-    [db.Sequelize.Op.gte]: startDate
-   }
-  }
-  locations = await lbs.getNSProjectUpdate(where)
+  locations = await lbs.getNSProjectUpdate(startDate)
  } else {
   locations = await lbs.getNSProjectUpdate()
  }
+ var masterProjectIds = []
+ var masterProjects = []
  // create CSV from json object and return it
  for (let i = 0; i < locations.length; i++) {
-  // set current project id and check the current against it
-  csv.push(locations[i].dataValues)
+  let project = getProjectStatus(locations, i)
+  csv.push(project.data)
+  i = project.newIndex
+  // get all all of the locations that stages that are part of this project
  }
 
  csv = Papa.unparse(csv)
@@ -421,12 +420,47 @@ function findLBSLocations(startDate) {
  }
 }
 
-function downloadLBSProject(startDate) {
- // format the project so if all project are complete the project is complete 
- // if all locations are on hold the project is on hold 
- // if one location is started then the project is started
 
- // the current estimated go-live date is the furthest away date from the location level
- // activation date last go-live date
- // website golive last date go-live date
+
+function getProjectStatus(locations, i) {
+ let currentProjectId = locations[i].master_project_id
+ var stages = []
+ var stage = null
+ var data = {
+  'Internal ID': locations[i].master_project_id,
+  'Current Estimated Go-Live Date': locations[i].estimated_go_live,
+  'Actual Go-Live Date': locations[i].actual_go_live,
+  'Original Estimated Go-live': locations[i].original_estimated_go_live,
+  'Website Launch Date': locations[i].website_launch_date,
+  'Start Date': locations[i].start_date,
+  'Project Lost date': locations[i].project_lost_date
+ }
+ // push the first project into it
+ while (i < locations.length && locations[i].master_project_id === currentProjectId) {
+  stages.push(locations[i].stage)
+  i++
+ }
+
+ if (stages.indexOf('In Process') !== -1) {
+  // a location is in process so set the project to in process
+  stage = "In Process"
+ } else if (stages.indexOf('On Hold') !== -1) {
+  // there are on hold locations and no i process locations
+  stage = "On Hold"
+ } else if (stages.indexOf('Complete') !== -1 && stages.indexOf('On Hold') === -1) {
+  // all locations are complete or lost so the project is complete
+  stage = "Complete"
+ } else if (stages.indexOf('Lost') !== -1 && stages.length === 1) {
+  // all locations are Lost
+  stage = "Lost"
+ } else {
+  // we have an error
+  // SEND IT VIA SLACK
+  console.log('error')
+ }
+ data.stage = stage
+ return {
+  newIndex: i-1,
+  data: data
+ }
 }
