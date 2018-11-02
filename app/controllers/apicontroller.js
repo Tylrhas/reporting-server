@@ -211,8 +211,6 @@ exports.getLBSProjects = async function (req, res) {
  } else {
   locations = await lbs.getNSProjectUpdate()
  }
- var masterProjectIds = []
- var masterProjects = []
  // create CSV from json object and return it
  for (let i = 0; i < locations.length; i++) {
   let project = getProjectStatus(locations, i)
