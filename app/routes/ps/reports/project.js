@@ -10,7 +10,7 @@ var teamMrr = require('../../../lib/reports/team_mrr')
 var cfts = require('../../../lib/reports/cft')
 var ps_project_report_dir = '/ps/reports/projects'
 var page_data = require('../../../lib/page_links')
-var scheduledimplementation = require('../../../lib/reports/scheduled_imp')
+var scheduledimplementation = require('../../../controllers/scheduled_implementation')
 
 
 module.exports = function (app, passport) {
@@ -288,7 +288,7 @@ module.exports = function (app, passport) {
   }
   res.render('pages/ps/reports/team-timeline', { user: req.user, lp_space_id: process.env.LPWorkspaceId, moment: moment, slug: 'coco-timeline', link_data: link_data, averageTime: averageTime });
  })
- app.get(ps_project_report_dir + '/scheduledimplementation', checkAuthentication, async function (req, res) {
+ app.get(ps_project_report_dir + '/scheduledimplementation',checkAuthentication,  async function (req, res) {
   let queue = await scheduledimplementation.getQueue()
   let link_data = page_data()
   res.render('pages/scheduledimp.ejs', { user: req.user, lp_space_id: process.env.LPWorkspaceId, moment: moment, slug: 'queue', link_data: link_data, queue: queue });

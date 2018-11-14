@@ -5,6 +5,8 @@ var projects = require('../../../lib/controllers/projects')
 var moment = require('moment')
 var throttledRequest = require('../../../config/throttled_request_promise')
 const LPauth = "Basic " + new Buffer(process.env.LpUserName + ":" + process.env.LPPassword).toString("base64");
+var scheduledimplementation = require('../../../controllers/scheduled_implementation')
+
 // set the sub dirs for the PS MRR Reporting Routes
 var ps_workload_reports = '/ps/reports/workload'
 module.exports = function (app, passport, express) {
@@ -64,60 +66,22 @@ module.exports = function (app, passport, express) {
  app.get(ps_workload_reports + '/cft', auth.basic, async function (req, res) {
   let link_data = page_data()
   // get all teams
-  var pods = await cft.getall()
-  // get number of active projects per teams
-  var activeProjects = await projects.activeCount({ is_done: false, is_archived: false, is_on_hold: false })
-  // get number of scheduled projects per team
-  var scheduledProjects = await projects.scheduledProjects({ is_done: false, is_archived: false, is_on_hold: false })
-  // get wip limit for each team
-  var wipLimits = {
-   44790301: {
-    limit: 15
-   },
-   46132813: {
-    limit: 12
-   },
-   46132814: {
-    limit: 12
-   },
-   46132815: {
-    limit: 12
-   },
-   46132816: {
-    limit: 12
-   },
-   46132817: {
-    limit: 12
-   }
-  }
-  status = {}
-  for (let i = 0; i < pods.length; i++) {
-   status[pods[i].id] = {
-    scheduledProjects: 0,
-    activeProjects: 0,
-    wipLimit: 0,
-    name: pods[i].name
-   }
-  }
-  console.log(activeProjects)
-  if (activeProjects != undefined) {
-   for (let i = 0; i < activeProjects.length; i++) {
-    status[activeProjects[i].id].activeProjects = activeProjects[i].lp_projects.length
-   }
-  }
-
+  let queue = await scheduledimplementation.getQueue()
+ 
   // transform and combine all of the data into one object
 
   // res.json(builder)
-  res.render('pages/ps/reports/team_workload.ejs', { user: req.user, slug: 'team_wordload', lp_space_id: process.env.LPWorkspaceId, moment: moment, link_data: link_data, pods: status })
+  res.render('pages/ps/reports/team_workload.ejs', { user: req.user, slug: 'team_wordload', lp_space_id: process.env.LPWorkspaceId, moment: moment, link_data: link_data, queue: queue })
  })
- app.get(ps_workload_reports + '/cft/:teamID/active', auth.basic, async function (req, res) {
+ app.get(ps_workload_reports + '/cft/:teamID/active', auth.basic , async function (req, res) {
   var cft_id = parseInt(req.params.teamID)
   // get all active project for a team
   let link_data = page_data()
-  // get all teams
-  var pods = await cft.getall()
+  var activeProjects = await scheduledimplementation.getActiveProjects(cft_id)
 
-  var activeProjects = await projects.activeCount({ is_done: false, is_archived: false, is_on_hold: false, cft_id: cft_id })
+  // res.json(activeProjects)
+  res.render('pages/scheduledimp.ejs', { user: req.user, slug: 'team_wordload', lp_space_id: process.env.LPWorkspaceId, moment: moment, link_data: link_data, projects: activeProjects })
+
+  // var activeProjects = await projects.activeCount({ is_done: false, is_archived: false, is_on_hold: false, cft_id: cft_id })
  })
 }

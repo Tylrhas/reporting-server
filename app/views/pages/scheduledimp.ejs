@@ -26,29 +26,19 @@
     <table class="table" id="active_projects">
      <thead>
       <tr>
-       <th scope="col">Project Name (Coming Soon)</th>
-       <th scope="col">Team</th>
+       <th scope="col">Project Name</th>
+       <th scope="col">Start Date</th>
        <th scope="col"># of Locations</th>
-       <th scope="col">Stage</th>
        <th scope="col">Total MRR</th>
-       <th scope="col">Milestone Done</th>
-       <th scope="col">Days in Queue</th>
-       <th scope="col">Next Milestone</th>
-       <th scope="col">Next Milestone Date</th>
       </tr>
      </thead>
      <tbody>
-      <% for (let i=0; i < queue.length; i++) {%>
+      <% for (let i=0; i < projects.length; i++) {%>
        <tr>
-         <td><%= queue[i].id%></td>
-         <td><%= queue[i].cft.name %></td>
-         <td><%= queue[i].lbs.length %></td>
-         <td><%= queue[i].dataValues.lastCompletedMilestone.name %></td>
-         <td><%= queue[i].dataValues.total_mrr %></td>
-         <td><%= moment(queue[i].dataValues.lastCompletedMilestone.date_done).format('MMM-DD-YYYY') %></td>
-         <td>10</td>
-         <td>Build Ready</td>
-         <td>10/10/18</td>
+         <td><a href="https://app.liquidplanner.com/space/158330/projects/show/<%= projects[i].id %>" target="_blank"><%= projects[i].name %></a></td>
+         <td><%= projects[i].start_date %></td>
+         <td><%= projects[i].locations %></td>
+         <td><%= projects[i].total_mrr %></td>
        </tr>
       <% } %>
      </tbody>

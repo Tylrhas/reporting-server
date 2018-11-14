@@ -14,14 +14,14 @@
    <li class="breadcrumb-item active">Team Workload </li>
   </ul>
  </div>
- <% for(var i = 0; i < Object.keys(pods).length; i++) { key = Object.keys(pods)[i] %>
+ <% for(var i = 0; i < queue.length; i++) {%>
  <% if ( i === 0 || i === 3) { %>
  <div class="row">
   <% } %>
   <div class="col-md-4">
    <div class="tile">
     <h4 class="center">
-     <%= pods[key].name %>
+     <%= queue[i].name %>
     </h4>
     <table class="table center col-md-12 center">
      <thead>
@@ -35,24 +35,24 @@
      <tbody>
       <tr>
         <td>
-          <a href="/ps/reports/workload/cft/<%= key %>/active">
-         <%= pods[key].activeProjects %>
+          <a href="/ps/reports/workload/cft/<%= queue[i].id %>/active">
+         <%= queue[i].active.length %>
         </a>
         </td>
         <td>
-          <a href="/ps/reports/workload/cft/<%= key %>/scheduled">
-         <%= pods[key].scheduledProjects %>
+          <a href="/ps/reports/workload/cft/<%= queue[i].id %>/scheduled">
+         <%= queue[i].scheduled.length %>
         </a>
         </td>
        <td>
-        <%= pods[key].wipLimit %>
+         <%= queue[i].wipLimit %>
        </td>
       </tr>
      </tbody>
     </table>
    </div>
   </div>
-  <% if ( i === 2 || i === Object.keys(pods).length -1 ) { %>
+  <% if ( i === 2 || i === queue.length -1 ) { %>
  </div>
  <% } %>
  <% } %>
