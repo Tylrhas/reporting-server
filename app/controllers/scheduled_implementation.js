@@ -327,6 +327,5 @@ async function getAllProjects(cft_id) {
    total_mrr: total_mrr
   })
  }
-
  return array
 }
