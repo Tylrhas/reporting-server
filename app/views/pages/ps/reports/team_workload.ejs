@@ -14,44 +14,78 @@
    <li class="breadcrumb-item active">Team Workload </li>
   </ul>
  </div>
- <% for(var i = 0; i < queue.length; i++) {%>
+ <% for(let i = 0; i < queue.length; i++) {%>
  <% if ( i === 0 || i === 3) { %>
  <div class="row">
   <% } %>
-  <div class="col-md-4">
-   <div class="tile">
-    <h4 class="center">
-     <%= queue[i].name %>
-    </h4>
-    <table class="table center col-md-12 center">
-     <thead>
-      <tr>
-       <th>Active Projects
-       </th>
-       <th>Scheduled Projects</th>
-       <th>WIP Limit</th>
-      </tr>
-     </thead>
-     <tbody>
-      <tr>
-        <td>
-          <a href="/ps/reports/workload/cft/<%= queue[i].id %>/active">
-         <%= queue[i].active.length %>
-        </a>
-        </td>
-        <td>
-          <a href="/ps/reports/workload/cft/<%= queue[i].id %>/scheduled">
-         <%= queue[i].scheduled.length %>
-        </a>
-        </td>
-       <td>
-         <%= queue[i].wipLimit %>
-       </td>
-      </tr>
-     </tbody>
-    </table>
-   </div>
-  </div>
+  <% if (queue[i].id === 48803247) { %>
+   <div class="col-md-4">
+     <div class="tile">
+      <h4 class="center">
+       <%= queue[i].name %>
+      </h4>
+      <table class="table center col-md-12 center">
+       <thead>
+        <tr>
+         <th>Projects</th>
+         <th>Locations</th>
+         <th>MRR</th>
+        </tr>
+       </thead>
+       <tbody>
+        <tr>
+         <td>
+          <a href="/ps/reports/workload/cft/<%= queue[i].id %>/projects">
+           <%= queue[i].projects %>
+          </a>
+         </td>
+         <td>
+           <%= queue[i].locations %>
+         </td>
+         <td>
+          <%= queue[i].mrr %>
+         </td>
+        </tr>
+       </tbody>
+      </table>
+     </div>
+    </div>
+   <% } else { %>
+    <div class="col-md-4">
+      <div class="tile">
+       <h4 class="center">
+        <%= queue[i].name %>
+       </h4>
+       <table class="table center col-md-12 center">
+        <thead>
+         <tr>
+          <th>Active Projects
+          </th>
+          <th>Scheduled Projects</th>
+          <th>WIP Limit</th>
+         </tr>
+        </thead>
+        <tbody>
+         <tr>
+          <td>
+           <a href="/ps/reports/workload/cft/<%= queue[i].id %>/active">
+            <%= queue[i].active.length %>
+           </a>
+          </td>
+          <td>
+           <a href="/ps/reports/workload/cft/<%= queue[i].id %>/scheduled">
+            <%= queue[i].scheduled.length %>
+           </a>
+          </td>
+          <td>
+           <%= queue[i].wipLimit %>
+          </td>
+         </tr>
+        </tbody>
+       </table>
+      </div>
+     </div>
+     <% }%>
   <% if ( i === 2 || i === queue.length -1 ) { %>
  </div>
  <% } %>

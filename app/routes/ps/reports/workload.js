@@ -84,4 +84,22 @@ module.exports = function (app, passport, express) {
 
   // var activeProjects = await projects.activeCount({ is_done: false, is_archived: false, is_on_hold: false, cft_id: cft_id })
  })
+ app.get(ps_workload_reports + '/cft/:teamID/scheduled', auth.basic , async function (req, res) {
+  var teamID = parseInt(req.params.teamID)
+  // get all active project for a team
+  let link_data = page_data()
+  var scheduledProjects = await scheduledimplementation.getScheduledProjects(teamID)
+
+  // res.json(activeProjects)
+  res.render('pages/scheduledimp.ejs', { user: req.user, slug: 'team_wordload', lp_space_id: process.env.LPWorkspaceId, moment: moment, link_data: link_data, projects: scheduledProjects })
+ })
+ app.get(ps_workload_reports + '/cft/:teamID/projects', auth.basic , async function (req, res) {
+  var teamID = parseInt(req.params.teamID)
+  // get all active project for a team
+  let link_data = page_data()
+  var allProjects = await scheduledimplementation.getAllProjects(teamID)
+
+  // res.json(activeProjects)
+  res.render('pages/scheduledimp.ejs', { user: req.user, slug: 'team_wordload', lp_space_id: process.env.LPWorkspaceId, moment: moment, link_data: link_data, projects: allProjects })
+ })
 }

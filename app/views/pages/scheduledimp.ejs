@@ -36,7 +36,7 @@
       <% for (let i=0; i < projects.length; i++) {%>
        <tr>
          <td><a href="https://app.liquidplanner.com/space/158330/projects/show/<%= projects[i].id %>" target="_blank"><%= projects[i].name %></a></td>
-         <td><%= projects[i].start_date %></td>
+         <td><%= moment(projects[i].start_date).format('MMM-DD-YYYY') %></td>
          <td><%= projects[i].locations %></td>
          <td><%= projects[i].total_mrr %></td>
        </tr>

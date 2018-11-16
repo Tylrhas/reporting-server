@@ -181,7 +181,9 @@ async function upsertProject(project, update_cft) {
    if (lp_project[0].cft_id === null || lp_project[0].cft_id === 0) {
     await db.lp_project.upsert(update_object)
    } else {
-    delete update_object.cft_id
+    if (update_object.cft_id === 0 || update_object.cft_id == null) {
+     delete update_object.cft_id
+    }
     await db.lp_project.upsert(update_object)
    }
   } else {
@@ -250,6 +252,7 @@ function findChildren(treeItem) {
 async function get_cft_id(body) {
  return new Promise(function (resolve, reject) {
   var found = false
+  var parentMatch = 0
   // find CFT ID
   var results = db.cft.findAll({
    attributes: ['id']
@@ -266,13 +269,13 @@ async function get_cft_id(body) {
     if (CFT_ids.indexOf(parent_id) !== -1) {
      // I want to return this ID
      found = true
-     resolve(parent_id)
+     parentMatch = parent_id
     }
    }
    if (!found) {
     resolve(0)
    } else {
-    reject('No CFT ID Found')
+    resolve(parentMatch)
    }
   })
  })
@@ -291,7 +294,9 @@ async function createTreeItem(body) {
   hrs_remaning: body.high_effort_remaining,
   child_type: body.type.toLowerCase()
  }
-
+ if (body.hasOwnProperty('started_on')) {
+  update_object.started_on = body.started_on
+ }
  if (body.hasOwnProperty('custom_field_values')) {
   // fill out the custom values
   for (let i = 0; i < Object.keys(body.custom_field_values).length; i++) {
