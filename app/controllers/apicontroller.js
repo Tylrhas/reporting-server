@@ -22,7 +22,11 @@ var throttledRequest = require('../config/throttled_request')
 exports.updatelpLbsapi = function (req, res) {
  lp_lbs.updateapi(req, res);
 }
-
+exports.backfillLBS = function (req, res) {
+var json = req.body
+res.send(201)
+lbs.backfill(json)
+}
 exports.lbsAPIUpdate = async function (req, res) {
  var locations
  start_date = null
@@ -54,8 +58,6 @@ exports.lbsAPIUpdate = async function (req, res) {
   }
   await lbs.update({id: LBSId}, update)
  }
-// get the updates from the API
-
 // push the updates to the database
 }
 

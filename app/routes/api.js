@@ -15,7 +15,7 @@ module.exports = function (app, passport) {
     app.post('/api/admin/lbs/projects/csv',apiController.getLBSProjects)
     app.get('/api/admin/lbs/update',apiController.lbsAPIUpdate)
     // app.get('/api/admin/teams/update', isAdmin, apiController.updateTeamProjects)
-
+    app.post('/api/admin/lbs/backfill', apiController.backfillLBS)
     app.get('/api/admin/lbs/match', isAdmin, apiController.findLBSProjects)
 
     //    app.get('/api/views/testData', isAdmin, apiController.test_view);
