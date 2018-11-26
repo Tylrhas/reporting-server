@@ -1,4 +1,5 @@
 var throttledRequest = require('./throttled_request')
+var objectConstructor = {}.constructor
 module.exports = {
  promise
 }
@@ -12,9 +13,12 @@ function promise(args) {
     reject(error)
    }
    else {
-    resolve(JSON.parse(body))
+    if (body.constructor === objectConstructor) {
+     resolve(body)
+    } else {
+     resolve(JSON.parse(body))
+    }
    }
   })
  })
-
 }
