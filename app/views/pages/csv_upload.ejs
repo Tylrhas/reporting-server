@@ -53,6 +53,15 @@
               <button id="archived_projects" class="center">Update</button>
           </div>
         </div>
+        <div class="col-md-4">
+         <div class="tile center">
+             <h4>Update LBS Data</h4>
+             <p>Pull dates and statuses from LP</p>
+             <p><b>Last Update: </b> <%= moment(jobs['update_lbs'].lastRun).format( 'MMM-DD-YYYY hh:MM:SS A') %></p>
+             <p><b>Last Run Status: </b> <%= jobs['update_lbs'].lastRunStatus %></p>
+             <button id="update_lbs" class="center">Update</button>
+         </div>
+       </div>
       </div>
     </main>
     <script src="/js/plugins/papaparse.min.js"></script>
@@ -115,6 +124,16 @@
       $.ajax({
           type: "get",
           url: '/api/admin/lbs/match',
+          success: function (data) {
+          },
+          dataType: 'JSON'
+        })
+    })
+
+        $('#update_lbs').click(function() {
+      $.ajax({
+          type: "get",
+          url: '/api/admin/lbs/update',
           success: function (data) {
           },
           dataType: 'JSON'
