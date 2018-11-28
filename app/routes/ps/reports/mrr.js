@@ -71,7 +71,13 @@ module.exports = function (app, passport, express) {
 
         var firstDay = new Date(year, month - 1, 0);
         var lastDay = new Date(year, month, 0);
-        var cft_name = db.cft.findAll({ where: { id: id } })
+        var cft_name = db.cft.findAll({ 
+         where: { 
+          id: {
+           [Op.not]: 48803247
+          } 
+         } 
+        })
 
         firstDay.setHours(23, 59, 59, 999);
         lastDay.setHours(23, 59, 59, 999);

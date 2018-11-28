@@ -378,7 +378,15 @@ async function findMissingLBSProjects(req, res) {
   status: 'running'
  })
  // get all non_associated MRR LBS and see if there is a project in LP for them
- var non_associated_lbs = await teamMrr.non_associated()
+ var non_associated_lbs = await db.lbs.findAll({
+  where: {
+   project_id: null,
+   actual_go_live: null,
+   project_type: {
+    [Op.notIn]: ["DA Rep & Social", "SEM Only", "Digital Advertising"]
+   }
+  }
+ })
 
  for (let i = 0; i < non_associated_lbs.length; i++) {
   let url = 'https://app.liquidplanner.com/api/workspaces/' + process.env.LPWorkspaceId + '/tasks/?filter[]=name starts_with ' + non_associated_lbs[i].id

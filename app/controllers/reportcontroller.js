@@ -121,7 +121,13 @@ function team_quick_look(month, year) {
   lastDay.setHours(23, 59, 59, 999);
 
   var mrr = teamMrr.month(firstDay, lastDay)
-  var teams = cfts.getall()
+  var teams = db.cft.findAll({ 
+   where: { 
+    id: {
+     [Op.not]: 48803247
+    } 
+   } 
+  })
   var non_assigned_mrr = teamMrr.non_associated_total(firstDay, lastDay)
   var cft_mrr_goals = teamMrr.month_goals(month, year)
   var cft_backlog = teamMrr.current_backlog(firstDay, lastDay)
@@ -155,10 +161,12 @@ function team_quick_look(month, year) {
     for (i2 = 0; i2 < results[0].length; i2++) {
       let project = results[0][i2]
       let cft_id = results[0][i2].cft_id
+      if (cft_id != null) {
       for (i3 = 0; i3 < project.lbs.length; i3++) {
         let lbs_mrr = project.lbs[i3].total_mrr
         teamMrr[cft_id].mrr = teamMrr[cft_id].mrr + lbs_mrr
       }
+     }
     }
     if (results[6] !== null) {
       no_team_backlog_mrr = results[6].locations.map(function (value, label) {
