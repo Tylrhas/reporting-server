@@ -28,6 +28,11 @@ res.send(201)
 lbs.backfill(json)
 }
 exports.lbsAPIUpdate = async function (req, res) {
+ if (req !== null) {
+  res.send(201)
+ }
+ // find the job and update the run time
+ await updateJob('update_lbs', 'running')
  var locations
  start_date = null
  if (req && req.body.start_date) {
@@ -58,7 +63,7 @@ exports.lbsAPIUpdate = async function (req, res) {
   }
   await lbs.update({id: LBSId}, update)
  }
-// push the updates to the database
+ await updateJob('update_lbs', 'complete')
 }
 
 exports.findLBSProjects = function (req, res) {
