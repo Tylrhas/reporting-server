@@ -243,9 +243,13 @@ function month_detail(month, year) {
   var firstDay = new Date(year, month, 1)
   var lastDay = new Date(year, month + 1, 0)
   var backlogfirstDay = new Date(year, month, day)
-  backlogfirstDay.setHours(0, 0, 0, 0)
-  firstDay = moment(firstDay).format('MM-DD-YYYY')
-  lastDay = moment(lastDay).format('MM-DD-YYYY')
+  firstDay = moment(firstDay).startOf('day')
+  backlogfirstDay = moment(backlogfirstDay).startOf('day')
+  lastDay = moment(lastDay).endOf('day')
+
+  firstDay = moment(firstDay).format('YYYY-MM-DD HH:mm:ss')
+  lastDay = moment(lastDay).format('YYYY-MM-DD HH:mm:ss')
+  backlogfirstDay = moment(backlogfirstDay).format('YYYY-MM-DD HH:mm:ss')
 
   var month_activated = mrr.activated_total(firstDay, lastDay)
   var ps_month_activated = mrr.activated_ps_total(firstDay, lastDay)
@@ -260,9 +264,13 @@ function month_detail(month, year) {
    day = date.getDate()
   }
   var backlogfirstDay = new Date(year, month, day)
-  backlogfirstDay.setHours(0, 0, 0, 0)
-  firstDay = moment(firstDay).format('MM-DD-YYYY')
-  lastDay = moment(lastDay).format('MM-DD-YYYY')
+  firstDay = moment(firstDay).startOf('day')
+  backlogfirstDay = moment(backlogfirstDay).startOf('day')
+  lastDay = moment(lastDay).endOf('day')
+
+  firstDay = moment(firstDay).format('YYYY-MM-DD HH:mm:ss')
+  lastDay = moment(lastDay).format('YYYY-MM-DD HH:mm:ss')
+  backlogfirstDay = moment(backlogfirstDay).format('YYYY-MM-DD HH:mm:ss')
 
   var month_activated = mrr.activated_total(firstDay, lastDay)
   var ps_month_activated = mrr.activated_ps_total(firstDay, lastDay)
@@ -272,8 +280,13 @@ function month_detail(month, year) {
  } else {
   var firstDay = new Date(year, month, 1)
   var lastDay = new Date(year, month + 1, 0)
-  firstDay = moment(firstDay).format('MM-DD-YYYY')
-  lastDay = moment(lastDay).format('MM-DD-YYYY')
+  firstDay = moment(firstDay).startOf('day')
+  backlogfirstDay = moment(backlogfirstDay).startOf('day')
+  lastDay = moment(lastDay).endOf('day')
+
+  firstDay = moment(firstDay).format('YYYY-MM-DD HH:mm:ss')
+  lastDay = moment(lastDay).format('YYYY-MM-DD HH:mm:ss')
+  backlogfirstDay = moment(backlogfirstDay).format('YYYY-MM-DD HH:mm:ss')
   var month_activated = mrr.activated_total(firstDay, lastDay)
   var ps_month_activated = mrr.activated_ps_total(firstDay, lastDay)
   var da_month_activated = mrr.activated_da_total(firstDay, lastDay)
