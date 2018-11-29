@@ -296,11 +296,15 @@ async function quarter_detail(quarter, year) {
   month = date.getMonth()
   year = date.getFullYear()
   var backlogfirstDay = new Date(year, month, day)
-  backlogfirstDay.setHours(0, 0, 0, 0)
   var firstDay = new Date(quater_month_map[quarter].first + '/' + year)
   var lastDay = new Date(quater_month_map[quarter].last + '/' + year)
-  firstDay.setHours(0, 0, 0, 0)
-  lastDay.setHours(23, 59, 59, 999)
+  firstDay = moment(firstDay).startOf('day')
+  backlogfirstDay = moment(backlogfirstDay).startOf('day')
+  lastDay = moment(lastDay).endOf('day')
+
+  firstDay = moment(firstDay).format('YYYY-MM-DD HH:mm:ss')
+  lastDay = moment(lastDay).format('YYYY-MM-DD HH:mm:ss')
+  backlogfirstDay = moment(backlogfirstDay).format('YYYY-MM-DD HH:mm:ss')
 
   var quarter_activated = mrr.activated_total(firstDay, lastDay)
   var ps_quater_activated = mrr.activated_ps_total(firstDay, lastDay)
@@ -315,13 +319,16 @@ async function quarter_detail(quarter, year) {
   month = date.getMonth()
   year = date.getFullYear()
   var backlogfirstDay = new Date(year, month, day)
-  backlogfirstDay.setHours(0, 0, 0, 0)
 
   var firstDay = new Date(quater_month_map[quarter].first + '/' + year)
   var lastDay = new Date(quater_month_map[quarter].last + '/' + year)
-  firstDay = moment(firstDay).format('MM-DD-YYYY')
-  lastDay = moment(lastDay).format('MM-DD-YYYY')
-  backlogfirstDay = moment(backlogfirstDay).format('MM-DD-YYYY')
+  firstDay = moment(firstDay).startOf('day')
+  backlogfirstDay = moment(backlogfirstDay).startOf('day')
+  lastDay = moment(lastDay).endOf('day')
+
+  firstDay = moment(firstDay).format('YYYY-MM-DD HH:mm:ss')
+  lastDay = moment(lastDay).format('YYYY-MM-DD HH:mm:ss')
+  backlogfirstDay = moment(backlogfirstDay).format('YYYY-MM-DD HH:mm:ss')
 
   var quarter_activated = mrr.activated_total(firstDay, lastDay)
   var ps_quater_activated = mrr.activated_ps_total(firstDay, lastDay)
@@ -330,11 +337,13 @@ async function quarter_detail(quarter, year) {
   var quarter_target = mrr.quarter_target(quarter, year)
  }
  else {
-
   var firstDay = new Date(quater_month_map[quarter].first + '/' + year)
   var lastDay = new Date(quater_month_map[quarter].last + '/' + year)
-  firstDay.setHours(0, 0, 0, 0)
-  lastDay.setHours(23, 59, 59, 999)
+  firstDay = moment(firstDay).startOf('day')
+  lastDay = moment(lastDay).endOf('day')
+
+  firstDay = moment(firstDay).format('YYYY-MM-DD HH:mm:ss')
+  lastDay = moment(lastDay).format('YYYY-MM-DD HH:mm:ss')
 
   var quarter_activated = mrr.activated_total(firstDay, lastDay)
   var ps_quater_activated = mrr.activated_ps_total(firstDay, lastDay)
@@ -342,9 +351,7 @@ async function quarter_detail(quarter, year) {
   var quarter_target = mrr.quarter_target(quarter, year)
   var quarter_backlog = 0
  }
- return Promise.all([quarter_activated, ps_quater_activated, da_quarter_activated, quarter_backlog, quarter_target]).then(results => {
-  console.log(results)
- })
+ return Promise.all([quarter_activated, ps_quater_activated, da_quarter_activated, quarter_backlog, quarter_target])
 }
 
 async function year_detail(year) {
