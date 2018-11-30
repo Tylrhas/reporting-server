@@ -33,6 +33,7 @@ async function getQueue() {
  for (let i = 0; i < activeProjects.length; i++) {
   var implementationStart = { status: false }
   var implementationReady = { status: false }
+  var websiteLive = { status: false }
   let project = activeProjects[i]
   if (!(teams.hasOwnProperty(project.cft_id)) && project.cft_id !== 0) {
    teams[project.cft_id] = {
@@ -62,12 +63,18 @@ async function getQueue() {
      if (milestone.date_done !== null) {
       implementationReady.status = true
      }
+    } 
+    if (milestone.name === 'Website(s) Live') {
+     websiteLive.milestone = milestone
+     if (milestone.date_done !== null) {
+      websiteLive.status = true
+     }
     }
    }
    if (implementationReady.status && !implementationStart.status) {
     // project is scheduled
     teams[project.cft_id].scheduled.push(project.id)
-   } else if (implementationReady.status && implementationStart.status) {
+   } else if (implementationReady.status && implementationStart.status && !websiteLive.status) {
     // project is active
     teams[project.cft_id].active.push(project.id)
    }
