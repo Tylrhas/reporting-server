@@ -47,7 +47,7 @@ async function getQueue() {
    // check if the implementation start milestone is complete
    for (let i2 = 0; i2 < project.dataValues.treeitems.length; i2++) {
     let milestone = project.dataValues.treeitems[i2]
-    if (milestone.name === 'Implementation Start') {
+    if (milestone.name.trim() === 'Implementation Start') {
      // project is scheduled
      implementationStart = {
       milestone: milestone
@@ -56,15 +56,15 @@ async function getQueue() {
       implementationStart.status = true
      }
     }
-    if (milestone.name === 'Implementation Ready') {
+    if (milestone.name.trim() === 'Implementation Ready') {
      implementationReady = {
       milestone: milestone
      }
      if (milestone.date_done !== null) {
       implementationReady.status = true
      }
-    } 
-    if (milestone.name === 'Website(s) Live') {
+    }
+    if (milestone.name.trim() === 'Website(s) Live') {
      websiteLive.milestone = milestone
      if (milestone.date_done !== null) {
       websiteLive.status = true
@@ -167,22 +167,44 @@ async function getActiveProjects(teamId) {
   ]
  })
  for (let i = 0; i < projects.length; i++) {
+  var implementationStart = { status: false }
+  var implementationReady = { status: false }
+  var websiteLive = { status: false }
   let project = projects[i]
   let milestones = projects[i].dataValues.treeitems
   for (i2 = 0; i2 < milestones.length; i2++) {
-   let milestone = milestones[i2]
-   if (milestone.name === 'Implementation Start' && milestone.date_done !== null) {
-    // push the project into active projects
-    activeProject = {
-     id: projects[i].id,
-     name: milestones[milestones.length - 1].name,
-     locations: project.lbs.length,
-     total_mrr: sumLBS(project.lbs),
-     start_date: milestone.date_done
-
+   let milestone = project.dataValues.treeitems[i2]
+   if (milestone.name.trim() === 'Implementation Start') {
+    // project is scheduled
+    implementationStart.milestone = milestone
+    if (milestone.date_done !== null) {
+     implementationStart.status = true
     }
-    activeProjects.push(activeProject)
    }
+   if (milestone.name.trim() === 'Implementation Ready') {
+    implementationReady.milestone = milestone
+    if (milestone.date_done !== null) {
+     implementationReady.status = true
+    }
+   }
+   if (milestone.name.trim() === 'Website(s) Live') {
+    websiteLive.milestone = milestone
+    if (milestone.date_done !== null) {
+     websiteLive.status = true
+    }
+   }
+  }
+  if (implementationReady.status && implementationStart.status && !websiteLive.status) {
+   // project is active
+   activeProject = {
+    id: projects[i].id,
+    name: milestones[milestones.length - 1].name,
+    locations: project.lbs.length,
+    total_mrr: sumLBS(project.lbs),
+    start_date: implementationStart.milestone.date_done
+
+   }
+   activeProjects.push(activeProject)
   }
  }
  return activeProjects
@@ -302,7 +324,7 @@ async function getAllProjects(cft_id) {
  let projects = await db.lp_project.findAll({
   attributtes: ['id'],
   where: {
-   cft_id: cft_id ,
+   cft_id: cft_id,
    done_on: null,
    is_done: false,
    is_on_hold: false,
