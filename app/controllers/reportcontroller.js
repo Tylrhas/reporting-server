@@ -168,7 +168,7 @@ function team_quick_look(month, year) {
     }
    }
   }
-  if (results[6] !== null) {
+  if (results[6].locations !== null) {
    no_team_backlog_mrr = results[6].locations.map(function (value, label) {
     return value.total_mrr
    })
