@@ -31,8 +31,6 @@ exports.lbsAPIUpdate = async function (req, res) {
  if (req !== null) {
   res.send(201)
  }
- // find the job and update the run time
- await updateJob('update_lbs', 'running')
  var locations
  start_date = null
  if (req && req.body.start_date) {
@@ -54,8 +52,8 @@ exports.lbsAPIUpdate = async function (req, res) {
    location_name: locationName,
    project_id: locations[i]["project_id"],
    stage: locations[i]["pick_list_custom_field:102670"],
-   original_estimated_go_live: moment(locations[i]["date_custom_field:151494"]).format('MM-DD-YYYY'),
-   estimated_go_live: moment(locations[i]["date_custom_field:147376"]).format('MM-DD-YYYY'),
+   original_estimated_go_live: locations[i]["date_custom_field:151494"],
+   estimated_go_live: locations[i]["date_custom_field:147376"],
    actual_go_live: locations[i]["date_custom_field:151495"],
    website_launch_date: locations[i]["date_custom_field:151496"],
    start_date: locations[i]["date_custom_field:151496"],
@@ -219,8 +217,8 @@ exports.getLBSLocations = async function (req, res) {
  var locations
  var startDate
  var csv = []
- if (req.body.startDate) {
-  startDate = req.body.startDate
+ if (req.query.startDate) {
+  startDate = req.query.startDate
  }
  if (startDate) {
   let where = {

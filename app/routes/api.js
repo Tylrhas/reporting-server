@@ -11,8 +11,8 @@ module.exports = function (app, passport) {
     app.post('/api/admin/user/update',isAdmin, apiController.updateUser);
     app.post('/api/admin/update/projects/archived', apiController.updateArchivedProjects)
     // start LP and NS integation endpoints
-    app.post('/api/admin/lbs/locations/csv', apiController.getLBSLocations)
-    app.post('/api/admin/lbs/projects/csv',apiController.getLBSProjects)
+    app.get('/api/admin/lbs/locations/csv', apiController.getLBSLocations)
+    app.get('/api/admin/lbs/projects/csv',apiController.getLBSProjects)
     app.get('/api/admin/lbs/update', apiController.lbsAPIUpdate)
     app.post('/api/admin/lbs/backfill', apiController.backfillLBS)
     // end LP and NS integation endpoints

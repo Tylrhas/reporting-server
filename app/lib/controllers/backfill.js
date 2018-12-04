@@ -389,6 +389,9 @@ async function findMissingLBSProjects(req, res) {
  })
 
  for (let i = 0; i < non_associated_lbs.length; i++) {
+  if (non_associated_lbs[i].id == 2971121) {
+   debugger
+  }
   let url = 'https://app.liquidplanner.com/api/workspaces/' + process.env.LPWorkspaceId + '/tasks/?filter[]=name starts_with ' + non_associated_lbs[i].id
   let lplbs = await throttledRequestPromise({ url: url, method: 'GET', headers: { "Authorization": auth } })
 
