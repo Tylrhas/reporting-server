@@ -62,7 +62,7 @@ function getNSProjectUpdate (date) {
    FROM lbs  
    GROUP BY master_project_id
   ) date ON date.master_project_id = lbs.master_project_id
-  WHERE lbs."updatedAt" >= :date AND lbs.master_project_id = 2359350
+  WHERE lbs."updatedAt" >= :date
   GROUP BY lbs.master_project_id, date.estimated_go_live,date.actual_go_live, date.original_estimated_go_live, date.start_date, date.website_launch_date, lbs.stage`,
   {
    replacements: {date: date}, 

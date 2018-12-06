@@ -23,9 +23,9 @@ exports.updatelpLbsapi = function (req, res) {
  lp_lbs.updateapi(req, res);
 }
 exports.backfillLBS = function (req, res) {
-var json = req.body
-res.send(201)
-lbs.backfill(json)
+ var json = req.body
+ res.send(201)
+ lbs.backfill(json)
 }
 exports.lbsAPIUpdate = async function (req, res) {
  if (req !== null) {
@@ -35,17 +35,17 @@ exports.lbsAPIUpdate = async function (req, res) {
  start_date = null
  if (req && req.body.start_date) {
   // check if there is a start date
-   start_date = req.body.start_date
+  start_date = req.body.start_date
  }
  locations = await lbs.getAnalyticsReport(start_date)
  locations = locations.rows
- for (let i = 0 ; i < locations.length; i++) {
+ for (let i = 0; i < locations.length; i++) {
   // update each lbs with the new info
   console.log(locations[i])
   // parse out the location ID
   let splitName = locations[i].name.split(/\s(.+)/, 2)
-   let LBSId = splitName[0]
-   let locationName = splitName[1]
+  let LBSId = splitName[0]
+  let locationName = splitName[1]
   // create the update object
   let update = {
    task_id: locations[i]["key"],
@@ -59,7 +59,7 @@ exports.lbsAPIUpdate = async function (req, res) {
    start_date: locations[i]["date_custom_field:151496"],
    project_lost_date: locations[i]["date_custom_field:151564"],
   }
-  await lbs.update({id: LBSId}, update)
+  await lbs.update({ id: LBSId }, update)
  }
  await updateJob('update_lbs', 'complete')
 }
@@ -232,9 +232,17 @@ exports.getLBSLocations = async function (req, res) {
  }
  // create CSV from json object and return it
  for (let i = 0; i < locations.length; i++) {
-  csv.push(locations[i].dataValues)
+  csv.push({
+   'Internal ID': locations[i].dataValues['Internal ID'],
+   'Current Estimated Go-Live Date': formatDate(locations[i].dataValues['Current Estimated Go-Live Date']),
+   'Actual Go-Live Date': formatDate(locations[i].dataValues['Actual Go-Live Date']),
+   'Original Estimated Go-live': formatDate(locations[i].dataValues['Original Estimated Go-live']),
+   'Website Launch Date': formatDate(locations[i].dataValues['Website Launch Date']),
+   'Start Date': formatDate(locations[i].dataValues['Start Date']),
+   'Project Lost date': formatDate(locations[i].dataValues['Project Lost date']),
+   'Stage': locations[i].dataValues['Stage']
+  })
  }
-
  csv = Papa.unparse(csv)
 
  res.send(csv)
@@ -244,8 +252,8 @@ exports.getLBSProjects = async function (req, res) {
  var locations
  var startDate
  var csv = []
- if (req.body.startDate) {
-  startDate = req.body.startDate
+ if (req.query.startDate) {
+  startDate = req.query.startDate
  }
  if (startDate) {
   locations = await lbs.getNSProjectUpdate(startDate)
@@ -467,12 +475,12 @@ function getProjectStatus(locations, i) {
  var stage = null
  var data = {
   'Internal ID': locations[i].master_project_id,
-  'Current Estimated Go-Live Date': locations[i].estimated_go_live,
-  'Actual Go-Live Date': locations[i].actual_go_live,
-  'Original Estimated Go-live': locations[i].original_estimated_go_live,
-  'Website Launch Date': locations[i].website_launch_date,
-  'Start Date': locations[i].start_date,
-  'Project Lost date': locations[i].project_lost_date
+  'Current Estimated Go-Live Date': formatDate(locations[i].estimated_go_live),
+  'Actual Go-Live Date': formatDate(locations[i].actual_go_live),
+  'Original Estimated Go-live': formatDate(locations[i].original_estimated_go_live),
+  'Website Launch Date': formatDate(locations[i].website_launch_date),
+  'Start Date': formatDate(locations[i].start_date),
+  'Project Lost date': formatDate(locations[i].project_lost_date)
  }
  // push the first project into it
  while (i < locations.length && locations[i].master_project_id === currentProjectId) {
@@ -499,7 +507,14 @@ function getProjectStatus(locations, i) {
  }
  data.stage = stage
  return {
-  newIndex: i-1,
+  newIndex: i - 1,
   data: data
  }
+}
+
+function formatDate(date) {
+ if (date != null) {
+  date = moment(date).format('MM-DD-YYYY')
+ }
+ return date
 }
