@@ -8,6 +8,7 @@ client_time = require('./jobs/client_time');
 var Sequelize = require("sequelize")
 var lp_users = require('../controllers/lp_users')
 var lbs = require('../controllers/location_billing_service')
+var slack = require('../lib/error')
 //Models
 var db = require("../models");
 const Op = Sequelize.Op
@@ -60,9 +61,9 @@ exports.lbsAPIUpdate = async function (req, res) {
    start_date: convertToUTC(locations[i]["date_custom_field:151496"]),
   }
       // check if the location status is lost
-  if (update.stage === 'Lost') {
+  if (update.stage == 'Lost') {
      // check if the location in the database has a lost date
-     lost_date = await db.lbs.findOne({
+     var lost_date = await db.lbs.findOne({
       where: {
        id: LBSId
       },
@@ -71,6 +72,20 @@ exports.lbsAPIUpdate = async function (req, res) {
      if (lost_date.project_lost_date == null) {
       update.project_lost_date == moment.utc()
      }
+  }
+
+  // check and see if the location has already been activated
+  if (update.actual_go_live != null) {
+   var actual_go_live = await db.lbs.findOne({
+    where: {
+     id: LBSId
+    },
+    attributes: ['actual_go_live']
+   })
+   if (actual_go_live.actual_go_live != null) {
+    // throw error
+    slack.sendError(`https://app.liquidplanner.com/space/158330/projects/show/${update.task_id}`, 'Task already has a go-live date')
+   }
   }
   await lbs.update({ id: LBSId }, update)
  }
