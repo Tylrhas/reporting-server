@@ -15,6 +15,7 @@ const auth = "Basic " + new Buffer(process.env.LpUserName + ":" + process.env.LP
 
 var Papa = require("papaparse")
 var moment = require('moment')
+var momentTz =  require('moment-timezone')
 // import the config for throttled request
 var throttledRequest = require('../config/throttled_request')
 
@@ -52,8 +53,8 @@ exports.lbsAPIUpdate = async function (req, res) {
    location_name: locationName,
    project_id: locations[i]["project_id"],
    stage: locations[i]["pick_list_custom_field:102670"],
-   original_estimated_go_live: locations[i]["date_custom_field:151494"],
-   estimated_go_live: locations[i]["date_custom_field:147376"],
+   original_estimated_go_live: convertToUTC(locations[i]["date_custom_field:151494"]),
+   estimated_go_live: convertToUTC(locations[i]["date_custom_field:147376"]),
    actual_go_live: locations[i]["date_custom_field:151495"],
    website_launch_date: locations[i]["date_custom_field:151496"],
    start_date: locations[i]["date_custom_field:151496"],
@@ -514,7 +515,15 @@ function getProjectStatus(locations, i) {
 
 function formatDate(date) {
  if (date != null) {
-  date = moment(date).format('MM-DD-YYYY')
+  date = moment.utc(date).local().format('MM-DD-YYYY')
+ }
+ return date
+}
+function convertToUTC(date) {
+ if (date != null) {
+  date = momentTz(date, 'America/Los_Angeles').format()
+  date = moment(date).endOf('day')
+  date = moment(date).utc().format()
  }
  return date
 }
