@@ -1,6 +1,7 @@
 db = require('../models')
 Op = db.Sequelize.Op
 sequelize = db.sequelize
+var moment = require('moment')
 module.exports = {
  getQueue,
  getActiveProjects,
@@ -243,8 +244,14 @@ async function getScheduledProjects(teamId) {
  for (let i = 0; i < projects.length; i++) {
   let project = projects[i]
   var milestones = project.treeitems
-  var implementationStart = { status: false }
-  var implementationReady = { status: false }
+  var implementationStart = { 
+   status: false,
+  milestone: null
+  }
+  var implementationReady = { 
+   status: false,
+   milestone: null 
+  }
   for (let i2 = 0; i2 < milestones.length; i2++) {
    let milestone = milestones[i2]
    if (milestone.name === 'Implementation Start') {
@@ -265,14 +272,14 @@ async function getScheduledProjects(teamId) {
     }
    }
   }
-  if (implementationReady.status && !implementationStart.status) {
+  if (implementationReady.status && !implementationStart.status && implementationStart.milestone !== null) {
    // the project is scheduled
    scheduledProject = {
     id: projects[i].id,
     name: milestones[milestones.length - 1].name,
     locations: project.lbs.length,
     total_mrr: sumLBS(project.lbs),
-    start_date: implementationReady.milestone.date_done
+    start_date: implementationStart.milestone.started_on
    }
    scheduledProjects.push(scheduledProject)
   }
