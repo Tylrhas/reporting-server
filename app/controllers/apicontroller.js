@@ -55,10 +55,22 @@ exports.lbsAPIUpdate = async function (req, res) {
    stage: locations[i]["pick_list_custom_field:102670"],
    original_estimated_go_live: convertToUTC(locations[i]["date_custom_field:151494"]),
    estimated_go_live: convertToUTC(locations[i]["date_custom_field:147376"]),
-   actual_go_live: locations[i]["date_custom_field:151495"],
-   website_launch_date: locations[i]["date_custom_field:151496"],
-   start_date: locations[i]["date_custom_field:151496"],
-   project_lost_date: locations[i]["date_custom_field:151564"],
+   actual_go_live: convertToUTC(locations[i]["date_custom_field:151495"]),
+   website_launch_date: convertToUTC(locations[i]["date_custom_field:151496"]),
+   start_date: convertToUTC(locations[i]["date_custom_field:151496"]),
+  }
+      // check if the location status is lost
+  if (update.stage === 'Lost') {
+     // check if the location in the database has a lost date
+     lost_date = await db.lbs.findOne({
+      where: {
+       id: LBSId
+      },
+      attributes: ['project_lost_date']
+     })
+     if (lost_date.project_lost_date == null) {
+      update.project_lost_date == moment.utc()
+     }
   }
   await lbs.update({ id: LBSId }, update)
  }
