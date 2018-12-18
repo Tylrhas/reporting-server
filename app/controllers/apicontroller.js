@@ -82,12 +82,17 @@ exports.lbsAPIUpdate = async function (req, res) {
     },
     attributes: ['actual_go_live']
    })
-   if (actual_go_live.actual_go_live != null) {
+   if (actual_go_live.actual_go_live != null && actual_go_live.actual_go_live !== convertToUTC(update.actual_go_live)) {
     // throw error
     slack.sendError(`https://app.liquidplanner.com/space/158330/projects/show/${update.task_id}`, 'Task already has a go-live date')
+    // USE REQUEST FROM LP API TO GET THE USERNAME
+    // get the task and see who the members are on it 
+    // get the members usernames based on member ids
+    // @mention the members on the task saying it cant be updated and 
+   } else {
+    await lbs.update({ id: LBSId }, update)
    }
   }
-  await lbs.update({ id: LBSId }, update)
  }
  await updateJob('update_lbs', 'complete')
 }
