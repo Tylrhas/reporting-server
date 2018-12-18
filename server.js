@@ -1,22 +1,22 @@
 require('dotenv').config()
+const PORT = process.env.PORT
 var express = require('./app/config/express')
-const passport = require('passport')
 
 //Models
 var db = require("./app/models")
 
 //load passport strategies
-require('./app/config/passport.js')(passport, db.user)
+require('./app/config/passport.js')(express.passport, db.user)
 
-//load the jobs 
-require('./app/config/job_scheduler')
+// //load the jobs 
+// require('./app/config/job_scheduler')
 
 
 
 // Sync the Database and start the app
 db.sequelize.sync().then(() => {
  express.app.listen(PORT, () => {
-  console.info(`${express.app.type} listening on ${express.app.address()}`)
+  console.info(`Reporting Server listening on ${PORT}`)
  })
- require('./app/routes/index')(express.app, passport)
+ require('./app/routes/index')(express.app, express.passport)
 }).catch(console.error)

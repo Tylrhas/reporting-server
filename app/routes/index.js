@@ -11,11 +11,11 @@ module.exports = function (app, passport) {
   // Import all Auth routes
   require('./auth.js')(app, passport)
   // Import all PS routes
-  require('./ps/index')(app, passport)
-  // Import all Admin routes
-  require('./admin.js')(app, passport)
-  // Import all API routes
-  require('./api.js')(app,passport)
-  // Import all Webhook routes
-  require('./lp_webhooks.js')(app, passport)
+  // require('./ps/index')(app, passport)
+  // // Import all Admin routes
+  // require('./admin.js')(app, passport)
+  // // Import all API routes
+  // require('./api.js')(app,passport)
+  // // Import all Webhook routes
+  // require('./lp_webhooks.js')(app, passport)
 }
