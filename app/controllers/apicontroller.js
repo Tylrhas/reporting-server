@@ -486,21 +486,6 @@ function updateJob(jobName, status) {
   })
  })
 }
-/**
- *
- *
- * @param {string} startDate
- * @returns {object}
- */
-function findLBSLocations(startDate) {
- if (startDate != null) {
-
- } else {
-
- }
-}
-
-
 
 function getProjectStatus(locations, i) {
  let currentProjectId = locations[i].master_project_id
