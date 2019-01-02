@@ -3,14 +3,14 @@ var page_data = require('../../../lib/page_links')
 var cft = require('../../../lib/reports/cft')
 var projects = require('../../../lib/controllers/projects')
 var moment = require('moment')
-var throttledRequest = require('../../../config/throttled_request_promise')
+// var throttledRequest = require('../../../config/throttled_request_promise')
 const LPauth = "Basic " + new Buffer(process.env.LpUserName + ":" + process.env.LPPassword).toString("base64");
 var scheduledimplementation = require('../../../controllers/scheduled_implementation')
 
 // set the sub dirs for the PS MRR Reporting Routes
-var ps_workload_reports = '/ps/reports/workload'
-module.exports = function (app, passport, express) {
- app.get(ps_workload_reports + '/', auth.basic, async function (req, res) {
+var psWorkloadPath = '/ps/reports/workload'
+module.exports = function (app, passport) {
+ app.get(`${psWorkloadPath}/`, auth.basic, async function (req, res) {
   var builder = {}
   var buildRemainingURL = process.env.LP_BUILDER_REMAINING
   var buildLoggedURL = process.env.LP_BUILDER_LOGGED
@@ -63,7 +63,7 @@ module.exports = function (app, passport, express) {
   // res.json(builder)
   res.render('pages/ps/reports/workload.ejs', { user: req.user, slug: 'wordload', lp_space_id: process.env.LPWorkspaceId, moment: moment, link_data: link_data, builder: builder })
  })
- app.get(ps_workload_reports + '/cft', auth.basic, async function (req, res) {
+ app.get(`${psWorkloadPath}/cft`, auth.basic, async function (req, res) {
   let link_data = page_data()
   // get all teams
   let queue = await scheduledimplementation.getQueue()
@@ -73,7 +73,7 @@ module.exports = function (app, passport, express) {
   // res.json(builder)
   res.render('pages/ps/reports/team_workload.ejs', { user: req.user, slug: 'team_wordload', lp_space_id: process.env.LPWorkspaceId, moment: moment, link_data: link_data, queue: queue })
  })
- app.get(ps_workload_reports + '/cft/:teamID/active', auth.basic , async function (req, res) {
+ app.get(`${psWorkloadPath}/cft/:teamID/active`, auth.basic , async function (req, res) {
   var cft_id = parseInt(req.params.teamID)
   // get all active project for a team
   let link_data = page_data()
@@ -84,7 +84,7 @@ module.exports = function (app, passport, express) {
 
   // var activeProjects = await projects.activeCount({ is_done: false, is_archived: false, is_on_hold: false, cft_id: cft_id })
  })
- app.get(ps_workload_reports + '/cft/:teamID/scheduled', auth.basic , async function (req, res) {
+ app.get(`${psWorkloadPath}/cft/:teamID/scheduled`, auth.basic , async function (req, res) {
   var teamID = parseInt(req.params.teamID)
   // get all active project for a team
   let link_data = page_data()
@@ -93,7 +93,7 @@ module.exports = function (app, passport, express) {
   // res.json(activeProjects)
   res.render('pages/scheduledimp.ejs', { user: req.user, slug: 'team_wordload', lp_space_id: process.env.LPWorkspaceId, moment: moment, link_data: link_data, projects: scheduledProjects })
  })
- app.get(ps_workload_reports + '/cft/:teamID/projects', auth.basic , async function (req, res) {
+ app.get(`${psWorkloadPath}/cft/:teamID/projects`, auth.basic , async function (req, res) {
   var teamID = parseInt(req.params.teamID)
   // get all active project for a team
   let link_data = page_data()

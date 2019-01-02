@@ -1,7 +1,7 @@
 var exports = module.exports = {}
 var projects = require('../lib/controllers/projects')
 //require api functions
-lp_projects = require('./api/lp_projects');
+const lp_projects = require('./api/lp_projects');
 lp_lbs = require('./api/lp_lbs');
 backfill = require('../lib/controllers/backfill')
 client_time = require('./jobs/client_time');
@@ -10,15 +10,15 @@ var lp_users = require('../controllers/lp_users')
 var lbs = require('../controllers/location_billing_service')
 var slack = require('../lib/error')
 //Models
-var db = require("../models");
+const db = require("../models");
 const Op = Sequelize.Op
 const auth = "Basic " + new Buffer(process.env.LpUserName + ":" + process.env.LPPassword).toString("base64");
 
-var Papa = require("papaparse")
-var moment = require('moment')
-var momentTz =  require('moment-timezone')
+const Papa = require("papaparse")
+// require dates lib for all date conversion and access to moment and momentTz
+const dates = require('../lib/dates') 
 // import the config for throttled request
-var throttledRequest = require('../config/throttled_request')
+const throttledRequest = require('../config/throttled_request')
 
 //API Calls
 exports.updatelpLbsapi = function (req, res) {
@@ -54,11 +54,11 @@ exports.lbsAPIUpdate = async function (req, res) {
    location_name: locationName,
    project_id: locations[i]["project_id"],
    stage: locations[i]["pick_list_custom_field:102670"],
-   original_estimated_go_live: convertToUTC(locations[i]["date_custom_field:151494"]),
-   estimated_go_live: convertToUTC(locations[i]["date_custom_field:147376"]),
-   actual_go_live: convertToUTC(locations[i]["date_custom_field:151495"]),
-   website_launch_date: convertToUTC(locations[i]["date_custom_field:151496"]),
-   start_date: convertToUTC(locations[i]["date_custom_field:151496"]),
+   original_estimated_go_live: dates.pst_to_utc(locations[i]["date_custom_field:151494"]),
+   estimated_go_live: dates.pst_to_utc(locations[i]["date_custom_field:147376"]),
+   actual_go_live: dates.pst_to_utc(locations[i]["date_custom_field:151495"]),
+   website_launch_date: dates.pst_to_utc(locations[i]["date_custom_field:151496"]),
+   start_date: dates.pst_to_utc(locations[i]["date_custom_field:151496"]),
   }
       // check if the location status is lost
   if (update.stage == 'Lost') {
@@ -70,7 +70,7 @@ exports.lbsAPIUpdate = async function (req, res) {
       attributes: ['project_lost_date']
      })
      if (lost_date.project_lost_date == null) {
-      update.project_lost_date == moment.utc()
+      update.project_lost_date == dates.moment.utc()
      }
   }
 
@@ -82,7 +82,7 @@ exports.lbsAPIUpdate = async function (req, res) {
     },
     attributes: ['actual_go_live']
    })
-   if (actual_go_live.actual_go_live != null && actual_go_live.actual_go_live !== convertToUTC(update.actual_go_live)) {
+   if (actual_go_live.actual_go_live != null && actual_go_live.actual_go_live !== dates.pst_to_utc(update.actual_go_live)) {
     // throw error
     slack.sendError(`https://app.liquidplanner.com/space/158330/projects/show/${update.task_id}`, 'Task already has a go-live date')
     // USE REQUEST FROM LP API TO GET THE USERNAME
@@ -547,15 +547,7 @@ function getProjectStatus(locations, i) {
 
 function formatDate(date) {
  if (date != null) {
-  date = moment.utc(date).local().format('MM-DD-YYYY')
- }
- return date
-}
-function convertToUTC(date) {
- if (date != null) {
-  date = momentTz(date, 'America/Los_Angeles').format()
-  date = moment(date).endOf('day')
-  date = moment(date).utc().format()
+  date = dates.moment.utc(date).local().format('MM-DD-YYYY')
  }
  return date
 }

@@ -14,7 +14,7 @@ var reportController = require('../../../controllers/reportcontroller')
  // set the sub dirs for the PS MRR Reporting Routes
 var ps_mrr_reports = '/ps/reports/mrr'
 
-module.exports = function (app, passport, express) {   
+module.exports = function (app, passport) {
    
     app.get(ps_mrr_reports + '/', auth.basic, function (req, res) {
         // get all years from 2018 - forward

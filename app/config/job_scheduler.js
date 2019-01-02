@@ -1,4 +1,3 @@
-// REQUIRED PACKAGES
 var schedule = require('node-schedule')
 var apiController = require('../controllers/apicontroller.js')
 

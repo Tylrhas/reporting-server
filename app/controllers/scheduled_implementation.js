@@ -108,7 +108,7 @@ async function convertToArray(teams) {
    limit: 36
   },
   46132814: {
-   limit: 36
+   limit: 48
   },
   46132815: {
    limit: 24
@@ -117,7 +117,7 @@ async function convertToArray(teams) {
    limit: 36
   },
   46132817: {
-   limit: 48
+   limit: 36
   },
   0: {
    limit: 0

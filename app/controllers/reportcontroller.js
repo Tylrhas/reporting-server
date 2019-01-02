@@ -1,11 +1,10 @@
 mrr = require('../lib/reports/mrr')
 var db = require('../models')
-var Sequelize = require("sequelize")
-const Op = Sequelize.Op
+const Op = db.Sequelize.Op
 var teamMrr = require('../lib/reports/team_mrr')
 var cfts = require('../lib/reports/cft')
-
 var moment = require('moment')
+const dates = require('../lib/dates')
 
 module.exports = {
  year_view,
@@ -113,12 +112,9 @@ function quarter_view(quarter, year) {
 function team_quick_look(month, year) {
  // get all LBS items launched this month and match to project and CFT and sum the totals for each team
 
- var firstDay = new Date(year, month - 1, 0);
- var lastDay = new Date(year, month, 0);
+ var firstDay = dates.firstDay(month, year)
+ var lastDay = dates.lastDay(month, year)
  var backlogfirstDay
-
- firstDay.setHours(23, 59, 59, 999);
- lastDay.setHours(23, 59, 59, 999);
 
  var mrr = teamMrr.month(firstDay, lastDay)
  var teams = db.cft.findAll({
