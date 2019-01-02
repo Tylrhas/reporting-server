@@ -1,20 +1,5 @@
 var exports = module.exports = {}
-require('dotenv').config();
-const request = require("request"),
-throttledRequest = require('throttled-request')(request);
-var runStatus
-//add event emmitter 
-const EventEmitter = require('events');
-class MyEmitter extends EventEmitter { }
-const myEmitter = new MyEmitter();
-
-//This will throttle the requests so no more than 30 are made every 15 seconds 
-throttledRequest.configure({
-    requests: 20,
-    milliseconds: 15000
-});
-
-
+var throttledRequest = require('../../config/throttled_request_promise')
 //Models
 var db = require("../../models");
 const url = process.env.lbs_url;
@@ -23,59 +8,32 @@ const auth = "Basic " + new Buffer(process.env.LpUserName + ":" + process.env.LP
 //for the hourly job 
 exports.update = function (req, res) {
 
-    if(req){
-        res.status(200)
-    }
-    get_all_Lbs();
-
-    myEmitter.once('returnresults', () => {
-        console.log(runStatus);
-    });
+  if (req) {
+    res.status(200)
+  }
+  get_all_Lbs()
 }
 
-function get_all_Lbs() {
-    //reset runstatus
-    runStatus = ''
-    throttledRequest({ method: 'GET', url: url, headers: { "Authorization": auth } }, (error, response, body) => {
-        if (error) {
-            returnresults = error;
-            console.log(error)
-        }
-        else {
-            let json = JSON.parse(body);
-
-            for (i = 0; i < Object.keys(json.rows).length; i++) {
-
-                insertlbs(json.rows[i],i,Object.keys(json.rows).length);
-            }
-        }
-    });
+async function get_all_Lbs() {
+  try {
+    let results = await throttledRequest.promise({ method: 'GET', url: url, headers: { "Authorization": auth } })
+    let updates = []
+    for (i = 0; i < Object.keys(results.rows).length; i++) {
+      updates.push(insertlbs(results.rows[i]))
+    }
+    Promise.all(updates).then(() => {
+      updateJobStatus('complete')
+    })
+  } catch (error) {
+    updateJobStatus('error')
+  }
 }
 
-function insertlbs(lbs, i, lbs_length) {
-    lbs_length = lbs_length - 1;
-    db.lp_lbs.upsert({ id: lbs['key'], task_name: lbs['name'], in_tags: lbs['inherited_tags'], website_type: lbs['pick_list_custom_field:133069'], design_type: lbs['pick_list_custom_field:133070'], project_id: lbs['project_id'], ns_id: lbs['text_custom_field:135152'], billing_type: lbs['pick_list_custom_field:102670'], billing_lost_reason: lbs['pick_list_custom_field:109756'] }).then(results => {
-        console.log(results);
-        console.log(i +' ' + lbs_length);
-        if (i == lbs_length) {
-            updateJobStatus()
-        }
-    });
+function insertlbs(lbs) {
+  return db.lp_lbs.upsert({ id: lbs['key'], task_name: lbs['name'], in_tags: lbs['inherited_tags'], website_type: lbs['pick_list_custom_field:133069'], design_type: lbs['pick_list_custom_field:133070'], project_id: lbs['project_id'], ns_id: lbs['text_custom_field:135152'], billing_type: lbs['pick_list_custom_field:102670'], billing_lost_reason: lbs['pick_list_custom_field:109756'] })
 }
 
-function updateJobStatus() {
-    if (runStatus === '') {
-        runStatus = 'complete';
-    }
-    else {
-        runStatus = 'error';
-        //set error emailer here to get the error
-    }
-    console.log(runStatus);
-    var date = new Date();
-    db.job.upsert({ id: 2, lastrun: date, lastrunstatus: runStatus }).then(results => {
-        console.log(results)
-        myEmitter.emit('returnresults');
-        return
-    });
+function updateJobStatus(status) {
+  var date = new Date();
+  db.job.upsert({ id: 2, lastrun: date, lastrunstatus: status })
 }
