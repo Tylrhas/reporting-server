@@ -3,12 +3,11 @@ var mrr = require('../../controllers/reportcontroller')
 var moment = require('moment')
 var page_data = require('../../lib/page_links')
 var reportcontroller = require('../../controllers/reportcontroller')
+var psPath = '/ps'
 
-var auth = require('../../lib/auth/auth_check')
-// index rout for /ps
-module.exports = function (app, passport, express) {
-  var psRouter = express.Router()
-  psRouter.get('/', auth.basic, function (req, res) {
+module.exports = function (app, passport) {
+
+  app.get(`${psPath}/`, auth.basic, function (req, res) {
     // get todays month
     var month_detail = mrr.month_detail()
     var quarter_detail = mrr.quarter_detail()
@@ -62,13 +61,10 @@ module.exports = function (app, passport, express) {
 
       res.render('pages/ps/index', { user: req.user, slug: 'home', link_data: link_data, moment: moment, quick_look_reports, quick_look_reports })
     })
-    // res.render('pages/index', { user: req.user, slug: 'home', active_projects: 1 })
   })
 
-  // set the sub dir for all PS level pages
-  app.use('/ps', psRouter)
-
-  var reports = require('./reports/index')(app, passport, express)
+  // require all of the PS report routes
+  require('./reports/index')(app, passport)
 }
 
 function checkValues (object) {
