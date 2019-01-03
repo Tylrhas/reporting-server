@@ -1,7 +1,6 @@
 require('dotenv').config()
 const PORT = process.env.PORT
 var express = require('./app/config/express')
-
 //Models
 var db = require("./app/models")
 
