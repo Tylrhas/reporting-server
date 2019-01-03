@@ -22,7 +22,11 @@ async function updateActiveProjects(req, res) {
   }
   let response = await throttledRequest.promise({ url: process.env.LP_ACTIVE_PROJECTS, method: 'GET', headers: { "Authorization": LPauth } })
   var projects = response.rows
-  _updateProjects(projects)
+  try {
+    _updateProjects(projects)
+  } catch (error) {
+    console.log(error)
+  }
 }
 async function _updateProjects(projects) {
   for (let i = 0 ; i < projects.length; i++) {
@@ -73,9 +77,9 @@ async function _updateProjects(projects) {
       })
     }
     await _checkForChildren(projectData)
-    console.error('DONE!!!!!!!!!')
     // after everything is complete update the job to have a complete status
   }
+  console.error('DONE!!!!!!!!!')
 }
 async function _checkForChildren(parent) {
   if (parent.hasOwnProperty('children')) {
@@ -103,6 +107,24 @@ async function _checkForChildren(parent) {
       }
       if (child.hasOwnProperty('custom_field_values')) {
         childUpdate = _addCustomFieldValues(child.custom_field_values, childUpdate)
+        if (childUpdate.task_type !== undefined && childUpdate.task_type === 'Location Service Billing') {
+          // create an LSB task for it
+          // parse the id from the name
+          let splitName = childUpdate.name.split(/\s(.+)/, 2)
+          if (!isNaN(splitName[0])) {
+            let lsb = await db.lbs.findOrCreate({
+              where: {
+                id: splitName[0]
+              }
+            })
+            lsb[0].update({
+              project_id: childUpdate.project_id,
+              task_id: child.id
+            }) 
+          } else {
+            throw new Error ('ID is not a number')
+          }
+        }
       }
       await dbChild[0].update(childUpdate)
       _checkForChildren(child)
