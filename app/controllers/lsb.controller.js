@@ -108,7 +108,7 @@ async function projects(req, res) {
      JOIN (
       SELECT master_project_id, MAX(estimated_go_live) AS estimated_go_live, MAX(actual_go_live) AS actual_go_live, MAX(original_estimated_go_live) AS original_estimated_go_live, MAX(start_date) AS start_date, MAX(website_launch_date) AS website_launch_date
       FROM lbs  
-      GROUP BY master_project_id AND actual_go_live
+      GROUP BY master_project_id
      ) date ON date.master_project_id = lbs.master_project_id
      WHERE lbs."updatedAt" >= :startDate
      GROUP BY lbs.master_project_id, date.estimated_go_live, date.actual_go_live, date.original_estimated_go_live, date.start_date, date.website_launch_date, lbs.stage`,
@@ -329,6 +329,14 @@ function __getProjectStatus(locations, i) {
     throw new Error(`Error in finding the Stage of Master Project ID : ${locations[i].master_project_id}`)
   }
   data.Stage = stage
+  if (data.Stage !== 'Complete') {
+    data['Actual Go-Live Date'] = null
+  }
+
+  if (data.Stage !== 'Lost') {
+    data['Project Lost date'] = null
+  }
+  
   return {
     newIndex: i - 1,
     data: data
