@@ -1,20 +1,31 @@
 const apiController = require('../controllers/api.controller')
 const jobController = require('../controllers/job.controller')
-const lbsController = require('../controllers/lsb.controller')
+const lsbController = require('../controllers/lsb.controller')
 // var auth = require('../lib/auth/auth_check')
 
 module.exports = function (app, passport) {
+  // Begin Data Endpoints 
   app.get('/api/projects', apiController.getAllProjects)
   app.get('/api/projects/:project_id', apiController.getProject)
   app.put('/api/jobs/archive', jobController.updateArchiveProjects)
   app.put('/api/jobs/active', jobController.updateActiveProjects)
+  // End Data Endpoints
+
   // Begin Liquidplanner -> 360 integration
-  app.put('/api/admin/lbs', lbsController.update)
+  app.put('/api/admin/lbs', lsbController.update) 
+  app.get('/api/admin/lbs/locations/csv', lsbController.locations)
+  app.get('/api/admin/lbs/projects/csv', lsbController.projects)
   // End Liquidplanner -> 360 integration
+
+  // Begin Job Endpoints
+  app.put('/api/lbs', lsbController.updateNSDates)
+  app.put('/api/lbs/match', lsbController.match)
+  // End Job Endpoints
+ 
+
   // app.get('/api/jobs/updatetasks', auth.basic , apiController.updatelptasksapi)
   // app.get('/api/projects/update', apiController.updateProjects)
   // app.get('/api/treeitems', apiController.getTreeItems)
-  // app.post('/api/csv/netsuitebacklog/update',auth.isAdmin, apiController.updateNsBacklog)
   // app.post('/api/admin/user/update',auth.isAdmin, apiController.updateUser);
   // app.post('/api/admin/update/projects/archived', apiController.updateArchivedProjects)
   // // start LP and NS integation endpoints
