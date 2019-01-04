@@ -1,9 +1,11 @@
 const throttledRequest = require('../config/throttled_request_promise')
 const LPauth = "Basic " + new Buffer(process.env.LpUserName + ":" + process.env.LPPassword).toString("base64")
 const db = require('../models')
+const dates = require('./dates.controller')
 module.exports = {
   updateArchiveProjects,
-  updateActiveProjects
+  updateActiveProjects,
+  _updateProject
 }
 async function updateArchiveProjects(req, res) {
   // get the job from the database and set its status to running 
@@ -29,55 +31,11 @@ async function updateActiveProjects(req, res) {
   }
 }
 async function _updateProjects(projects) {
-  for (let i = 0 ; i < projects.length; i++) {
+  for (let i = 0; i < projects.length; i++) {
     var project = projects[i]
     let projectURL = `https://app.liquidplanner.com/api/v1/workspaces/158330/treeitems/${project.key}?depth=-1&leaves=true`
-    var projectData = await throttledRequest.promise({ url: projectURL, method: 'GET', headers: { "Authorization": LPauth } })
-    if (projectData.type = 'Project') {
-      // update the project in the database
-      var projectUpdate = {
-        id: projectData.id,
-        started_on: projectData.started_on,
-        done_on: projectData.done_on,
-        is_done: projectData.is_done,
-        is_on_hold: projectData.is_on_hold,
-        is_archived: false,
-        promise_by: projectData.promise_by,
-        level_of_service: null,
-        vertical: null,
-        package: null,
-        project_type: null,
-        ps_phase: null,
-      }
-      // check if the archived folder is a parent of this project 
-      if (projectData.parent_ids.includes(parseInt(process.env.LPArchiveFolder))) {
-        projectUpdate.is_archived = true
-      } else {
-        var cfts = await _getCFTsArray()
-
-      }
-      // if custom field values exist then add them
-      if (projectData.hasOwnProperty('custom_field_values')) {
-        projectUpdate = _addCustomFieldValues(projectData.custom_field_values, projectUpdate)
-      }
-      // update or create the project in the database
-      await db.lp_project.upsert(projectUpdate)
-      var dbProject = await db.treeitem.findOrCreate({
-        where: {
-          id: projectData.id
-        }
-      })
-      await dbProject[0].update({
-        hrs_remaning: projectData.high_effort_remaining,
-        hrs_logged: projectData.work,
-        is_done: projectData.is_done,
-        project_id: projectData.id,
-        child_type: projectData.type.toLowerCase(),
-        name: projectData.name
-      })
-    }
-    await _checkForChildren(projectData)
-    // after everything is complete update the job to have a complete status
+    var project = await throttledRequest.promise({ url: projectURL, method: 'GET', headers: { "Authorization": LPauth } })
+    await _updateProject(project)
   }
   console.error('DONE!!!!!!!!!')
 }
@@ -95,12 +53,12 @@ async function _checkForChildren(parent) {
         parent_id: child.parent_id,
         project_id: child.project_id,
         child_type: child.type.toLowerCase(),
-        e_start: child.expected_start,
-        e_finish: child.expected_finish,
-        deadline: child.promise_by,
-        started_on: child.started_on,
+        e_start: dates.pst_to_utc(child.expected_start),
+        e_finish: dates.pst_to_utc(child.expected_finish),
+        // deadline: child.promise_by,
+        started_on: dates.pst_to_utc(child.started_on),
         is_done: child.is_done,
-        date_done: child.done_on,
+        date_done: dates.pst_to_utc(child.done_on),
         hrs_logged: child.work,
         hrs_remaning: child.high_effort_remaining,
         name: child.name
@@ -117,17 +75,18 @@ async function _checkForChildren(parent) {
                 id: splitName[0]
               }
             })
-            lsb[0].update({
+            await lsb[0].update({
               project_id: childUpdate.project_id,
               task_id: child.id
-            }) 
+            })
+            await dbChild[0].update(childUpdate)
           } else {
-            throw new Error ('ID is not a number')
+            throw new Error('ID is not a number')
           }
         }
       }
       await dbChild[0].update(childUpdate)
-      _checkForChildren(child)
+      await _checkForChildren(child)
     }
   } else {
     return
@@ -146,6 +105,54 @@ function _addCustomFieldValues(customFields, projectUpdate) {
   return projectUpdate
 }
 
+async function _updateProject(project) {
+  if (project.type = 'Project') {
+    // update the project in the database
+    var projectUpdate = {
+      id: project.id,
+      started_on: project.started_on,
+      done_on: project.done_on,
+      is_done: project.is_done,
+      is_on_hold: project.is_on_hold,
+      is_archived: false,
+      promise_by: project.promise_by,
+      level_of_service: null,
+      vertical: null,
+      package: null,
+      project_type: null,
+      ps_phase: null,
+    }
+    // check if the archived folder is a parent of this project 
+    if (project.parent_ids.includes(parseInt(process.env.LPArchiveFolder))) {
+      projectUpdate.is_archived = true
+    } else {
+      var cfts = await _getCFTsArray()
+    }
+    // if custom field values exist then add them
+    if (project.hasOwnProperty('custom_field_values')) {
+      projectUpdate = _addCustomFieldValues(project.custom_field_values, projectUpdate)
+    }
+    // update or create the project in the database
+    await db.lp_project.upsert(projectUpdate)
+    var dbProject = await db.treeitem.findOrCreate({
+      where: {
+        id: project.id
+      }
+    })
+    await dbProject[0].update({
+      hrs_remaning: project.high_effort_remaining,
+      hrs_logged: project.work,
+      is_done: project.is_done,
+      project_id: project.id,
+      child_type: project.type.toLowerCase(),
+      name: project.name
+    })
+  }
+  await _checkForChildren(project)
+  return
+  // after everything is complete update the job to have a complete status
+}
+
 async function _getCFTsArray() {
   var cfts = await db.cft.findAll({
     attributes: ['id']
@@ -157,6 +164,7 @@ async function _getCFTsArray() {
 
   return cftsArray
 }
+
 // update archive projects and tasks folder
 // update LBS dates 
 // update lp projects and tasks 
