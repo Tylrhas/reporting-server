@@ -8,7 +8,9 @@ module.exports = function (app, passport) {
   app.get('/api/projects/:project_id', apiController.getProject)
   app.put('/api/jobs/archive', jobController.updateArchiveProjects)
   app.put('/api/jobs/active', jobController.updateActiveProjects)
+  // Begin Liquidplanner -> 360 integration
   app.put('/api/admin/lbs', lbsController.update)
+  // End Liquidplanner -> 360 integration
   // app.get('/api/jobs/updatetasks', auth.basic , apiController.updatelptasksapi)
   // app.get('/api/projects/update', apiController.updateProjects)
   // app.get('/api/treeitems', apiController.getTreeItems)
