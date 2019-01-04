@@ -8,6 +8,9 @@ function pst_to_utc (date) {
   date = momentTz(date, 'America/Los_Angeles').format()
   // convert to UTC
   date = moment(date).utc().format()
+  if (date == 'Invalid date') {
+    date = null
+  }
   return date
 }
 function addPST (date) {
