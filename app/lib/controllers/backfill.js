@@ -381,11 +381,13 @@ async function findMissingLBSProjects(req, res) {
  var non_associated_lbs = await db.lbs.findAll({
   where: {
    project_id: null,
-   actual_go_live: null,
-   project_type: {
-    [Op.notIn]: ["DA Rep & Social", "SEM Only", "Digital Advertising"]
+   estimated_go_live: {
+    [Op.not]: null
    }
-  }
+  },
+  order: [
+    ['estimated_go_live', 'DESC']
+  ]
  })
 
  for (let i = 0; i < non_associated_lbs.length; i++) {
@@ -397,11 +399,11 @@ async function findMissingLBSProjects(req, res) {
    var count = await db.lp_project.count({ where: { id: lplbs[0].project_id } })
    if (count > 0) {
     // update LBS
-    await db.lbs.upsert({ id: non_associated_lbs[i].id, project_id: lplbs[0].project_id })
+    await db.lbs.upsert({ id: non_associated_lbs[i].id, project_id: lplbs[0].project_id})
    } else {
     // insert the project then update the LBS
     await upsertProject({ key: lplbs[0].project_id }, true)
-    await db.lbs.upsert({ id: non_associated_lbs[i].id, project_id: lplbs[0].project_id })
+    await db.lbs.upsert({ id: non_associated_lbs[i].id, project_id: lplbs[0].project_id})
    }
   }
  }
