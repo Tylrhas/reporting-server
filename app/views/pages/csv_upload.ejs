@@ -1,5 +1,4 @@
 <% include ../partials/header.ejs %>
-  <% include ../partials/nav.ejs %>
     <main class="app-content">
 
       <div class="app-title">
@@ -87,8 +86,8 @@
       })
       function submitUpdates(results, file) {
         $.ajax({
-          type: "POST",
-          url: '/api/csv/netsuitebacklog/update',
+          type: "PUT",
+          url: '/api/lbs',
           data: results,
           success: success,
           dataType: 'JSON'
