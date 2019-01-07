@@ -7,8 +7,6 @@ module.exports = function (app, passport) {
   // Begin Data Endpoints 
   app.get('/api/projects', apiController.getAllProjects)
   app.get('/api/projects/:project_id', apiController.getProject)
-  app.put('/api/jobs/archive', jobController.updateArchiveProjects)
-  app.put('/api/jobs/active', jobController.updateActiveProjects)
   // End Data Endpoints
 
   // Begin Liquidplanner -> 360 integration
@@ -20,6 +18,8 @@ module.exports = function (app, passport) {
   // Begin Job Endpoints
   app.put('/api/lbs', lsbController.updateNSDates)
   app.put('/api/lbs/match', lsbController.match)
+  app.put('/api/jobs/archive', jobController.updateArchiveProjects)
+  app.put('/api/jobs/active', jobController.updateActiveProjects)
   // End Job Endpoints
  
 

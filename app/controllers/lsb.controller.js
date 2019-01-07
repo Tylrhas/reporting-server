@@ -370,7 +370,13 @@ function __get_all_lp_users() {
     return userObject
   })
 }
-
+/**
+ *
+ *
+ * @param {string} jobName
+ * @param {*} update
+ * @returns {}
+ */
 async function __updateJob(jobName, update) {
   var job = await db.job.findAll({
     where: {
