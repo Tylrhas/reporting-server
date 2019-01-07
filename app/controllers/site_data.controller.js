@@ -22,6 +22,7 @@ function all (month, year) {
     siteData.pageYear = year,
     pageQuarter = getQuarter(month + '/1/' + year)
   }
+  return siteData
 }
 function getQuarter(d) {
   if (d == null){
