@@ -39,7 +39,7 @@
               <p>Look for LP LBS tasks that are not matched with a project</p>
               <p><b>Last Update: </b> <%= site_data.convert.moment(jobs['match_lbs'].lastRun).format( 'MMM-DD-YYYY hh:MM:SS A') %></p>
               <p><b>Last Run Status: </b> <%= jobs['match_lbs'].lastRunStatus %></p>
-              <button id="backfill_lp" class="center">Match</button>
+              <button id="match_lbs" class="center">Match</button>
           </div>
         </div>
       </div>
@@ -102,8 +102,8 @@
     <script>
     $('#archived_projects').click(function() {
       $.ajax({
-          type: "post",
-          url: '/api/admin/update/projects/archived',
+          type: "PUT",
+          url: '/api/jobs/archive',
           success: function (data) {
 
           },
@@ -112,18 +112,18 @@
     })
     $('#update_lp').click(function() {
       $.ajax({
-          type: "get",
-          url: '/api/projects/update',
+          type: "PUT",
+          url: '/api/jobs/active',
           success: function (data) {
 
           },
           dataType: 'JSON'
         })
     })
-    $('#backfill_lp').click(function() {
+    $('#match_lbs').click(function() {
       $.ajax({
-          type: "get",
-          url: '/api/admin/lbs/match',
+          type: "PUT",
+          url: '/api/lbs/match',
           success: function (data) {
           },
           dataType: 'JSON'
