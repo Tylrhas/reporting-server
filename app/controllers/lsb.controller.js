@@ -6,6 +6,7 @@ const jobController = require('../controllers/job.controller')
 const Papa = require("papaparse")
 const Op = db.Sequelize.Op
 const slack = require('../controllers/slack.controller')
+
 module.exports = {
   update,
   locations,
