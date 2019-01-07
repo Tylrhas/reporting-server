@@ -5,6 +5,7 @@ const dates = require('./dates.controller')
 const jobController = require('../controllers/job.controller')
 const Papa = require("papaparse")
 const Op = db.Sequelize.Op
+const slack = require('../controllers/slack.controller')
 module.exports = {
   update,
   locations,
@@ -17,6 +18,7 @@ async function update(req, res) {
   if (req) {
     res.sendStatus(201)
   }
+  await __updateJob('update_lbs', 'complete')
   var locations
   start_date = null
   if (req && req.body.start_date) {
@@ -64,7 +66,7 @@ async function update(req, res) {
     await __findTreeItem(update)
     await lsb[0].update(update)
   }
-  // await updateJob('update_lbs', 'complete')
+  await __updateJob('update_lbs', 'complete')
 }
 async function locations(req, res) {
   try {
@@ -111,7 +113,8 @@ async function projects(req, res) {
       GROUP BY master_project_id
      ) date ON date.master_project_id = lbs.master_project_id
      WHERE lbs."updatedAt" >= :startDate
-     GROUP BY lbs.master_project_id, date.estimated_go_live, date.actual_go_live, date.original_estimated_go_live, date.start_date, date.website_launch_date, lbs.stage`,
+     GROUP BY lbs.master_project_id, date.estimated_go_live, date.actual_go_live, date.original_estimated_go_live, date.start_date, date.website_launch_date, lbs.stage
+     ORDER BY lbs.master_project_id ASC`,
       {
         replacements: { startDate: startDate },
         type: db.sequelize.QueryTypes.SELECT
@@ -120,9 +123,13 @@ async function projects(req, res) {
     var csv = []
     // create CSV from json object and return it
     for (let i = 0; i < projects.length; i++) {
-      let project = __getProjectStatus(projects, i)
-      csv.push(project.data)
-      i = project.newIndex
+      try {
+        let project = __getProjectStatus(projects, i)
+        csv.push(project.data)
+        i = project.newIndex
+      } catch (error) {
+        slack.sendError(error.message)
+      }
       // get all all of the locations that stages that are part of this project
     }
 
@@ -134,6 +141,7 @@ async function projects(req, res) {
   }
 }
 async function updateNSDates(req, res) {
+  var job = await __updateJob('ns_backlog', { status: 'running' })
   res.status(200)
   var updates = []
   var data = req.body.data
@@ -241,15 +249,18 @@ async function updateNSDates(req, res) {
           updates.push(nsLocation[i2].update({ estimated_go_live: null }))
         }
         Promise.all([updates]).then(() => {
-          updateJob('ns_backlog', 'complete')
+          job.update({ lastrun: dates.moment().format(), lastrunstatus: 'complete', status: 'active' })
         })
       })
     } else {
-      updateJob('ns_backlog', 'complete')
+      job.update({ lastrun: dates.moment().format(), lastrunstatus: 'active' })
     }
   })
 }
 async function match(req, res) {
+
+  // set the job to running 
+  var job = await __updateJob('match_lbs', { status: 'running' })
   if (req) {
     res.sendStatus(201)
   }
@@ -275,6 +286,7 @@ async function match(req, res) {
       })
     }
   }
+  await job.update({ lastrun: dates.moment().format(), lastrunstatus: 'active' })
 }
 async function __findTreeItem(update) {
   var treeItem = await db.treeitem.findOne({ where: { id: update.task_id } })
@@ -326,7 +338,7 @@ function __getProjectStatus(locations, i) {
     // all locations are Lost
     stage = "Lost"
   } else {
-    throw new Error(`Error in finding the Stage of Master Project ID : ${locations[i].master_project_id}`)
+    throw new Error(`Error in finding the Stage of Master Project ID : ${currentProjectId}`)
   }
   data.Stage = stage
   if (data.Stage !== 'Complete') {
@@ -336,7 +348,7 @@ function __getProjectStatus(locations, i) {
   if (data.Stage !== 'Lost') {
     data['Project Lost date'] = null
   }
-  
+
   return {
     newIndex: i - 1,
     data: data
@@ -357,4 +369,15 @@ function __get_all_lp_users() {
     }
     return userObject
   })
+}
+
+async function __updateJob(jobName, update) {
+  var job = await db.job.findAll({
+    where: {
+      jobname: jobName
+    }
+  })
+
+  await job[0].update(update)
+  return job[0]
 }
