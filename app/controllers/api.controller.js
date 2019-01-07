@@ -1,7 +1,8 @@
 var db = require('../models')
 module.exports = {
   getAllProjects,
-  getProject
+  getProject,
+  updateGoal
 }
 
 async function getAllProjects(req, res) {
@@ -23,4 +24,18 @@ async function getProject(req, res) {
     results = error
   }
   res.json(results)
+}
+
+async function updateGoal(req, res) {
+  try {
+    let body = req.body
+    if ('id' in body) {
+      await db.mrr_targets.upsert(body)
+      res.send(200)
+    } else {
+      await db.mrr_targets.create(body)
+    }
+  } catch (err) {
+    res.send(err.message)
+  }
 }

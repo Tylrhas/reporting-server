@@ -21,6 +21,8 @@ module.exports = function (app, passport) {
   app.put('/api/jobs/archive', auth.isAdmin, jobController.updateArchiveProjects)
   app.put('/api/jobs/active', auth.isAdmin, jobController.updateActiveProjects)
   // End Job Endpoints
+
+  app.put('/api/goals', auth.isAdmin, apiController.updateGoal)
  
 
   // app.get('/api/jobs/updatetasks', auth.basic , apiController.updatelptasksapi)
