@@ -1,7 +1,7 @@
 const apiController = require('../controllers/api.controller')
 const jobController = require('../controllers/job.controller')
 const lsbController = require('../controllers/lsb.controller')
-// var auth = require('../lib/auth/auth_check')
+const auth = require('../controllers/auth.controller')
 
 module.exports = function (app, passport) {
   // Begin Data Endpoints 
@@ -10,16 +10,16 @@ module.exports = function (app, passport) {
   // End Data Endpoints
 
   // Begin Liquidplanner -> 360 integration
-  app.put('/api/admin/lbs', lsbController.update) 
-  app.get('/api/admin/lbs/locations/csv', lsbController.locations)
-  app.get('/api/admin/lbs/projects/csv', lsbController.projects)
+  app.put('/api/360/lbs', auth.isAdmin, lsbController.update) 
+  app.get('/api/360/lbs/locations/csv', lsbController.locations)
+  app.get('/api/360/lbs/projects/csv', lsbController.projects)
   // End Liquidplanner -> 360 integration
 
   // Begin Job Endpoints
-  app.put('/api/lbs', lsbController.updateNSDates)
-  app.put('/api/lbs/match', lsbController.match)
-  app.put('/api/jobs/archive', jobController.updateArchiveProjects)
-  app.put('/api/jobs/active', jobController.updateActiveProjects)
+  app.put('/api/lbs', auth.isAdmin, lsbController.updateNSDates)
+  app.put('/api/lbs/match', auth.isAdmin, lsbController.match)
+  app.put('/api/jobs/archive', auth.isAdmin, jobController.updateArchiveProjects)
+  app.put('/api/jobs/active', auth.isAdmin, jobController.updateActiveProjects)
   // End Job Endpoints
  
 
