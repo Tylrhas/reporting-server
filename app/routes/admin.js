@@ -1,16 +1,16 @@
 const db = require('../models')
 const site_data = require('../controllers/site_data.controller')
 const adminRoute = '/admin'
-const auth = require('./auth')
+const auth = require('../controllers/auth.controller')
 module.exports = function (app, passport) {
 
 
-  app.get(`${adminRoute}/users`, async function (req, res) {
+  app.get(`${adminRoute}/users`, auth.isAdmin, async function (req, res) {
     var users = await db.user.findAll()
     res.render('pages/users', { user: req.user, users: users, slug: "users", site_data: site_data.all() });
 
   })
-  app.get(`${adminRoute}/update`, async function (req, res) {
+  app.get(`${adminRoute}/update`, auth.isAdmin,  async function (req, res) {
     var results = await db.job.findAll()
     // Transform the data
     let jobs = {}
@@ -22,7 +22,7 @@ module.exports = function (app, passport) {
       }
     }
 
-    res.render('pages/csv_upload', { slug: "update", user: req.user, jobs: jobs, moment: moment, link_data: link_data.page() })
+    res.render('pages/admin_update', { slug: "update", user: req.user, jobs: jobs, site_data: site_data.all() })
 
   })
 

@@ -1,15 +1,13 @@
-// var auth = require('../controllers/auth')
-// var moment = require('moment')
-// var page_data = require('../lib/page_links')
+const auth = require('../controllers/auth.controller')
+const site_data = require('../controllers/site_data.controller')
 
 module.exports = function (app, passport) {
-  // index route for the whole application
-  // app.get('/', auth.basic, function (req, res) {
-  //   let link_data = page_data()
-  //   res.render('pages/index', { user: req.user, slug: 'home', moment: moment, link_data: link_data })
-  // })
+
+  app.get('/', auth.basic, function (req, res) {
+    res.render('pages/index', { user: req.user, slug: 'home', site_data: site_data.all() })
+  })
   // Import all Auth routes
-  // require('./auth.js')(app, passport)
+  require('./auth.js')(app, passport)
   // Import all PS routes
   // require('./ps/index')(app, passport)
   // // Import all Admin routes

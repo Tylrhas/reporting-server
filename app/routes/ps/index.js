@@ -1,4 +1,4 @@
-var auth = require('../../lib/auth/auth_check')
+var auth = require('../../controllers/auth.controller')
 var mrr = require('../../controllers/reportcontroller')
 var moment = require('moment')
 var page_data = require('../../lib/page_links')
