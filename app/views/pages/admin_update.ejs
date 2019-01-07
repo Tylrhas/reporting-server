@@ -132,8 +132,8 @@
 
         $('#update_lbs').click(function() {
       $.ajax({
-          type: "get",
-          url: '/api/admin/lbs/update',
+          type: "PUT",
+          url: '/api/360/lbs',
           success: function (data) {
           },
           dataType: 'JSON'
