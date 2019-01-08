@@ -1,6 +1,7 @@
 const dates = require('./dates.controller')
 module.exports = {
-  all
+  all,
+  checkVariance
 } 
 
 function all (month, year) {
@@ -41,4 +42,21 @@ function date_data () {
     year: d.getFullYear()
   }
   return date
+}
+
+function checkVariance (total, target) {
+  if (typeof total === 'string') {
+    total = parseFloat(total.replace(/,/g , ''))
+  }
+  if (typeof target === 'string') {
+    target = parseFloat(target.replace(/,/g , ''))
+  }
+  let variancePercent = 100 * (total / target)
+  if (variancePercent > 90) {
+    return 'green'
+  } else if (variancePercent < 90 && variancePercent > 75) {
+    return 'yellow'
+  } else {
+    return 'red'
+  }
 }
