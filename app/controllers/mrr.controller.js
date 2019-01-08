@@ -1,8 +1,23 @@
 const db = require('../models')
 const Op = db.Sequelize.Op
 const dates = require('./dates.controller')
+const quater_month_map = {
+  1: {
+    months: [1,2,3],
+  },
+  2: {
+    months: [4,5,6]
+  },
+  3: {
+    months: [7,8,9]
+  },
+  4: {
+    months: [10,11,12]
+    }
+}
 module.exports = {
-  month_detail
+  month_detail,
+  quarter_detail
 }
 /**
  * Gets the MRR details for a given month
@@ -36,7 +51,30 @@ async function month_detail(month, year) {
 }
 
 async function quarter_detail (quarter, year) {
-  
+
+  var today = dates.today()
+  if (quarter === undefined || year === undefined) {
+    month = dates.currentMonth()
+    year = dates.currentYear()
+    quarter = dates.currentQuarter()
+  }
+  var firstDay = dates.startOfQuarter(quarter)
+  var lastDay = dates.endOfQuarter(quarter)
+  var backlogfirstDay = firstDay
+
+  if (dates.moment(today).isAfter(firstDay)) {
+    backlogfirstDay = today
+  }
+
+  let backlog = await __getBacklog(backlogfirstDay, lastDay)
+  let target = await __getTargetMonth(month, year)
+  let actviated = await __getActivated(firstDay, lastDay)
+  let variance = ((backlog + actviated) - target)
+  let psActivated = await __getPSActivated(firstDay, lastDay)
+  let daActivated = await __getDAActivated(firstDay, lastDay)
+
+    return { target, backlog, actviated, variance, psActivated, daActivated }
+
 }
 /**
  * Gets a months target from the database

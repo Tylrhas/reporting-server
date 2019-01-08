@@ -55,6 +55,15 @@ function currentDay() {
 function currentYear() {
   return moment().format('YYYY')
 }
+function currentQuarter() {
+  return moment().quarter()
+}
+function startOfQuarter(quarter) {
+  moment().quarter(quarter).startOf('quarter')
+}
+function endOfQuarter(quarter) {
+  moment().quarter(quarter).endOf('quarter')
+}
 function firstDay(month, year) {
   return moment().month(--month).year(year).startOf('month').format()
 }
@@ -72,6 +81,9 @@ module.exports = {
   currentDay,
   currentMonth,
   currentYear,
+  currentQuarter,
+  endOfQuarter,
+  startOfQuarter,
   firstDay,
   lastDay,
   addPST,
