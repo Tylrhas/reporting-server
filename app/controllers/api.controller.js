@@ -1,9 +1,32 @@
-var db = require('../models')
+const db = require('../models')
+const mrrController = require('./mrr.controller')
 module.exports = {
   getAllProjects,
   getProject,
-  updateGoal
+  updateGoal,
+  monthMrrDetails,
+  yearMrrDetails
 }
+async function yearMrrDetails (req, res) {
+  var year = parseInt(req.params.year)
+  try {
+    var mrrDetails = await mrrController.year_detail(month, year)
+    res.send(mrrDetails)
+  } catch (error) {
+    res.send(error.message)
+  }
+}
+async function monthMrrDetails (req, res) {
+  var month = parseInt(req.params.month)
+  var year = parseInt(req.params.year)
+
+  try {
+    var mrrDetails = await mrrController.month_detail(month, year)
+    res.send(mrrDetails)
+  } catch (error) {
+    res.send(error.message)
+  }
+} 
 
 async function getAllProjects(req, res) {
   let allProjects = await db.lp_project.findAll()

@@ -44,7 +44,7 @@ function now() {
   return moment().format()
 }
 function today() {
-  return moment().format('MM-DD-YYYY')
+  return moment().startOf('day').format()
 }
 function currentMonth() {
   return moment().format('MM')
@@ -56,10 +56,10 @@ function currentYear() {
   return moment().format('YYYY')
 }
 function firstDay(month, year) {
-  return moment().month(--month).year(year).startOf('month').format('MM-DD-YYYY HH:mm:ss')
+  return moment().month(--month).year(year).startOf('month').format()
 }
 function lastDay(month, year) {
-  return moment().month(--month).year(year).endOf('month').format('MM-DD-YYYY HH:mm:ss')
+  return moment().month(--month).year(year).endOf('month').format()
 }
 module.exports = {
   pst_to_utc,
