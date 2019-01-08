@@ -8,7 +8,7 @@
   </li>
   <li class="dropright"><a class="treeview-item" href="#">CFT Reports</a>
     <ul class="dropdown-menu dropdown-menu-right">
-        <li><a class="treeview-item" href="/ps/reports/mrr/teams/<%= site_data.currentYear %>/<%= site_data.currentMonth %>"><%= `${site_data.currentMonth}/1/${site_data.currentYear}`%>. Goals</a></li>
+        <li><a class="treeview-item" href="/ps/reports/mrr/teams/<%= site_data.currentYear %>/<%= site_data.currentMonth %>"><%= site_data.convert.moment(`${site_data.currentMonth}/1/${site_data.currentYear}`).format('MMM - YYYY')%> Goals</a></li>
         <li><a class="treeview-item" href="/ps/reports/workload/cft">WIP</a></li>
         <li><a class="treeview-item" href="/ps/reports/mrr/teams">MRR Goals Archive</a></li>
     </ul>

@@ -26,17 +26,6 @@ async function mrrDetails (req, res) {
     res.send(error.message)
   }
 }
-async function monthMrrDetails (req, res) {
-  var month = parseInt(req.params.month)
-  var year = parseInt(req.params.year)
-
-  try {
-    var mrrDetails = await mrrController.month_detail(month, year)
-    res.send(mrrDetails)
-  } catch (error) {
-    res.send(error.message)
-  }
-} 
 
 async function getAllProjects(req, res) {
   let allProjects = await db.lp_project.findAll()

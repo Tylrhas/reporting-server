@@ -1,4 +1,4 @@
-var auth = require('../../../lib/auth/auth_check')
+const auth = require('../../../controllers/auth.controller')
 var psReportPath = '/ps/reports'
 module.exports = function (app, passport) {
 
@@ -9,5 +9,5 @@ module.exports = function (app, passport) {
   // Import all reporting routes
   require('./mrr')(app, passport)
   // var projectReports = require('./project')(app, passport, express)
-  require('./workload')(app, passport)
+  // require('./workload')(app, passport)
 }

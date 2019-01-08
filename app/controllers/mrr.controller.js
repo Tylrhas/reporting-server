@@ -43,12 +43,13 @@ async function month_detail(month, year) {
 
   let backlog = await __getBacklog(backlogfirstDay, lastDay)
   let target = await __getTargetMonth(month, year)
-  let actviated = await __getActivated(firstDay, lastDay)
-  let variance = ((backlog + actviated) - target)
+  let activated = await __getActivated(firstDay, lastDay)
+  let variance = __roundNumber(((backlog + activated) - target), 2)
+  let total = activated + backlog
   let psActivated = await __getPSActivated(firstDay, lastDay)
   let daActivated = await __getDAActivated(firstDay, lastDay)
 
-  return { target, backlog, actviated, variance, psActivated, daActivated }
+  return { target, backlog, activated, variance, psActivated, daActivated, total }
 }
 
 async function quarter_detail(quarter, year) {
@@ -69,12 +70,13 @@ async function quarter_detail(quarter, year) {
 
   let backlog = await __getBacklog(backlogfirstDay, lastDay)
   let target = await __getTargetQuarter(quarter, year)
-  let actviated = await __getActivated(firstDay, lastDay)
-  let variance = ((backlog + actviated) - target)
+  let activated = await __getActivated(firstDay, lastDay)
+  let variance = __roundNumber(((backlog + activated) - target), 2)
+  let total = activated + backlog
   let psActivated = await __getPSActivated(firstDay, lastDay)
   let daActivated = await __getDAActivated(firstDay, lastDay)
 
-  return { target, backlog, actviated, variance, psActivated, daActivated }
+  return { target, backlog, activated, variance, psActivated, daActivated, total }
 
 }
 
@@ -95,12 +97,13 @@ async function year_detail(year) {
 
   let backlog = await __getBacklog(backlogfirstDay, lastDay)
   let target = await __getTargetYear(year)
-  let actviated = await __getActivated(firstDay, lastDay)
-  let variance = ((backlog + actviated) - target)
+  let activated = await __getActivated(firstDay, lastDay)
+  let variance = __roundNumber(((backlog + activated) - target), 2)
+  let total = activated + backlog
   let psActivated = await __getPSActivated(firstDay, lastDay)
   let daActivated = await __getDAActivated(firstDay, lastDay)
 
-  return { target, backlog, actviated, variance, psActivated, daActivated }
+  return { target, backlog, activated, variance, psActivated, daActivated, total }
 }
 /**
  * Gets a months target from the database
@@ -121,7 +124,7 @@ async function __getTargetMonth(month, year) {
   if (target) {
     mrrTarget = target.target
   }
-  return mrrTarget
+  return __roundNumber(mrrTarget, 2)
 }
 
 async function __getTargetQuarter(quarter, year) {
@@ -140,7 +143,7 @@ async function __getTargetQuarter(quarter, year) {
   if (target) {
     mrrTarget = target
   }
-  return mrrTarget
+  return __roundNumber(mrrTarget, 2)
 }
 
 async function __getTargetYear(year) {
@@ -154,7 +157,7 @@ async function __getTargetYear(year) {
   if (target) {
     mrrTarget = target
   }
-  return mrrTarget
+  return __roundNumber(mrrTarget, 2)
 }
 
 /**
@@ -179,7 +182,7 @@ async function __getBacklog(firstDay, lastDay) {
   if (!backlog) {
     backlog = 0
   }
-  return backlog
+  return __roundNumber(backlog, 2)
 }
 /**
  * Get the activated total for a date range
@@ -199,7 +202,7 @@ async function __getActivated(firstDay, lastDay) {
   if (!activated) {
     activated = 0
   }
-  return activated
+  return __roundNumber(activated, 2)
 }
 /**
  * Get the total MRR PS Activated in a Date Range
@@ -223,7 +226,7 @@ async function __getPSActivated(firstDay, lastDay) {
   if (!psActivated) {
     psActivated = 0
   }
-  return psActivated
+  return __roundNumber(psActivated, 2)
 }
 
 /**
@@ -247,5 +250,13 @@ async function __getDAActivated(firstDay, lastDay) {
     daActivated = 0
   }
 
-  return daActivated
+  return __roundNumber(daActivated, 2)
+}
+
+function __roundNumber (number, digits) {
+  if (number !== 0) {
+    let power = Math.pow(10,digits) 
+    number =  Math.round(number * power) / power
+  }
+  return number
 }

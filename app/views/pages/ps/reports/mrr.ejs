@@ -12,13 +12,13 @@
     </ul>
   </div>
   <% if (cols === 12) { %>
-    <% for (i = 0; i < quick_look_reports.length; i++ ) { %>
-    <%- include('../quick_look_dashboard.ejs', {quick_look_report: quick_look_reports[i]}); %>
+    <% for (i = 0; i < details.length; i++ ) { %>
+    <%- include('../quick_look_dashboard.ejs', {quick_look_report: details[i]}); %>
     <%} %>
   <%} else { %>
     <div class="row">
-    <% for (i = 0; i < quick_look_reports.length; i++ ) { %>
-    <%- include('../quick_look_cols.ejs', {quick_look_report: quick_look_reports[i], cols: cols}); %>
+    <% for (i = 0; i < details.length; i++ ) { %>
+    <%- include('../quick_look_cols.ejs', {quick_look_report: details[i], cols: cols}); %>
     <%} %>
   </div>
   <%} %>
