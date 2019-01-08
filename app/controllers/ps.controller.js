@@ -39,7 +39,6 @@ async function dashboard(req, res) {
 
   res.render('pages/ps/index', { user: req.user, slug: 'home', site_data: site_data.all(), quick_look_reports, quick_look_reports })
 }
-
 async function yearDetailArchive(req, res) {
   // get all years from 2018 - forward
   let years = site_data.archive_years()
@@ -67,7 +66,6 @@ async function yearDetails(req, res) {
   }
   res.render('pages/ps/reports/mrr', { user: req.user, slug: 'mrr', site_data: site_data.all(), details: quarters, cols: 3 });
 }
-
 async function quarterDetails(req, res) {
   // parse the year and month params out of the URL 
   var quarter = parseInt(req.params.quarter)
