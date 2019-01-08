@@ -4,13 +4,23 @@ module.exports = {
   getAllProjects,
   getProject,
   updateGoal,
-  monthMrrDetails,
-  yearMrrDetails
+  mrrDetails
 }
-async function yearMrrDetails (req, res) {
-  var year = parseInt(req.params.year)
+async function mrrDetails (req, res) {
+  var year = parseInt(req.query.year)
+  var month = parseInt(req.query.month)
+  var quarter = parseInt(req.query.quarter)
+  var mrrDetails 
   try {
-    var mrrDetails = await mrrController.year_detail(month, year)
+  if (year && month) {
+    mrrDetails = await mrrController.month_detail(month, year)
+  } else if (year && quarter) {
+    mrrDetails = await mrrController.quarter_detail(quarter, year)
+  } else if (year) {
+    mrrDetails = await mrrController.year_detail(year)
+  } else {
+    mrrDetails = 'Please supply a year and a quarter or month'
+  }
     res.send(mrrDetails)
   } catch (error) {
     res.send(error.message)

@@ -59,10 +59,16 @@ function currentQuarter() {
   return moment().quarter()
 }
 function startOfQuarter(quarter) {
-  moment().quarter(quarter).startOf('quarter')
+  return moment().quarter(quarter).startOf('quarter').format()
 }
 function endOfQuarter(quarter) {
-  moment().quarter(quarter).endOf('quarter')
+  return moment().quarter(quarter).endOf('quarter').format()
+}
+function startOfYear(year) {
+  return moment().year(year).startOf('year').format()
+}
+function endOfYear(year) {
+  return moment().year(year).endOf('year').format()
 }
 function firstDay(month, year) {
   return moment().month(--month).year(year).startOf('month').format()
@@ -84,6 +90,8 @@ module.exports = {
   currentQuarter,
   endOfQuarter,
   startOfQuarter,
+  startOfYear,
+  endOfYear,
   firstDay,
   lastDay,
   addPST,

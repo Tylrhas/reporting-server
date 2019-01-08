@@ -3,21 +3,22 @@ const Op = db.Sequelize.Op
 const dates = require('./dates.controller')
 const quater_month_map = {
   1: {
-    months: [1,2,3],
+    months: [1, 2, 3],
   },
   2: {
-    months: [4,5,6]
+    months: [4, 5, 6]
   },
   3: {
-    months: [7,8,9]
+    months: [7, 8, 9]
   },
   4: {
-    months: [10,11,12]
-    }
+    months: [10, 11, 12]
+  }
 }
 module.exports = {
   month_detail,
-  quarter_detail
+  quarter_detail,
+  year_detail
 }
 /**
  * Gets the MRR details for a given month
@@ -50,7 +51,7 @@ async function month_detail(month, year) {
   return { target, backlog, actviated, variance, psActivated, daActivated }
 }
 
-async function quarter_detail (quarter, year) {
+async function quarter_detail(quarter, year) {
 
   var today = dates.today()
   if (quarter === undefined || year === undefined) {
@@ -67,14 +68,39 @@ async function quarter_detail (quarter, year) {
   }
 
   let backlog = await __getBacklog(backlogfirstDay, lastDay)
-  let target = await __getTargetMonth(month, year)
+  let target = await __getTargetQuarter(quarter, year)
   let actviated = await __getActivated(firstDay, lastDay)
   let variance = ((backlog + actviated) - target)
   let psActivated = await __getPSActivated(firstDay, lastDay)
   let daActivated = await __getDAActivated(firstDay, lastDay)
 
-    return { target, backlog, actviated, variance, psActivated, daActivated }
+  return { target, backlog, actviated, variance, psActivated, daActivated }
 
+}
+
+async function year_detail(year) {
+  var today = dates.today()
+
+  if (year === undefined) {
+    year = dates.currentYear()
+  }
+
+  var firstDay = dates.startOfYear(year)
+  var lastDay = dates.endOfYear(year)
+  var backlogfirstDay = firstDay
+
+  if (dates.moment(today).isAfter(firstDay)) {
+    backlogfirstDay = today
+  }
+
+  let backlog = await __getBacklog(backlogfirstDay, lastDay)
+  let target = await __getTargetYear(year)
+  let actviated = await __getActivated(firstDay, lastDay)
+  let variance = ((backlog + actviated) - target)
+  let psActivated = await __getPSActivated(firstDay, lastDay)
+  let daActivated = await __getDAActivated(firstDay, lastDay)
+
+  return { target, backlog, actviated, variance, psActivated, daActivated }
 }
 /**
  * Gets a months target from the database
@@ -94,9 +120,43 @@ async function __getTargetMonth(month, year) {
   })
   if (target) {
     mrrTarget = target.target
-  } 
+  }
   return mrrTarget
 }
+
+async function __getTargetQuarter(quarter, year) {
+  quarter = quater_month_map[quarter]
+  var mrrTarget = 0
+  var target = await db.mrr_targets.sum('target', {
+    where: {
+      year: year,
+      cft_id: null,
+      month: {
+        [Op.in]: quarter.months
+      }
+    }
+  })
+
+  if (target) {
+    mrrTarget = target
+  }
+  return mrrTarget
+}
+
+async function __getTargetYear(year) {
+  var mrrTarget = 0
+  target = await db.mrr_targets.sum('target', {
+    where: {
+      year: year,
+      cft_id: null
+    }
+  })
+  if (target) {
+    mrrTarget = target
+  }
+  return mrrTarget
+}
+
 /**
  * Gets the backlog for a given month
  *
@@ -105,7 +165,7 @@ async function __getTargetMonth(month, year) {
  * @returns {number}
  */
 async function __getBacklog(firstDay, lastDay) {
-  let backlog 
+  let backlog
   if (dates.moment(firstDay).isBefore(lastDay)) {
     backlog = await db.lbs.sum('total_mrr', {
       where: {
@@ -128,11 +188,11 @@ async function __getBacklog(firstDay, lastDay) {
  * @param {number} lastDay
  * @returns {number}
  */
-async function __getActivated (firstDay, lastDay) {
+async function __getActivated(firstDay, lastDay) {
   let activated = await db.lbs.sum('total_mrr', {
     where: {
       actual_go_live: {
-        [Op.between]: [firstDay,lastDay]
+        [Op.between]: [firstDay, lastDay]
       }
     }
   })
@@ -148,21 +208,21 @@ async function __getActivated (firstDay, lastDay) {
  * @param {date} lastDay
  * @returns {number}
  */
-async function __getPSActivated (firstDay, lastDay) {
-  
+async function __getPSActivated(firstDay, lastDay) {
+
   let psActivated = await db.lbs.sum('total_mrr', {
     where: {
       actual_go_live: {
         [Op.between]: [firstDay, lastDay]
       },
       project_type: {
-          [Op.notIn]: ["DA Rep & Social", "SEM Only", "Digital Advertising"]
+        [Op.notIn]: ["DA Rep & Social", "SEM Only", "Digital Advertising"]
       }
     }
   })
   if (!psActivated) {
     psActivated = 0
-  } 
+  }
   return psActivated
 }
 
@@ -173,7 +233,7 @@ async function __getPSActivated (firstDay, lastDay) {
  * @param {date} lastDay
  * @returns {number}
  */
-async function __getDAActivated (firstDay, lastDay) {
+async function __getDAActivated(firstDay, lastDay) {
   let daActivated = await db.lbs.sum('total_mrr', {
     where: {
       actual_go_live: {
@@ -186,6 +246,6 @@ async function __getDAActivated (firstDay, lastDay) {
   if (!daActivated) {
     daActivated = 0
   }
-  
+
   return daActivated
 }

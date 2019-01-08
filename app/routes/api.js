@@ -7,8 +7,7 @@ module.exports = function (app, passport) {
   // Begin Data Endpoints 
   app.get('/api/projects', apiController.getAllProjects)
   app.get('/api/projects/:project_id', apiController.getProject)
-  app.get('/api/mrr/:year', apiController.yearMrrDetails)
-  app.get('/api/mrr/:year/:month', apiController.monthMrrDetails)
+  app.get('/api/mrr', apiController.mrrDetails)
   // End Data Endpoints
 
   // Begin Liquidplanner -> 360 integration
