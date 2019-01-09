@@ -2,6 +2,9 @@ const throttledRequest = require('../config/throttled_request_promise')
 const LPauth = "Basic " + new Buffer(process.env.LpUserName + ":" + process.env.LPPassword).toString("base64")
 const db = require('../models')
 const dates = require('./dates.controller')
+const Honeybadger = require('honeybadger').configure({
+  apiKey: process.env.HONEYBADGER_API_KEY
+})
 module.exports = {
   updateArchiveProjects,
   updateActiveProjects,
@@ -27,17 +30,25 @@ async function updateActiveProjects(req, res) {
   try {
     _updateProjects(projects)
   } catch (error) {
-    console.log(error)
+    Honeybadger.notify(error)
   }
 }
 async function _updateProjects(projects) {
-  for (let i = 0; i < projects.length; i++) {
-    var project = projects[i]
-    let projectURL = `https://app.liquidplanner.com/api/v1/workspaces/158330/treeitems/${project.key}?depth=-1&leaves=true`
-    var project = await throttledRequest.promise({ url: projectURL, method: 'GET', headers: { "Authorization": LPauth } })
-    await _updateProject(project)
+  try {
+    for (let i = 0; i < projects.length; i++) {
+      var project = projects[i]
+      let projectURL = `https://app.liquidplanner.com/api/v1/workspaces/158330/treeitems/${project.key}?depth=-1&leaves=true`
+      var project = await throttledRequest.promise({ url: projectURL, method: 'GET', headers: { "Authorization": LPauth } })
+      await _updateProject(project)
+      console.error('DONE!!!!!!!!!')
+    }
+  } catch (error) {
+    Honeybadger.notify(error, {
+      context: {
+      project: project
+      }
+    })
   }
-  console.error('DONE!!!!!!!!!')
 }
 async function _checkForChildren(parent) {
   if (parent.hasOwnProperty('children')) {
@@ -63,9 +74,12 @@ async function _checkForChildren(parent) {
         hrs_remaning: child.high_effort_remaining,
         name: child.name
       }
+      if (child.project_id === 49432637) {
+        debugger
+      }
       if (child.hasOwnProperty('custom_field_values')) {
         childUpdate = _addCustomFieldValues(child.custom_field_values, childUpdate)
-        if (childUpdate.task_type !== undefined && childUpdate.task_type === 'Location Service Billing') {
+        if (childUpdate.hasOwnProperty('task_type') && childUpdate.task_type === 'Location Service Billing') {
           // create an LSB task for it
           // parse the id from the name
           let splitName = childUpdate.name.split(/\s(.+)/, 2)
@@ -81,12 +95,25 @@ async function _checkForChildren(parent) {
             })
             await dbChild[0].update(childUpdate)
           } else {
-            throw new Error('ID is not a number')
+            Honeybadger.notify(`ID is not a number - ${splitName[0]}`, {
+              context: {
+              dbItem: dbChild[0].dataValues, 
+              update: childUpdate
+              }
+            })
           }
         }
       }
       await dbChild[0].update(childUpdate)
-      await _checkForChildren(child)
+      try {
+        await _checkForChildren(child) 
+      } catch (error) {
+        Honeybadger.notify(error, {
+          context: {
+            child: child
+          }
+        })
+      }
     }
   } else {
     return
@@ -148,7 +175,15 @@ async function _updateProject(project) {
       name: project.name
     })
   }
-  await _checkForChildren(project)
+  try {
+    await _checkForChildren(project) 
+  } catch (error) {
+    Honeybadger.notify(error, {
+      context: {
+        project: project
+      }
+    })
+  }
   return
   // after everything is complete update the job to have a complete status
 }

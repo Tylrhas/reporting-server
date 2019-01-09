@@ -6,7 +6,9 @@ const jobController = require('../controllers/job.controller')
 const Papa = require("papaparse")
 const Op = db.Sequelize.Op
 const slack = require('../controllers/slack.controller')
-
+const Honeybadger = require('honeybadger').configure({
+  apiKey: process.env.HONEYBADGER_API_KEY
+})
 module.exports = {
   update,
   locations,
@@ -19,7 +21,7 @@ async function update(req, res) {
   if (req) {
     res.sendStatus(201)
   }
-  await __updateJob('update_lbs', 'complete')
+  var job = await __updateJob('update_lbs', { status: 'running' })
   var locations
   start_date = null
   if (req && req.body.start_date) {
@@ -63,11 +65,18 @@ async function update(req, res) {
         update.project_lost_date = dates.pst_to_utc(dates.now())
       }
     }
-
-    await __findTreeItem(update)
-    await lsb[0].update(update)
+    try {
+      await __findTreeItem(update)
+      await lsb[0].update(update)
+    } catch (error) {
+      Honeybadger.notify(error, {
+        context: {
+        update: update
+        }
+      })
+    }
   }
-  await __updateJob('update_lbs', 'complete')
+  await job.update({ lastrun: dates.pst_to_utc(dates.now()), status: 'active', lastrunstatus: 'complete' })
 }
 async function locations(req, res) {
   try {
@@ -99,7 +108,9 @@ async function locations(req, res) {
     res.send(csv)
     // convert all dates from utc to PST for upload
   } catch (error) {
+    Honeybadger.notify(error)
     res.send(error)
+    
   }
 }
 async function projects(req, res) {
@@ -129,6 +140,7 @@ async function projects(req, res) {
         csv.push(project.data)
         i = project.newIndex
       } catch (error) {
+        Honeybadger.notify(error)
         slack.sendError(error.message)
       }
       // get all all of the locations that stages that are part of this project
@@ -138,6 +150,7 @@ async function projects(req, res) {
 
     res.send(csv)
   } catch (error) {
+    Honeybadger.notify(error)
     res.send(error.stack)
   }
 }
@@ -290,6 +303,9 @@ async function match(req, res) {
   await job.update({ lastrun: dates.moment().format(), lastrunstatus: 'active' })
 }
 async function __findTreeItem(update) {
+  if (update.task_id === 47738410) {
+    debugger
+  }
   var treeItem = await db.treeitem.findOne({ where: { id: update.task_id } })
   if (treeItem === null) {
     // fetch the project from LP
@@ -300,7 +316,11 @@ async function __findTreeItem(update) {
       // update every treeitem in project
       return
     } catch (error) {
-      console.log(error)
+      Honeybadger.notify(error, {
+        context: {
+        project: project
+        }
+      })
     }
   } else {
     return
