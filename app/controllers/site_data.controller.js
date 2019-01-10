@@ -8,9 +8,9 @@ module.exports = {
 function all (month, year) {
 
   var siteData = {
-    currentDate: __date_data(),
-    currentMonth: dates.moment(__date_data()).format('MM') ,
-    currentYear: dates.moment(__date_data()).format('YYYY') ,
+    currentDate: dates.moment().format(),
+    currentMonth: dates.moment(dates.moment().format()).format('MM') ,
+    currentYear: dates.moment(dates.moment().format()).format('YYYY') ,
     currentQuarter: __getQuarter(),
     convert: dates,
     pageMonth: month,
@@ -33,14 +33,6 @@ function __getQuarter(d) {
   var m = Math.floor(d.getMonth()/3) +1;
   let quarter = m > 4? m - 4 : m;
   return quarter
-}
-function __date_data () {
-  var d = new Date();
-  var date = {
-    month: d.getMonth() + 1,
-    year: d.getFullYear()
-  }
-  return date
 }
 function archive_years () {
   // get all years from 2018 to current year

@@ -23,7 +23,7 @@ module.exports = {
   yearDetails,
   quarterDetails,
   yearDetailArchive,
-  mrrDetailsTeam,
+  teamActivatedDetails,
   mrrDetailsDashboard,
 
 }
@@ -86,47 +86,10 @@ async function quarterDetails(req, res) {
   }
   res.render('pages/ps/reports/mrr', { user: req.user, slug: 'mrr', site_data: site_data.all(), details: details, cols: 4 })
 }
-async function mrrDetailsTeam(req, res) {
+async function teamActivatedDetails(req, res) {
   var id = parseInt(req.params.teamid)
   var month = parseInt(req.params.month)
   var year = parseInt(req.params.year)
-
-  var firstDay = new Date(year, month - 1, 0);
-  var lastDay = new Date(year, month, 0);
-  var cft_name = db.cft.findAll({
-    where: {
-      id: {
-        [Op.not]: 48803247
-      }
-    }
-  })
-
-  firstDay.setHours(23, 59, 59, 999);
-  lastDay.setHours(23, 59, 59, 999);
-
-  let link_data = page_data(month, year)
-
-  if (id === 0) {
-    var no_team = teamMrr.non_associated_range(firstDay, lastDay)
-
-    no_team.then(results => {
-      res.render('pages/ps/reports/no_team_mrr_detail', { user: req.user, results: results, slug: 'mrr', moment: moment, link_data: link_data });
-    })
-  } else {
-    var lbs = teamMrr.month_id(firstDay, lastDay, id)
-    Promise.all([cft_name, lbs]).then(results => {
-      for (i = 0; i < results[1].length; i++) {
-        results[1][i].total_mrr = results[1][i].lbs.reduce((prev, cur) => prev + cur.total_mrr, 0)
-      }
-      res.render('pages/ps/reports/team_mrr_detail', { user: req.user, projects: results[1], lp_space_id: process.env.LPWorkspaceId, slug: 'mrr', moment: moment, link_data: link_data, cftName: results[0][0].name });
-    })
-  }
-}
-async function mrrDetailsDashboard(req, res) {
-  // get all LBS items launched this month and match to project and CFT and sum the totals for each team
-  var month = parseInt(req.params.month)
-  var year = parseInt(req.params.year)
-  // get all teams except for the intake bucket
 
   var today = dates.today()
   if (month === undefined || year === undefined) {
@@ -135,11 +98,26 @@ async function mrrDetailsDashboard(req, res) {
   }
   var firstDay = dates.firstDay(month, year)
   var lastDay = dates.lastDay(month, year)
-  var backlogfirstDay = firstDay
+  var cft_name = await teamController.getName(id)
 
-  if (dates.moment(today).isAfter(firstDay)) {
-    backlogfirstDay = today
+
+  if (id === 0) {
+    var no_team = await teamMRRController.non_associated_range(firstDay, lastDay)
+    
+    res.render('pages/ps/reports/no_team_mrr_detail', { user: req.user, results: no_team, slug: 'mrr', site_data: site_data.all() })
+  } else {
+    var lbs = await teamMRRController.activated(firstDay, lastDay, id)
+      for (i = 0; i < lbs.length; i++) {
+        lbs[i].total_mrr = lbs[i].lbs.reduce((prev, cur) => prev + cur.total_mrr, 0)
+      }
+      res.render('pages/ps/reports/team_mrr_detail', { user: req.user, projects: lbs, lp_space_id: process.env.LPWorkspaceId, slug: 'mrr', site_data: site_data.all(), cftName: cft_name });
   }
+}
+async function mrrDetailsDashboard(req, res) {
+  // get all LBS items launched this month and match to project and CFT and sum the totals for each team
+  var month = parseInt(req.params.month)
+  var year = parseInt(req.params.year)
+
   teamDetails = []
   var teams = await teamController.realTeams()
   for (let i = 0; i < teams.length; i++) {
@@ -176,11 +154,11 @@ async function __teamDashboard(month, year, teamId) {
     link: `/ps/reports/mrr/teams/backlog/${teamId}/${year}/${month}`
 }
   if (dates.moment(today).isBefore(lastDay)) {
-    backlog.value = teamMRRController.backlog(backlogfirstDay, lastDay, teamId)
+    backlog.value = await teamMRRController.backlog(backlogfirstDay, lastDay, teamId)
 }
   // get activated
   var activated =  {
-    value: await teamMRRController.activated(firstDay, lastDay, teamId),
+    value: await teamMRRController.activatedTotal(firstDay, lastDay, teamId),
     link: `/ps/reports/mrr/teams/${teamId}/${year}/${month}` 
   }
   // calculate % of backlog activated

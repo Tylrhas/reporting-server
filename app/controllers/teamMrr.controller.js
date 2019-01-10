@@ -5,9 +5,11 @@ const mrrController = require('./mrr.controller')
 module.exports = {
   backlog,
   startingBacklog,
+  activatedTotal,
   activated,
   target,
-  percent
+  percent,
+  non_associated_range
 }
 async function target(month, year, teamId) {
   let target = await db.mrr_targets.findOne({
@@ -24,7 +26,7 @@ async function target(month, year, teamId) {
   }
   return target
 }
-async function backlog(startDate, endDate, teamId) {
+async function backlog(firstDay, lastDay, teamId) {
   let projects = await db.lp_project.findAll({
     attributes: ['id', 'cft_id'],
     where: {
@@ -67,7 +69,7 @@ async function startingBacklog(month, year, teamId) {
   }
   return backlog
 }
-async function activated(firstDay, lastDay, teamId) {
+async function activatedTotal(firstDay, lastDay, teamId) {
   let projects = await db.lp_project.findAll({
     attributes: ['id', 'cft_id'],
     where: {
@@ -95,6 +97,32 @@ async function activated(firstDay, lastDay, teamId) {
 
   return mrrController.__roundNumber(teamMRR, 2)
 }
+
+async function activated(firstDay, lastDay, teamId) {
+  return db.lp_project.findAll({
+    where: {
+     cft_id: teamId
+    },
+    include: [
+     {
+      model: db.treeitem,
+      attributes: ['name'],
+      where: {
+       child_type: 'project'
+      }
+     },
+     {
+      model: db.lbs,
+      attributes: ['total_mrr'],
+      where: {
+       actual_go_live: {
+        [Op.between]: [firstDay, lastDay]
+       }
+      }
+     }
+    ]
+   })
+}
 function percent(goal, actual ) {
   let percent = 0
   if (goal != 0) {
@@ -102,4 +130,27 @@ function percent(goal, actual ) {
     percent = mrrController.__roundNumber(percent, 2)
   } 
   return percent
+}
+
+async function non_associated_range(firstDay, lastDay) {
+  return db.lbs.findAll({
+    where: {
+     project_id: null,
+     total_mrr: {
+      [Op.not]: null
+     },
+     actual_go_live: {
+      [Op.between]: [firstDay, lastDay]
+     },
+     project_type: {
+      [Op.notIn]: ["SEM Only", "Digital Advertising"]
+     }
+    },
+    include: [
+     {
+      model: db.lp_user,
+      attributes: ['first_name', 'last_name']
+     }
+    ]
+   })
 }

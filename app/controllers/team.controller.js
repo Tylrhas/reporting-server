@@ -1,6 +1,7 @@
 const db = require('../models')
 module.exports = {
-  realTeams
+  realTeams,
+  getName
 }
 
 async function realTeams() {
@@ -10,4 +11,17 @@ async function realTeams() {
     }
   })
   return teams
+}
+
+async function getName (id) {
+  var teamName = null
+  var team = await db.cft.findOne({
+    where: {
+      id: id
+    }
+  })
+  if (team) {
+    teamName = team.name
+  }
+  return teamName
 }
