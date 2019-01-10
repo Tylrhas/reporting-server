@@ -18,7 +18,8 @@ const quater_month_map = {
 module.exports = {
   month_detail,
   quarter_detail,
-  year_detail
+  year_detail,
+  __roundNumber
 }
 /**
  * Gets the MRR details for a given month

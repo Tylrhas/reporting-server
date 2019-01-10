@@ -12,18 +12,16 @@ function all (month, year) {
     currentMonth: dates.moment(__date_data()).format('MM') ,
     currentYear: dates.moment(__date_data()).format('YYYY') ,
     currentQuarter: __getQuarter(),
-    convert: dates
+    convert: dates,
+    pageMonth: month,
+    pageYear: year,
+    pageQuarter: __getQuarter(month + '/1/' + year)
   }
   if (month == null || year == null) {
       siteData.pageMonth = siteData.currentMonth
       siteData.pageYear = siteData.currentYear
-      pageQuarter = siteData.currentQuarter
+      siteData.pageQuarter = siteData.currentQuarter
     }
-  else {
-    siteData.pageMonth = month,
-    siteData.pageYear = year,
-    pageQuarter = __getQuarter(month + '/1/' + year)
-  }
   return siteData
 }
 function __getQuarter(d) {

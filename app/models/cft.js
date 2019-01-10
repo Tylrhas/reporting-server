@@ -9,6 +9,9 @@ module.exports = function (sequelize, Sequelize) {
     },
     name: {
       type: Sequelize.TEXT
+    },
+    real_team: {
+      type: Sequelize.BOOLEAN
     }
   })
   cft.associate = function (models) {

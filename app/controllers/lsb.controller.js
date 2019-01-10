@@ -272,7 +272,7 @@ async function updateNSDates(req, res) {
   })
 }
 async function match(req, res) {
-
+  try {
   // set the job to running 
   var job = await __updateJob('match_lbs', { status: 'running' })
   if (req) {
@@ -289,7 +289,7 @@ async function match(req, res) {
     ]
   })
   for (let i = 0; i < lsb.length; i++) {
-    location = lsb[i]
+    var location = lsb[i]
     var url = `https://app.liquidplanner.com/api/workspaces/158330/tasks?filter[]=name contains ${location.id}`
     var treeitem = await throttledRequest.promise({ url: url, method: 'GET', headers: { "Authorization": LPauth } })
     if (treeitem.length > 0) {
@@ -301,6 +301,14 @@ async function match(req, res) {
     }
   }
   await job.update({ lastrun: dates.moment().format(), lastrunstatus: 'active' })
+} catch (error) {
+  Honeybadger.notify(error, {
+    context: {
+      location: location.dataValues,
+      treeitem: treeitem
+    }
+  })
+}
 }
 async function __findTreeItem(update) {
   if (update.task_id === 47738410) {
