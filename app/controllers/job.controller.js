@@ -137,6 +137,7 @@ async function _updateProject(project) {
     // update the project in the database
     var projectUpdate = {
       id: project.id,
+      cft_id: await __getCFTId(project),
       started_on: project.started_on,
       done_on: project.done_on,
       is_done: project.is_done,
@@ -152,8 +153,6 @@ async function _updateProject(project) {
     // check if the archived folder is a parent of this project 
     if (project.parent_ids.includes(parseInt(process.env.LPArchiveFolder))) {
       projectUpdate.is_archived = true
-    } else {
-      var cfts = await _getCFTsArray()
     }
     // if custom field values exist then add them
     if (project.hasOwnProperty('custom_field_values')) {
@@ -199,7 +198,17 @@ async function _getCFTsArray() {
 
   return cftsArray
 }
-
+async function __getCFTId (project) {
+  let teamID = 0
+  var cfts = await _getCFTsArray()
+  for (let i = 0; i < cfts.length; i++) {
+    let cft_id = cfts[i]
+    if(project.parent_ids.indexOf(cft_id) !== -1) {
+      teamID = cft_id
+    }
+  }
+  return teamID
+}
 // update archive projects and tasks folder
 // update LBS dates 
 // update lp projects and tasks 

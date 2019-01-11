@@ -10,7 +10,10 @@ module.exports = {
   activated,
   target,
   percent,
-  non_associated_range
+  nonAssociatedActivation,
+  nonAssociatedActivationTotal,
+  nonAssociatedBacklog,
+  nonAssociatedBacklogTotal
 }
 async function target(month, year, teamId) {
   let target = await db.mrr_targets.findOne({
@@ -168,8 +171,7 @@ function percent(goal, actual ) {
   } 
   return percent
 }
-
-async function non_associated_range(firstDay, lastDay) {
+async function nonAssociatedActivation(firstDay, lastDay) {
   return db.lbs.findAll({
     where: {
      project_id: null,
@@ -190,4 +192,43 @@ async function non_associated_range(firstDay, lastDay) {
      }
     ]
    })
+}
+async function nonAssociatedActivationTotal(firstDay, lastDay) {
+  let lbs = await nonAssociatedActivation(firstDay, lastDay)
+  let total = 0
+  for(let i = 0; i < lbs.length; i++) {
+      total = total + lbs[i].total_mrr
+  }
+  return total
+}
+async function nonAssociatedBacklog(firstDay, lastDay) {
+  return db.lbs.findAll({
+    where: {
+     project_id: null,
+     total_mrr: {
+      [Op.not]: null
+     },
+     estimated_go_live: {
+      [Op.between]: [firstDay, lastDay]
+     },
+     project_type: {
+      [Op.notIn]: ["SEM Only", "Digital Advertising"]
+     }
+    },
+    include: [
+     {
+      model: db.lp_user,
+      attributes: ['first_name', 'last_name']
+     }
+    ]
+   })
+}
+
+async function nonAssociatedBacklogTotal (firstDay, lastDay) {
+  let lbs = await nonAssociatedBacklog(firstDay, lastDay)
+  let total = 0
+  for(let i = 0; i < lbs.length; i++) {
+      total = total + lbs[i].total_mrr
+  }
+  return total
 }
