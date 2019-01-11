@@ -25,6 +25,8 @@ module.exports = {
   yearDetailArchive,
   teamActivatedDetails,
   mrrDetailsDashboard,
+  teamArchive,
+  teamBacklog
 
 }
 async function dashboard(req, res) {
@@ -103,14 +105,14 @@ async function teamActivatedDetails(req, res) {
 
   if (id === 0) {
     var no_team = await teamMRRController.non_associated_range(firstDay, lastDay)
-    
+
     res.render('pages/ps/reports/no_team_mrr_detail', { user: req.user, results: no_team, slug: 'mrr', site_data: site_data.all() })
   } else {
     var lbs = await teamMRRController.activated(firstDay, lastDay, id)
-      for (i = 0; i < lbs.length; i++) {
-        lbs[i].total_mrr = lbs[i].lbs.reduce((prev, cur) => prev + cur.total_mrr, 0)
-      }
-      res.render('pages/ps/reports/team_mrr_detail', { user: req.user, projects: lbs, lp_space_id: process.env.LPWorkspaceId, slug: 'mrr', site_data: site_data.all(), cftName: cft_name });
+    for (i = 0; i < lbs.length; i++) {
+      lbs[i].total_mrr = lbs[i].lbs.reduce((prev, cur) => prev + cur.total_mrr, 0)
+    }
+    res.render('pages/ps/reports/team_mrr_detail', { user: req.user, projects: lbs, lp_space_id: process.env.LPWorkspaceId, slug: 'mrr', site_data: site_data.all(), cftName: cft_name });
   }
 }
 async function mrrDetailsDashboard(req, res) {
@@ -128,7 +130,11 @@ async function mrrDetailsDashboard(req, res) {
   }
   res.render('pages/ps/reports/team_mrr', { user: req.user, teamMrr: teamDetails, site_data: site_data.all(), slug: 'mrr' })
 }
-
+async function teamArchive(req, res) {
+  var months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+  let years = site_data.archive_years()
+  res.render('pages/ps/reports/team_mrr_goal_archive', { user: req.user, slug: 'mrr', site_data: site_data.all(), years: years, months: months });
+}
 async function __teamDashboard(month, year, teamId) {
 
   var today = dates.today()
@@ -149,29 +155,29 @@ async function __teamDashboard(month, year, teamId) {
   // get target 
   var target = await teamMRRController.target(month, year, teamId)
   // get current backlog
-  var  backlog = {
+  var backlog = {
     value: 0,
     link: `/ps/reports/mrr/teams/backlog/${teamId}/${year}/${month}`
-}
+  }
   if (dates.moment(today).isBefore(lastDay)) {
-    backlog.value = await teamMRRController.backlog(backlogfirstDay, lastDay, teamId)
-}
+    backlog.value = await teamMRRController.backlogTotal(backlogfirstDay, lastDay, teamId)
+  }
   // get activated
-  var activated =  {
+  var activated = {
     value: await teamMRRController.activatedTotal(firstDay, lastDay, teamId),
-    link: `/ps/reports/mrr/teams/${teamId}/${year}/${month}` 
+    link: `/ps/reports/mrr/teams/${teamId}/${year}/${month}`
   }
   // calculate % of backlog activated
   var backlogPercent = {
     percent: teamMRRController.percent(startingBacklog, activated.value),
     class: site_data.checkVariance(activated.value, startingBacklog)
-  } 
+  }
   // caluclate the % of target activated
   var targetPercent = {
     percent: teamMRRController.percent(target, activated.value),
     class: site_data.checkVariance(activated.value, target)
-  } 
- 
+  }
+
   var details = {
     activated,
     startingBacklog,
@@ -181,4 +187,26 @@ async function __teamDashboard(month, year, teamId) {
     targetPercent
   }
   return details
+}
+async function teamBacklog(req, res) {
+    var id = parseInt(req.params.teamid)
+    var month = parseInt(req.params.month)
+    var year = parseInt(req.params.year)
+
+    var today = dates.today()
+    if (month === undefined || year === undefined) {
+      month = dates.currentMonth()
+      year = dates.currentYear()
+    }
+    var firstDay = dates.firstDay(month, year)
+    var lastDay = dates.lastDay(month, year)
+    var backlogfirstDay = firstDay
+  
+    if (dates.moment(today).isAfter(firstDay)) {
+      backlogfirstDay = today
+    }
+    // get the backlog for the team
+    let lbs = await teamMRRController.backlog(backlogfirstDay, lastDay, id)
+    let cftName = teamController.getName(id)
+    res.render('pages/ps/reports/team_backlog', { user: req.user, lbs: lbs, slug: 'team_backlog', lp_space_id: process.env.LPWorkspaceId, site_data: site_data.all(), cftName: cftName });
 }

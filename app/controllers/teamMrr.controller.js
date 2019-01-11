@@ -3,6 +3,7 @@ sequelize = db.sequelize
 Op = db.Sequelize.Op
 const mrrController = require('./mrr.controller')
 module.exports = {
+  backlogTotal,
   backlog,
   startingBacklog,
   activatedTotal,
@@ -26,7 +27,7 @@ async function target(month, year, teamId) {
   }
   return target
 }
-async function backlog(firstDay, lastDay, teamId) {
+async function backlogTotal(firstDay, lastDay, teamId) {
   let projects = await db.lp_project.findAll({
     attributes: ['id', 'cft_id'],
     where: {
@@ -53,6 +54,42 @@ async function backlog(firstDay, lastDay, teamId) {
     }
 
   return mrrController.__roundNumber(teamMRR, 2)
+}
+
+async function backlog(firstDay, lastDay, teamId) {
+  let projects = await db.lp_project.findAll({
+    where: {
+     cft_id: teamId
+    },
+    include: [
+     {
+      model: db.lbs,
+      where: {
+       estimated_go_live: {
+        [Op.between]: [firstDay, lastDay]
+       },
+       actual_go_live: null
+      }, include: [
+       {
+        model: db.lp_user,
+        attributes: ['first_name', 'last_name']
+       }
+      ]
+     },
+     {
+      model: db.treeitem,
+      where: {
+       child_type: 'project'
+      }
+     }
+    ]
+   })
+   //  parse the object to get all of the LBS for this team
+   locations = []
+   for (i = 0; i < projects.length; i++) {
+    locations = locations.concat(projects[i].lbs)
+   }
+   return { locations, projects}
 }
 async function startingBacklog(month, year, teamId) {
   let backlog = await db.mrr_backlog.findOne({
