@@ -8,6 +8,6 @@ module.exports = function (app, passport) {
 
   // Import all reporting routes
   require('./mrr')(app, passport)
-  // require('./project')(app, passport, express)
+  require('./project')(app, passport)
   require('./workload')(app, passport)
 }
