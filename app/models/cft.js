@@ -10,6 +10,9 @@ module.exports = function (sequelize, Sequelize) {
     name: {
       type: Sequelize.TEXT
     },
+    wip_limit: {
+      type: Sequelize.INTEGER
+    },
     real_team: {
       type: Sequelize.BOOLEAN
     }

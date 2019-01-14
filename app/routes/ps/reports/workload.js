@@ -1,5 +1,4 @@
 const auth = require('../../../controllers/auth.controller')
-var scheduledimplementation = require('../../../controllers/scheduled_implementation')
 const workloadController = require('../../../controllers/workload.controller')
 // set the sub dirs for the PS MRR Reporting Routes
 var psWorkloadPath = '/ps/reports/workload'
