@@ -1,95 +1,90 @@
-var express = require('express')
-var app = express()
-
-var Sequelize = require("sequelize")
+const Sequelize = require("sequelize")
 const Op = Sequelize.Op
 //Models
-var db = require("../../../models")
-var moment = require('moment');
-var teamMrr = require('../../../lib/reports/team_mrr')
-var cfts = require('../../../lib/reports/cft')
-var ps_project_report_dir = '/ps/reports/projects'
-var page_data = require('../../../lib/page_links')
-var scheduledimplementation = require('../../../controllers/scheduled_implementation')
+const db = require("../../../models")
+// const teamMrr = require('../../../lib/reports/team_mrr')
+// const cfts = require('../../../lib/reports/cft')
+const ps_project_report_dir = '/ps/reports/projects'
+// const scheduledimplementation = require('../../../controllers/scheduled_implementation')
+const dates = require('../../../controllers/dates.controller')
+const site_data = require('../../../controllers/site_data.controller')
 
 
 module.exports = function (app, passport) {
- app.get(ps_project_report_dir + '/active', checkAuthentication, function (req, res) {
-  let link_data = page_data()
-  var d = new Date();
-  var date = {
-   month: d.getMonth() + 1,
-   year: d.getFullYear()
-  }
-  var projectType = ['Add Location', 'New', 'Migration', 'Transfer', 'Enh - General Enhancement', 'Enh - Branded Name Change', 'Internal Project', 'Corporate Only', 'Redesign']
-  var package = ['Essential', 'Elite', 'Add - Existing Design', 'Expanded', 'Proven Path', 'New Package (combination)', 'Streamlined (retired)']
-  let cft = db.cft.findAll({
-   attributes: ['name']
-  })
-  let projects = db.lp_project.findAll({
-   attributes: ['expected_finish', 'id', 'package', 'project_type', 'ps_phase'],
-   where: {
-    is_done: false,
-    is_archived: false,
-    is_on_hold: false,
-    expected_finish: {
-     [Op.not]: null
-    }
-   },
-   include: [
-    {
-     attributes: ['id', 'name'],
-     model: db.treeitem,
-     where: {
-      child_type: 'project'
-     }
-    },
-    {
-     attributes: ['name'],
-     model: db.cft,
-    },
-    {
-     attributes: ['total_mrr', 'estimated_go_live', 'actual_go_live'],
-     model: db.lbs,
-    }
-   ]
-  })
-  Promise.all([cft, projects])
-   .then(results => {
-    console.log(results)
-    for (i = 0; i < results[1].length; i++) {
-     // calculate the activated and unactivated MRR
-     if (results[1][i].hasOwnProperty('lbs')) {
-      results[1][i].activatedMRR = 0
-      results[1][i].unactivatedMRR = 0
-      results[1][i].activationDate = null
-      results[1][i].estimatedGolive = null
-      for (lbsi = 0; lbsi < results[1][i].lbs.length; lbsi++) {
-       let lbs = results[1][i].lbs[lbsi]
-       if (lbs.actual_go_live != null) {
-        // activated MRR
-        results[1][i].activatedMRR = results[1][i].activatedMRR + lbs.total_mrr
-        results[1][i].activationDate = checkActivationDate(results[1][i].activationDate, lbs.actual_go_live)
-        results[1][i].estimatedGolive = checkEstimatedGoLiveDate(results[1][i].estimatedGolive, lbs.estimated_go_live)
-       } else {
-        // unactivated MRR
-        results[1][i].unactivatedMRR = results[1][i].unactivatedMRR + lbs.total_mrr
-        results[1][i].activationDate = checkActivationDate(results[1][i].activationDate, lbs.actual_go_live)
-        results[1][i].estimatedGolive = checkEstimatedGoLiveDate(results[1][i].estimatedGolive, lbs.estimated_go_live)
-       }
-      }
-      // get the oldest go-live date and the furtheset away estimated - go-live date
+//  app.get(ps_project_report_dir + '/active', checkAuthentication, function (req, res) {
+//   var d = new Date();
+//   var date = {
+//    month: d.getMonth() + 1,
+//    year: d.getFullYear()
+//   }
+//   var projectType = ['Add Location', 'New', 'Migration', 'Transfer', 'Enh - General Enhancement', 'Enh - Branded Name Change', 'Internal Project', 'Corporate Only', 'Redesign']
+//   var package = ['Essential', 'Elite', 'Add - Existing Design', 'Expanded', 'Proven Path', 'New Package (combination)', 'Streamlined (retired)']
+//   let cft = db.cft.findAll({
+//    attributes: ['name']
+//   })
+//   let projects = db.lp_project.findAll({
+//    attributes: ['expected_finish', 'id', 'package', 'project_type', 'ps_phase'],
+//    where: {
+//     is_done: false,
+//     is_archived: false,
+//     is_on_hold: false,
+//     expected_finish: {
+//      [Op.not]: null
+//     }
+//    },
+//    include: [
+//     {
+//      attributes: ['id', 'name'],
+//      model: db.treeitem,
+//      where: {
+//       child_type: 'project'
+//      }
+//     },
+//     {
+//      attributes: ['name'],
+//      model: db.cft,
+//     },
+//     {
+//      attributes: ['total_mrr', 'estimated_go_live', 'actual_go_live'],
+//      model: db.lbs,
+//     }
+//    ]
+//   })
+//   Promise.all([cft, projects])
+//    .then(results => {
+//     console.log(results)
+//     for (i = 0; i < results[1].length; i++) {
+//      // calculate the activated and unactivated MRR
+//      if (results[1][i].hasOwnProperty('lbs')) {
+//       results[1][i].activatedMRR = 0
+//       results[1][i].unactivatedMRR = 0
+//       results[1][i].activationDate = null
+//       results[1][i].estimatedGolive = null
+//       for (lbsi = 0; lbsi < results[1][i].lbs.length; lbsi++) {
+//        let lbs = results[1][i].lbs[lbsi]
+//        if (lbs.actual_go_live != null) {
+//         // activated MRR
+//         results[1][i].activatedMRR = results[1][i].activatedMRR + lbs.total_mrr
+//         results[1][i].activationDate = checkActivationDate(results[1][i].activationDate, lbs.actual_go_live)
+//         results[1][i].estimatedGolive = checkEstimatedGoLiveDate(results[1][i].estimatedGolive, lbs.estimated_go_live)
+//        } else {
+//         // unactivated MRR
+//         results[1][i].unactivatedMRR = results[1][i].unactivatedMRR + lbs.total_mrr
+//         results[1][i].activationDate = checkActivationDate(results[1][i].activationDate, lbs.actual_go_live)
+//         results[1][i].estimatedGolive = checkEstimatedGoLiveDate(results[1][i].estimatedGolive, lbs.estimated_go_live)
+//        }
+//       }
+//       // get the oldest go-live date and the furtheset away estimated - go-live date
 
-     }
-    }
-    // send over the projects lp_space_id to create links on page and moment to change the date 
-    res.render('pages/active_projects', { user: req.user, projects: results[1], cfts: results[0], projectType: projectType, package: package, lp_space_id: process.env.LPWorkspaceId, moment: moment, slug: 'active-projects', link_data: link_data });
-   })
- })
+//      }
+//     }
+//     // send over the projects lp_space_id to create links on page and moment to change the date 
+//     res.render('pages/active_projects', { user: req.user, projects: results[1], cfts: results[0], projectType: projectType, package: package, lp_space_id: process.env.LPWorkspaceId,slug: 'active-projects', site_data: site_data.all()});
+//    })
+//  })
  app.get(ps_project_report_dir + '/coco/timeline', checkAuthentication, async function (req, res) {
   // find all projects that are active for a given team
-  var todaysDate = new Date()
-  let link_data = page_data()
+  var todaysDate = dates.today()
   let projects = await db.lp_project.findAll({
    where: {
     is_done: false,
@@ -163,7 +158,7 @@ module.exports = function (app, passport) {
    }
    if (impReady && seoChecklist) {
     milestones.total++
-    let datedif = moment(seoChecklist).diff(impReady, 'days')
+    let datedif = dates.bussinessDaysBetween(seoChecklist,impReady)
     if (datedif < 0) {
      milestones.rejected++
      rejectedProjects.push({ project_id: projects[i].id, milestone: 'Implementation to SEO Checklist (SEO Review)', days: datedif })
@@ -174,7 +169,7 @@ module.exports = function (app, passport) {
    }
    if (seoChecklist && buildReady) {
     milestones.total++
-    let datedif = moment(buildReady).diff(seoChecklist, 'days')
+    let datedif = dates.bussinessDaysBetween(buildReady, seoChecklist)
     if (datedif < 0) {
      milestones.rejected++
      rejectedProjects.push({ project_id: projects[i].id, milestone: 'SEO Checklist to Build Ready (Copy and Build Prep)', days: datedif })
@@ -185,7 +180,7 @@ module.exports = function (app, passport) {
    }
    if (seoChecklist && copySolution) {
     milestones.total++
-    let datedif = moment(copySolution).diff(seoChecklist, 'days')
+    let datedif = dates.bussinessDaysBetween(copySolution, seoChecklist)
     if (datedif < 0) {
      milestones.rejected++
      rejectedProjects.push({ project_id: projects[i].id, milestone: 'SEO Checklist to Copy Solution (Copy)', days: datedif })
@@ -196,7 +191,7 @@ module.exports = function (app, passport) {
    }
    if (copySolution && buildReady) {
     milestones.total++
-    let datedif = moment(buildReady).diff(copySolution, 'days')
+    let datedif = dates.bussinessDaysBetween(buildReady, copySolution)
     if (datedif < 0) {
      milestones.rejected++
      rejectedProjects.push({ project_id: projects[i].id, milestone: 'Copy Solution to Build Ready (Build Prep)', days: datedif })
@@ -207,7 +202,7 @@ module.exports = function (app, passport) {
    }
    if (buildReady && peerReview) {
     milestones.total++
-    let datedif = moment(peerReview).diff(buildReady, 'days')
+    let datedif = dates.bussinessDaysBetween(peerReview, buildReady)
     if (datedif < 0) {
      milestones.rejected++
      rejectedProjects.push({ project_id: projects[i].id, milestone: 'Build Ready to Peer Review (Build)', days: datedif })
@@ -218,7 +213,7 @@ module.exports = function (app, passport) {
    }
    if (peerReview && seoStaging) {
     milestones.total++
-    let datedif = moment(seoStaging).diff(peerReview, 'days')
+    let datedif = dates.bussinessDaysBetween(seoStaging, peerReview)
     if (datedif < 0) {
      milestones.rejected++
      rejectedProjects.push({ project_id: projects[i].id, milestone: 'Peer Review to SEO Staging (SEO Staging)', days: datedif })
@@ -229,7 +224,7 @@ module.exports = function (app, passport) {
    }
    if (seoStaging && pmRevew) {
     milestones.total++
-    let datedif = moment(pmRevew).diff(seoStaging, 'days')
+    let datedif = dates.bussinessDaysBetween(pmRevew, seoStaging)
     if (datedif < 0) {
      milestones.rejected++
      rejectedProjects.push({ project_id: projects[i].id, milestone: 'SEO Staging to PM Review (PM Review)', days: datedif })
@@ -240,7 +235,7 @@ module.exports = function (app, passport) {
    }
    if (pmRevew && stagingQC) {
     milestones.total++
-    let datedif = moment(stagingQC).diff(pmRevew, 'days')
+    let datedif = dates.bussinessDaysBetween(stagingQC, pmRevew)
     if (datedif < 0) {
      milestones.rejected++
      rejectedProjects.push({ project_id: projects[i].id, milestone: 'PM Review to Staging QC (Staging QC)', days: datedif })
@@ -251,7 +246,7 @@ module.exports = function (app, passport) {
    }
    if (stagingQC && linksDelivered) {
     milestones.total++
-    let datedif = moment(linksDelivered).diff(stagingQC, 'days')
+    let datedif = dates.bussinessDaysBetween(linksDelivered, stagingQC)
     if (datedif < 0) {
      milestones.rejected++
      rejectedProjects.push({ project_id: projects[i].id, milestone: 'Staging QC to Links Delivered (Links Delivered)', days: datedif })
@@ -286,14 +281,14 @@ module.exports = function (app, passport) {
    date: todaysDate,
    milestoneData: milestones
   }
-  res.render('pages/ps/reports/team-timeline', { user: req.user, lp_space_id: process.env.LPWorkspaceId, moment: moment, slug: 'coco-timeline', link_data: link_data, averageTime: averageTime });
+  res.render('pages/ps/reports/team-timeline', { user: req.user, lp_space_id: process.env.LPWorkspaceId, slug: 'coco-timeline', site_data: site_data.all(), averageTime: averageTime });
  })
- app.get(ps_project_report_dir + '/scheduledimplementation',checkAuthentication,  async function (req, res) {
-  let queue = await scheduledimplementation.getQueue()
-  let link_data = page_data()
-  res.render('pages/scheduledimp.ejs', { user: req.user, lp_space_id: process.env.LPWorkspaceId, moment: moment, slug: 'queue', link_data: link_data, queue: queue });
-  // res.json(queue)
- })
+//  app.get(ps_project_report_dir + '/scheduledimplementation',checkAuthentication,  async function (req, res) {
+//   let queue = await scheduledimplementation.getQueue()
+//   let link_data = page_data()
+//   res.render('pages/scheduledimp.ejs', { user: req.user, lp_space_id: process.env.LPWorkspaceId, moment: moment, slug: 'queue', link_data: link_data, queue: queue });
+//   // res.json(queue)
+//  })
  function getSum(total, num) {
   return total + num;
  }
@@ -310,7 +305,7 @@ module.exports = function (app, passport) {
 function checkActivationDate(activationDate, actual_go_live) {
  if (activationDate == null && actual_go_live != null) {
   return actual_go_live
- } else if (activationDate != null && actual_go_live != null && moment(actual_go_live).isBefore(activationDate)) {
+ } else if (activationDate != null && actual_go_live != null && dates.moment(actual_go_live).isBefore(activationDate)) {
   return actual_go_live
  } else {
   return activationDate
@@ -320,7 +315,7 @@ function checkActivationDate(activationDate, actual_go_live) {
 function checkEstimatedGoLiveDate(estimatedGolive, estimated_go_live) {
  if (estimatedGolive == null && estimated_go_live != null) {
   return estimated_go_live
- } else if (estimatedGolive != null && estimated_go_live != null && moment(estimated_go_live).isAfter(estimatedGolive)) {
+ } else if (estimatedGolive != null && estimated_go_live != null && dates.moment(estimated_go_live).isAfter(estimatedGolive)) {
   return estimated_go_live
  } else {
   return estimatedGolive

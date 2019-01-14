@@ -1,5 +1,11 @@
-var moment = require('moment')
-var momentTz = require('moment-timezone')
+const moment = require('moment')
+const momentTz = require('moment-timezone')
+const momentBusinessDays = require('moment-business-days')
+
+momentBusinessDays.updateLocale('us', {
+  workingWeekdays: [1, 2, 3, 4, 5]
+})
+
 
 function pst_to_utc(date) {
   if (date !== null) {
@@ -76,6 +82,15 @@ function firstDay(month, year) {
 function lastDay(month, year) {
   return moment().month(--month).year(year).endOf('month').format()
 }
+function bussinessDaysBetween (lastDay, firstDay) {
+  let days
+  if (moment(firstDay).isAfter(lastDay)) {
+    days = moment(lastDay).diff(firstDay,'days')
+  } else {
+    days = momentBusinessDays(lastDay, 'MM-DD-YYYY').businessDiff(momentBusinessDays(firstDay,'MM-DD-YYYY'))
+  }
+  return days
+}
 module.exports = {
   pst_to_utc,
   utc_to_pst,
@@ -95,4 +110,5 @@ module.exports = {
   firstDay,
   lastDay,
   addPST,
+  bussinessDaysBetween
 }
