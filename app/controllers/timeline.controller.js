@@ -1,12 +1,12 @@
 const db = require('../models')
 const Op = db.Sequelize.Op
-const dates = require('../../../controllers/dates.controller')
-const site_data = require('../../../controllers/site_data.controller')
+const dates = require('./dates.controller')
+const site_data = require('./site_data.controller')
 module.exports = {
   elCocoLocoTimeline
 }
 
-async function elCocoLocoTimeline(req, res)
+async function elCocoLocoTimeline(req, res) {
 // find all projects that are active for a given team
 var todaysDate = dates.today()
 let projects = await db.lp_project.findAll({
@@ -206,4 +206,4 @@ averageTime = {
   milestoneData: milestones
 }
 res.render('pages/ps/reports/team-timeline', { user: req.user, lp_space_id: process.env.LPWorkspaceId, slug: 'coco-timeline', site_data: site_data.all(), averageTime: averageTime });
-}) 
+}

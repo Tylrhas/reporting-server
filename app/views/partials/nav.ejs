@@ -15,7 +15,7 @@
     <% include ps_nav.ejs %>
     </li>
     <!-- <li><a class=" app-menu__item" href="/reports/active-projects">Active Projects</a></li> -->
-    <% if (user.user_group == 'admin') {%>
+    <% if (user !== undefined && user.user_group == 'admin') {%>
     <li class="treeview"><a class="app-menu__item <% if (slug == 'users') {%>active<%} %>" href="#" data-toggle="treeview"><i class="app-menu__icon fa fa-cogs"></i><span class="app-menu__label">Admin</span><i class="treeview-indicator fa fa-angle-right"></i></a>
       <ul class="treeview-menu">
         <li><a class="treeview-item <% if (slug == 'users') {%>active<%} %>" href="/admin/users">Users</a></li>
