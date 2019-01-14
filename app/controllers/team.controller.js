@@ -8,7 +8,10 @@ async function realTeams() {
   var teams = await db.cft.findAll({
     where: {
       real_team: true
-    }
+    },
+    order: [
+      ['id', 'DESC']
+    ]
   })
   return teams
 }
