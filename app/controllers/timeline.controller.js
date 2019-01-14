@@ -207,3 +207,7 @@ averageTime = {
 }
 res.render('pages/ps/reports/team-timeline', { user: req.user, lp_space_id: process.env.LPWorkspaceId, slug: 'coco-timeline', site_data: site_data.all(), averageTime: averageTime });
 }
+
+function getSum (total, num) {
+  return total + num;
+}

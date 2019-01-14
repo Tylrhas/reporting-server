@@ -186,10 +186,6 @@ function mrrTotals () {
   }
 }
 
-function getSum (total, num) {
-  return total + num;
-}
-
 $('#download_csv').click(function () {
   // gather all visable rows in the table
   let headers = $('table#active_projects thead tr').get().map(function (row) {
