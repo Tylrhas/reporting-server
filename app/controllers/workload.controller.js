@@ -25,7 +25,6 @@ async function dashboard (req, res) {
   builder.remaining = await throttledRequest.promise({ url: buildRemainingURL, method: 'GET', headers: { "Authorization": LPauth } })
   // get the report of hours logged
   builder.logged = await throttledRequest.promise({ url: buildLoggedURL, method: 'GET', headers: { "Authorization": LPauth } })
-  let link_data = page_data()
 
   builder.remaining.total_hours = 0
   builder.remaining.needs_scheduled = 0
@@ -60,7 +59,7 @@ async function dashboard (req, res) {
    }
   }
   // res.json(builder)
-  res.render('pages/ps/reports/workload.ejs', { user: req.user, slug: 'wordload', lp_space_id: process.env.LPWorkspaceId, moment: moment, link_data: link_data, builder: builder })
+  res.render('pages/ps/reports/workload.ejs', { user: req.user, slug: 'wordload', lp_space_id: process.env.LPWorkspaceId, site_data: site_data.all(), builder: builder })
  }
 
  async function cftDashboard (req, res) {
@@ -72,11 +71,10 @@ async function dashboard (req, res) {
  async function teamActiveProjects (req, res) {
   var cft_id = parseInt(req.params.teamID)
   // get all active project for a team
-  let link_data = page_data()
   var activeProjects = await scheduledimplementation.getActiveProjects(cft_id)
 
   // res.json(activeProjects)
-  res.render('pages/scheduledimp.ejs', { user: req.user, slug: 'team_wordload', lp_space_id: process.env.LPWorkspaceId, moment: moment, link_data: link_data, projects: activeProjects })
+  res.render('pages/scheduledimp.ejs', { user: req.user, slug: 'team_wordload', lp_space_id: process.env.LPWorkspaceId, site_data: site_data.all(), projects: activeProjects })
 
   // var activeProjects = await projects.activeCount({ is_done: false, is_archived: false, is_on_hold: false, cft_id: cft_id })
  }
@@ -84,18 +82,16 @@ async function dashboard (req, res) {
  async function teamScheduledProjects (req, res) {
   var teamID = parseInt(req.params.teamID)
   // get all active project for a team
-  let link_data = page_data()
   var scheduledProjects = await scheduledimplementation.getScheduledProjects(teamID)
 
   // res.json(activeProjects)
-  res.render('pages/scheduledimp.ejs', { user: req.user, slug: 'team_wordload', lp_space_id: process.env.LPWorkspaceId, moment: moment, link_data: link_data, projects: scheduledProjects })
+  res.render('pages/scheduledimp.ejs', { user: req.user, slug: 'team_wordload', lp_space_id: process.env.LPWorkspaceId, site_data: site_data.all(), projects: scheduledProjects })
  }
  async function allProjects (req, res) {
   var teamID = parseInt(req.params.teamID)
   // get all active project for a team
-  let link_data = page_data()
   var allProjects = await scheduledimplementation.getAllProjects(teamID)
 
   // res.json(activeProjects)
-  res.render('pages/scheduledimp.ejs', { user: req.user, slug: 'team_wordload', lp_space_id: process.env.LPWorkspaceId, moment: moment, link_data: link_data, projects: allProjects })
+  res.render('pages/scheduledimp.ejs', { user: req.user, slug: 'team_wordload', lp_space_id: process.env.LPWorkspaceId, site_data: site_data.all(), projects: allProjects })
  }
