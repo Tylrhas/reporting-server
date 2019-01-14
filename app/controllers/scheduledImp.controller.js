@@ -1,6 +1,7 @@
-db = require('../models')
-Op = db.Sequelize.Op
-sequelize = db.sequelize
+const db = require('../models')
+const Op = db.Sequelize.Op
+const sequelize = db.sequelize
+const site_data = require('./site_data.controller')
 module.exports = {
   getQueue,
   getActiveProjects,
