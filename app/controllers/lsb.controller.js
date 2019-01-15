@@ -21,62 +21,74 @@ async function update(req, res) {
   if (req) {
     res.sendStatus(201)
   }
-  var job = await __updateJob('update_lbs', { status: 'running' })
-  var locations
-  start_date = null
-  if (req && req.body.start_date) {
-    // check if there is a start date
-    start_date = req.body.start_date
-  }
-  locations = await throttledRequest.promise({ url: process.env.LP_LBS_UPDATE, method: 'GET', headers: { "Authorization": LPauth } })
-  locations = locations.rows
-  for (let i = 0; i < locations.length; i++) {
-    let location = locations[i]
-    // update each lbs with the new info
-    console.log(location)
-    // parse out the location ID
-    let splitName = location.name.split(/\s(.+)/, 2)
-    let LBSId = splitName[0]
-    let locationName = splitName[1]
-
-    // create the update object
-    let update = {
-      task_id: location["key"],
-      location_name: locationName,
-      project_id: location["project_id"],
-      stage: location["pick_list_custom_field:102670"],
-      original_estimated_go_live: dates.pst_to_utc(location["date_custom_field:151494"]),
-      estimated_go_live: dates.pst_to_utc(location["date_custom_field:147376"]),
-      actual_go_live: dates.pst_to_utc(location["date_custom_field:151495"]),
-      website_launch_date: dates.pst_to_utc(location["date_custom_field:151496"]),
-      start_date: dates.pst_to_utc(location["date_custom_field:151496"]),
-      project_lost_date: null,
+  try {
+    var job = await __updateJob('update_lbs', { status: 'running' })
+    var locations
+    start_date = null
+    if (req && req.body.start_date) {
+      // check if there is a start date
+      start_date = req.body.start_date
     }
+    locations = await throttledRequest.promise({ url: process.env.LP_LBS_UPDATE, method: 'GET', headers: { "Authorization": LPauth } })
+    locations = locations.rows
+    for (let i = 0; i < locations.length; i++) {
+      let location = locations[i]
+      // update each lbs with the new info
+      console.log(location)
+      // parse out the location ID
+      let splitName = location.name.split(/\s(.+)/, 2)
+      let LBSId = splitName[0]
+      let locationName = splitName[1]
 
-    let lsb = await db.lbs.findOrCreate({
-      where: {
-        id: LBSId
+      // create the update object
+      let update = {
+        task_id: location["key"],
+        location_name: locationName,
+        project_id: location["project_id"],
+        stage: location["pick_list_custom_field:102670"],
+        original_estimated_go_live: dates.pst_to_utc(location["date_custom_field:151494"]),
+        estimated_go_live: dates.pst_to_utc(location["date_custom_field:147376"]),
+        actual_go_live: dates.pst_to_utc(location["date_custom_field:151495"]),
+        website_launch_date: dates.pst_to_utc(location["date_custom_field:151496"]),
+        start_date: dates.pst_to_utc(location["date_custom_field:151496"]),
+        project_lost_date: null,
+      }
+      if (isNaN(LBSId)) {
+
+      } else {
+        var lsb = await db.lbs.findOrCreate({
+          where: {
+            id: LBSId
+          }
+        })
+
+        if (location['pick_list_custom_field:102670'] === 'Lost') {
+          //  check if the location is currently set to lost
+          if (!lsbStatusCheck[1] || lsbStatusCheck.project_lost_date == null) {
+            update.project_lost_date = dates.pst_to_utc(dates.now())
+          }
+        }
+        try {
+          await __findTreeItem(update)
+          await lsb[0].update(update)
+        } catch (error) {
+          Honeybadger.notify(error, {
+            context: {
+              update: update
+            }
+          })
+        }
+      }
+    }
+    await job.update({ lastrun: dates.pst_to_utc(dates.now()), status: 'active', lastrunstatus: 'complete' })
+  } catch (error) {
+    Honeybadger.notify(error, {
+      context: {
+        update: update,
+        lsb: lsb
       }
     })
-
-    if (location['pick_list_custom_field:102670'] === 'Lost') {
-      //  check if the location is currently set to lost
-      if (!lsbStatusCheck[1] || lsbStatusCheck.project_lost_date == null) {
-        update.project_lost_date = dates.pst_to_utc(dates.now())
-      }
-    }
-    try {
-      await __findTreeItem(update)
-      await lsb[0].update(update)
-    } catch (error) {
-      Honeybadger.notify(error, {
-        context: {
-        update: update
-        }
-      })
-    }
   }
-  await job.update({ lastrun: dates.pst_to_utc(dates.now()), status: 'active', lastrunstatus: 'complete' })
 }
 async function locations(req, res) {
   try {
@@ -110,7 +122,7 @@ async function locations(req, res) {
   } catch (error) {
     Honeybadger.notify(error)
     res.send(error)
-    
+
   }
 }
 async function projects(req, res) {
@@ -273,42 +285,42 @@ async function updateNSDates(req, res) {
 }
 async function match(req, res) {
   try {
-  // set the job to running 
-  var job = await __updateJob('match_lbs', { status: 'running' })
-  if (req) {
-    res.sendStatus(201)
-  }
-  // select LSB from database where there is no task or project id
-  var lsb = await db.lbs.findAll({
-    where: {
-      task_id: null,
-      project_id: null
-    },
-    order: [
-      ['estimated_go_live', 'DESC']
-    ]
-  })
-  for (let i = 0; i < lsb.length; i++) {
-    var location = lsb[i]
-    var url = `https://app.liquidplanner.com/api/workspaces/158330/tasks?filter[]=name contains ${location.id}`
-    var treeitem = await throttledRequest.promise({ url: url, method: 'GET', headers: { "Authorization": LPauth } })
-    if (treeitem.length > 0) {
-      await __findTreeItem({ task_id: treeitem[0].id, project_id: treeitem[0].project_id })
-      await location.update({
-        task_id: treeitem[0].id,
-        project_id: treeitem[0].project_id
-      })
+    // set the job to running 
+    var job = await __updateJob('match_lbs', { status: 'running' })
+    if (req) {
+      res.sendStatus(201)
     }
-  }
-  await job.update({ lastrun: dates.moment().format(), lastrunstatus: 'active' })
-} catch (error) {
-  Honeybadger.notify(error, {
-    context: {
-      location: location.dataValues,
-      treeitem: treeitem
+    // select LSB from database where there is no task or project id
+    var lsb = await db.lbs.findAll({
+      where: {
+        task_id: null,
+        project_id: null
+      },
+      order: [
+        ['estimated_go_live', 'DESC']
+      ]
+    })
+    for (let i = 0; i < lsb.length; i++) {
+      var location = lsb[i]
+      var url = `https://app.liquidplanner.com/api/workspaces/158330/tasks?filter[]=name contains ${location.id}`
+      var treeitem = await throttledRequest.promise({ url: url, method: 'GET', headers: { "Authorization": LPauth } })
+      if (treeitem.length > 0) {
+        await __findTreeItem({ task_id: treeitem[0].id, project_id: treeitem[0].project_id })
+        await location.update({
+          task_id: treeitem[0].id,
+          project_id: treeitem[0].project_id
+        })
+      }
     }
-  })
-}
+    await job.update({ lastrun: dates.moment().format(), lastrunstatus: 'active' })
+  } catch (error) {
+    Honeybadger.notify(error, {
+      context: {
+        location: location.dataValues,
+        treeitem: treeitem
+      }
+    })
+  }
 }
 async function __findTreeItem(update) {
   if (update.task_id === 47738410) {
@@ -326,7 +338,7 @@ async function __findTreeItem(update) {
     } catch (error) {
       Honeybadger.notify(error, {
         context: {
-        project: project
+          project: project
         }
       })
     }
