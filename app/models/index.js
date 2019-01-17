@@ -1,9 +1,11 @@
-"use strict";
-var fs = require("fs");
-var path = require("path");
-var Sequelize = require("sequelize");
+const fs = require('fs');
+const path = require('path');
+const Sequelize = require('sequelize');
+
+let db = {}
 require('sequelize-hierarchy')(Sequelize);
-var sequelize = new Sequelize(process.env.DATABASE_URL, {
+
+const sequelize = new Sequelize(process.env.DATABASE_URL, {
   pool: {
     max: process.env.DATABASE_MAX_CONNECTIONS,
     min: process.env.DATABASE_MIN_CONNECTIONS,
@@ -13,24 +15,20 @@ var sequelize = new Sequelize(process.env.DATABASE_URL, {
   },
   dialectOptions: {
     // convert the string to a boolean
-    ssl: (process.env.DATABASE_SSL =="true")
-  }
-}
-);
-var db = {};
+    ssl: (process.env.DATABASE_SSL == 'true'),
+  },
+})
 
 fs
   .readdirSync(__dirname)
-  .filter(function (file) {
-    return (file.indexOf(".") !== 0) && (file !== "index.js");
-  })
-  .forEach(function (file) {
-    var model = sequelize.import(path.join(__dirname, file));
+  .filter((file) => (file.indexOf(".") !== 0) && (file !== "index.js"))
+  .forEach((file) => {
+    let model = sequelize.import(path.join(__dirname, file));
     db[model.name] = model;
   });
 
-Object.keys(db).forEach(function (modelName) {
-  if ("associate" in db[modelName]) {
+Object.keys(db).forEach((modelName) => {
+  if ('associate' in db[modelName]) {
     db[modelName].associate(db);
   }
 });
