@@ -54,7 +54,11 @@ async function update(req, res) {
         project_lost_date: null,
       }
       if (isNaN(LBSId)) {
-
+        Honeybadger.notify('id is not a number', {
+          context: {
+            update: update
+          }
+        })
       } else {
         var lsb = await db.lbs.findOrCreate({
           where: {
@@ -64,7 +68,7 @@ async function update(req, res) {
 
         if (location['pick_list_custom_field:102670'] === 'Lost') {
           //  check if the location is currently set to lost
-          if (!lsbStatusCheck[1] || lsbStatusCheck.project_lost_date == null) {
+          if (update.project_lost_date == null) {
             update.project_lost_date = dates.pst_to_utc(dates.now())
           }
         }
@@ -279,7 +283,7 @@ async function updateNSDates(req, res) {
         })
       })
     } else {
-      job.update({ lastrun: dates.moment().format(), lastrunstatus: 'active' })
+      job.update({ lastrun: dates.moment().format(), lastrunstatus: 'complete', status: 'active' })
     }
   })
 }
@@ -323,9 +327,6 @@ async function match(req, res) {
   }
 }
 async function __findTreeItem(update) {
-  if (update.task_id === 47738410) {
-    debugger
-  }
   var treeItem = await db.treeitem.findOne({ where: { id: update.task_id } })
   if (treeItem === null) {
     // fetch the project from LP
