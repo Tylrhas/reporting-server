@@ -316,7 +316,7 @@ async function match(req, res) {
         })
       }
     }
-    await job.update({ lastrun: dates.moment().format(), lastrunstatus: 'active' })
+    await job.update({ lastrun: dates.moment().format(), lastrunstatus: 'complete', status: 'active' })
   } catch (error) {
     Honeybadger.notify(error, {
       context: {
