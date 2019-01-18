@@ -15,16 +15,20 @@ async function updateArchiveProjects(req, res) {
   if (req) {
     res.sendStatus(200)
   }
-  let job = await db.jobs.findOne({
-    where: {
-      name: 'archived_projects'
-    }
-  })
-  await job.update({status: 'running'})
-  let response = await throttledRequest.promise({ url: process.env.LP_ARCHIVE_PROJECTS, method: 'GET', headers: { "Authorization": LPauth } })
-  var projects = response.rows
-  _updateProjects(projects)
-  job.update({lastrun: dates.now(), status: 'active'})
+  try {
+    let job = await db.jobs.findOne({
+      where: {
+        name: 'archived_projects'
+      }
+    })
+    await job.update({status: 'running'})
+    let response = await throttledRequest.promise({ url: process.env.LP_ARCHIVE_PROJECTS, method: 'GET', headers: { "Authorization": LPauth } })
+    var projects = response.rows
+    await _updateProjects(projects)
+    await job.update({lastrun: dates.now(), status: 'active'}) 
+  } catch (error) {
+    Honeybadger.notify(error)
+  }
 }
 
 async function updateActiveProjects(req, res) {
