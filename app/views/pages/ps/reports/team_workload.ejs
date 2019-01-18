@@ -18,39 +18,6 @@
  <% if ( i === 0 || i === 3) { %>
  <div class="row">
   <% } %>
-  <% if (queue[i].id === 48803247) { %>
-   <div class="col-md-4">
-     <div class="tile">
-      <h4 class="center">
-       <%= queue[i].name %>
-      </h4>
-      <table class="table center col-md-12 center">
-       <thead>
-        <tr>
-         <th>Projects</th>
-         <th>Locations</th>
-         <th>MRR</th>
-        </tr>
-       </thead>
-       <tbody>
-        <tr>
-         <td>
-          <a href="/ps/reports/workload/cft/<%= queue[i].id %>/projects">
-           <%= queue[i].projects %>
-          </a>
-         </td>
-         <td>
-           <%= queue[i].locations %>
-         </td>
-         <td>
-          <%= queue[i].mrr %>
-         </td>
-        </tr>
-       </tbody>
-      </table>
-     </div>
-    </div>
-   <% } else { %>
     <div class="col-md-4">
       <div class="tile">
        <h4 class="center">
@@ -59,14 +26,15 @@
        <table class="table center col-md-12 center">
         <thead>
          <tr>
-          <th>Active Projects
-          </th>
+          <th>Intake</th>
+          <th>Active Projects</th>
           <th>Scheduled Projects</th>
           <th>WIP Limit</th>
          </tr>
         </thead>
         <tbody>
          <tr>
+           <td>12</td>
           <td>
            <a href="/ps/reports/workload/cft/<%= queue[i].id %>/active">
             <%= queue[i].active.length %>
@@ -85,7 +53,6 @@
        </table>
       </div>
      </div>
-     <% }%>
   <% if ( i === 2 || i === queue.length -1 ) { %>
  </div>
  <% } %>

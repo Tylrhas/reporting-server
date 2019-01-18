@@ -14,7 +14,7 @@ async function getQueue() {
     attributtes: ['cft_id', 'id'],
     where: {
       cft_id: {
-        [Op.not]: 0
+        [Op.notIn]: [0, 48803247] 
       },
       done_on: null,
       is_done: false,

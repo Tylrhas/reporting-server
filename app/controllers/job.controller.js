@@ -28,7 +28,14 @@ async function updateActiveProjects(req, res) {
   let response = await throttledRequest.promise({ url: process.env.LP_ACTIVE_PROJECTS, method: 'GET', headers: { "Authorization": LPauth } })
   var projects = response.rows
   try {
-    _updateProjects(projects)
+    let job = await db.jobs.findOne({
+      where: {
+        name: 'external_update'
+      }
+    })
+    job.update({status: 'running'})
+    await _updateProjects(projects)
+    job.update({lastrun: dates.now(), status: 'active'})
   } catch (error) {
     Honeybadger.notify(error)
   }
