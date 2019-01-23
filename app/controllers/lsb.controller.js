@@ -22,7 +22,12 @@ async function update(req, res) {
     res.sendStatus(201)
   }
   try {
-    var job = await __updateJob('update_lbs', { status: 'running' })
+    let job = await db.job.findOne({
+      where: {
+        jobname: 'archived_projects'
+      }
+    })
+    await job.update({status: 'running'})
     var locations
     start_date = null
     if (req && req.body.start_date) {
@@ -290,10 +295,15 @@ async function updateNSDates(req, res) {
 async function match(req, res) {
   try {
     // set the job to running 
-    var job = await __updateJob('match_lbs', { status: 'running' })
+    let job = await db.job.findOne({
+      where: {
+        jobname: 'match_lbs'
+      }
+    })
     if (req) {
       res.sendStatus(201)
     }
+    await job.update({status: 'running'})
     // select LSB from database where there is no task or project id
     var lsb = await db.lbs.findAll({
       where: {
@@ -316,7 +326,7 @@ async function match(req, res) {
         })
       }
     }
-    await job.update({ lastrun: dates.moment().format(), lastrunstatus: 'complete', status: 'active' })
+    job.update({lastrun: dates.now(), status: 'active'})
   } catch (error) {
     Honeybadger.notify(error, {
       context: {

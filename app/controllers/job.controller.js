@@ -16,9 +16,9 @@ async function updateArchiveProjects(req, res) {
     res.sendStatus(200)
   }
   try {
-    let job = await db.jobs.findOne({
+    let job = await db.job.findOne({
       where: {
-        name: 'archived_projects'
+        jobname: 'archived_projects'
       }
     })
     await job.update({status: 'running'})
@@ -39,9 +39,9 @@ async function updateActiveProjects(req, res) {
   let response = await throttledRequest.promise({ url: process.env.LP_ACTIVE_PROJECTS, method: 'GET', headers: { "Authorization": LPauth } })
   var projects = response.rows
   try {
-    let job = await db.jobs.findOne({
+    let job = await db.job.findOne({
       where: {
-        name: 'external_update'
+        jobname: 'external_update'
       }
     })
     await job.update({status: 'running'})
@@ -60,6 +60,7 @@ async function _updateProjects(projects) {
       await _updateProject(project)
       console.error('DONE!!!!!!!!!')
     }
+    return
   } catch (error) {
     Honeybadger.notify(error, {
       context: {
