@@ -16,11 +16,12 @@
       <li class="breadcrumb-item active">El Coco Loco</li>
     </ul>
   </div>
+  <%   Object.entries(averageTime).forEach(report => { %>
   <div class="col">
     <div class="tile">
       <div class="row">
         <div class="col">
-          <h2>Milestones</h2>
+          <h2><%= report[1].name %></h2>
         </div>
         <div class="col"><button class="btn btn-primary btn-right" id="download_milestones">Download CSV</button></div>
       </div>
@@ -33,45 +34,26 @@
           </tr>
         </thead>
         <tbody>
-          <%var total = 0 
-          for(var i=0; i < Object.keys(averageTime.milestones).length; i++) { 
-                        key = Object.keys(averageTime.milestones)[i]
-                        if (i === 2 || i === 3) {
-                          total = total + 0
-                        } else {
-                          total = total + Math.round(100*averageTime.milestones[key])/100
-                        }
-                        %>
-          <tr>
-            <td>
-              <%= averageTime.date %>
-            </td>
-            <td>
-              <%= averageTime.milestoneMap[key] %>
-            </td>
-            <td>
-              <%= Math.round(100*averageTime.milestones[key])/100 %>
-            </td>
-            <td>
-          </tr>
-          <% } %>
+            <% Object.entries(report[1].averages).forEach(milestone => { %>
+              <tr>
+                <td><%= site_data.currentDate %></td>
+                <td><%= milestone[1].name %></td>
+                <td><%= milestone[1].value %></td>
+              </tr>
+              <%})%>
         </tbody>
         <tfoot>
-          <tr>
-            <td></td>
-            <td></td>
-            <td><%= total %></td>
-          </tr>
+          <tr></tr>
+          <tr></tr>
+          <tr></tr>
         </tfoot>
       </table>
     </div>
     <div class="tile">
         <div class="row">
             <div class="col">
-              <h2>Defective Projects</h2>
+              <h2>Defective <%= report[1].name %> </h2>
               <p>
-                  <%= Math.round(((averageTime.milestoneData.rejected / averageTime.milestoneData.total) * 100)*100)/100  %> % of
-                  milestones are defective</p>
             </div>
             <div class="col"><button class="btn btn-primary btn-right" id="download_defective">Download CSV</button></div>
           </div>
@@ -85,30 +67,19 @@
           </tr>
         </thead>
         <tbody>
-          <% for(var i=0; i < averageTime.rejectedProjects.length; i++) { %>
+            <% report[1].rejectedProjects.forEach(project => { %>
           <tr>
-            <td>
-              <%= averageTime.date %>
-            </td>
-            <td>
-              <a href="https://app.liquidplanner.com/space/<%= lp_space_id %>/projects/show/<%= averageTime.rejectedProjects[i].project_id  %>"
-                target="_blank">
-                <%= averageTime.rejectedProjects[i].project_id %>
-              </a>
-            </td>
-            <td>
-              <%= averageTime.rejectedProjects[i].milestone %>
-            </td>
-            <td>
-              <%= averageTime.rejectedProjects[i].days %>
-            </td>
-
+            <td><%= site_data.currentDate %></td>
+            <td><a href="<%=`https://app.liquidplanner.com/space/${site_data.LPWorkspaceId}/projects/show/${project.project_id}`%>" target="_blank"><%= project.project_id %></a></td>
+            <td><%= project.milestone %></td>
+            <td><%= project.days %></td>
           </tr>
-          <% } %>
+          <% }) %>
         </tbody>
       </table>
     </div>
   </div>
+  <% }) %>
 </main>
 <script type="text/javascript" src="/js/plugins/papaparse.min.js"></script>
 <script>
