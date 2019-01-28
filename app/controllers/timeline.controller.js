@@ -2,9 +2,16 @@ const db = require('../models')
 const Op = db.Sequelize.Op
 const dates = require('./dates.controller')
 const site_data = require('./site_data.controller')
+const team = require('./team.controller')
 module.exports = {
   timeline,
-  detail
+  detail,
+  dashboard
+}
+
+async function dashboard (req, res) {
+  let teams = await team.noAssociatedTeam()
+  res.render('pages/ps/reports/milestone_cards', {user: req.user, lp_space_id: process.env.LPWorkspaceId, slug: 'timeline', site_data: site_data.all(), cards: teams})
 }
 
 async function timeline(req, res) {
@@ -15,19 +22,30 @@ async function timeline(req, res) {
   let milestoneTimes = await milestoneTimeline(teamID, todaysDate)
   milestoneTimes.name = 'Milestones'
   taskTimes.name = 'Tasks'
+  let teamName = await db.cft.findOne({
+    attributtes: ['name'],
+    where: {
+      id: teamID
+    }
+  })
   let averageTime = {
     milestoneTimes,
     taskTimes
   }
-  res.render('pages/ps/reports/team-timeline', { user: req.user, lp_space_id: process.env.LPWorkspaceId, slug: 'timeline', site_data: site_data.all(), averageTime: averageTime });
+  
+  res.render('pages/ps/reports/team-timeline', { user: req.user, lp_space_id: process.env.LPWorkspaceId, slug: 'timeline', site_data: site_data.all(), averageTime: averageTime, teamName: teamName.name, teamID, teamID })
 }
-
 async function detail(req, res) {
   let teamID = req.params.teamid
   let projects = await getMilestones(teamID)
   let milestoneGroups = groupMilestones(projects)
-  res.render('pages/ps/reports/team-timeline-detail', { user: req.user, lp_space_id: process.env.LPWorkspaceId, slug: 'timeline', site_data: site_data.all(), averageTime: milestoneGroups })
-  // res.send(milestoneGroups)
+  let teamName = await db.cft.findOne({
+    attributtes: ['name'],
+    where: {
+      id: teamID
+    }
+  })
+  res.render('pages/ps/reports/team-timeline-detail', { user: req.user, lp_space_id: process.env.LPWorkspaceId, slug: 'timeline', site_data: site_data.all(), averageTime: milestoneGroups, teamName: teamName.name })
 }
 
 function getSum(total, num) {
@@ -121,7 +139,6 @@ async function milestoneTimeline(teamID, todaysDate) {
   })
   return milestoneData
 }
-
 function buildAverageTimes(milestones, project, milestoneData) {
   let project_id = project.id
 
@@ -540,7 +557,6 @@ function pushProjectMilestones (projectMilestones, milestones) {
 
   return milestones
 }
-
 function findMilestones(project, ) {
   let milestones = {
     contractExecution: null,

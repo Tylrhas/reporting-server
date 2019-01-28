@@ -1,0 +1,39 @@
+<% include ../../../partials/header.ejs %>
+<% include ../../../partials/nav.ejs %>
+<main class="app-content">
+  <div class="app-title">
+    <div>
+      <h1>Team Based MRR</h1>
+      <p>All teams Activated MRR for
+        <%= site_data.convert.moment(site_data.pageMonth + '/1/' + site_data.pageYear).format( 'MMM-YYYY') %>
+      </p>
+    </div>
+    <ul class="app-breadcrumb breadcrumb">
+      <li class="breadcrumb-item">
+        <i class="fa fa-home fa-lg"></i>
+      </li>
+      <li class="breadcrumb-item">PS</li>
+      <li class="breadcrumb-item active">
+        Milestones
+      </li>
+    </ul>
+  </div>
+  <% cards.forEach((card, i) => { %>
+  <% if ( i === 0 || i === 3) { %>
+  <div class="row">
+    <% } %>
+    <div class="col-md-4">
+      <div class="tile">
+        <a href="/ps/reports/milestones/timeline/<%= card.id %>">
+        <h4 class="center">
+          <%= card.name  %>
+        </h4>
+      </a>
+      </div>
+    </div>
+    <% if ( i === 2 || i === cards.length -1 ) { %>
+  </div>
+  <% } %>
+  <% }) %>
+</main>
+<% include ../../../partials/footer.ejs %>
