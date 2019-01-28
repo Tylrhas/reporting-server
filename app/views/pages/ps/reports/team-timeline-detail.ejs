@@ -37,7 +37,7 @@
         <tbody>
             <% report.values.forEach(milestone => { %>
               <tr>
-                <td><%= milestone.projectID %></td>
+                <td><a href="https://app.liquidplanner.com/space/<%= lp_space_id %>/projects/show/<%= milestone.projectID %>"><%= milestone.projectID %></a</td>
                 <td><%= milestone.days %></td>
               </tr>
               <%})%>
