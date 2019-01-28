@@ -29,7 +29,7 @@
           </div>
           <div class="col"><button class="btn btn-primary btn-right download" data-table-id="<%= report[1].name.toLowerCase() %>">Download CSV</button>
             <% if (report[1].name === 'Milestones') { %>
-            <a class="btn btn-primary btn-right" style="margin-right: 10px;" href="<%= teamID %>/detail"> View Details</a>
+              <button class="btn btn-primary btn-right" style="margin-right: 10px;"><a href="<%= teamID %>/detail" style="color: #fff;">View Details</a></button>
             <% } %>
           </div>
         </div>
