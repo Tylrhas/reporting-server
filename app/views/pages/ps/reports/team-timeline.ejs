@@ -13,129 +13,139 @@
       <li class="breadcrumb-item">Reports</li>
       <li class="breadcrumb-item">Projects</li>
       <li class="breadcrumb-item">Timeline</li>
-      <li class="breadcrumb-item active">El Coco Loco</li>
+      <li class="breadcrumb-item active">Team Name</li>
     </ul>
   </div>
   <%   Object.entries(averageTime).forEach(report => { %>
   <div class="col">
     <div class="tile">
-      <div class="row">
-        <div class="col">
-          <h2><%= report[1].name %></h2>
+        <div class="row">
+          <div class="col">
+              <a data-toggle="collapse" href="#<%= report[1].name.toLowerCase() %>" role="button" aria-expanded="true" aria-controls="<%= report[1].name.toLowerCase() %>">
+
+            <h2>
+              <%= report[1].name %>
+            </h2>
+            </a>
+          </div>
+          <div class="col"><button class="btn btn-primary btn-right download" data-table-id="<%= report[1].name.toLowerCase() %>">Download CSV</button>
+            <% if (report[1].name === 'Milestones') { %>
+            <a class="btn btn-primary btn-right" href="timeline/detail">Details</a>
+            <% } %>
+          </div>
         </div>
-        <div class="col"><button class="btn btn-primary btn-right" id="download_milestones">Download CSV</button></div>
-      </div>
-      <table class="table" id="milstone_reports">
-        <thead>
-          <tr>
-            <th scope="col">Report Date</th>
-            <th scope="col"><%= report[1].name %></th>
-            <th scope="col">Number of Days</th>
-          </tr>
-        </thead>
-        <tbody>
+      <div id="<%= report[1].name.toLowerCase() %>" class="collapse show">
+        <table class="table" id="milstone_reports">
+          <thead>
+            <tr>
+              <th scope="col">Report Date</th>
+              <th scope="col">
+                <%= report[1].name %>
+              </th>
+              <th scope="col">Number of Days</th>
+            </tr>
+          </thead>
+          <tbody>
             <% Object.entries(report[1].averages).forEach(milestone => { %>
-              <tr>
-                <td><%= site_data.currentDate %></td>
-                <td><%= milestone[1].name %></td>
-                <td><%= milestone[1].value %></td>
-              </tr>
-              <%})%>
-        </tbody>
-        <tfoot>
-          <tr></tr>
-          <tr></tr>
-          <tr></tr>
-        </tfoot>
-      </table>
+            <tr>
+              <td>
+                <%= site_data.currentDate %>
+              </td>
+              <td>
+                <%= milestone[1].name %>
+              </td>
+              <td>
+                <%= milestone[1].value %>
+              </td>
+            </tr>
+            <%})%>
+          </tbody>
+          <tfoot>
+            <tr></tr>
+            <tr></tr>
+            <tr></tr>
+          </tfoot>
+        </table>
+      </div>
     </div>
     <div class="tile">
-        <div class="row">
-            <div class="col">
-              <h2>Defective <%= report[1].name %> </h2>
-              <p>
-            </div>
-            <div class="col"><button class="btn btn-primary btn-right" id="download_defective">Download CSV</button></div>
-          </div>
+      <div class="row">
+        <div class="col">
+            <a data-toggle="collapse" href="#defective_<%= report[1].name.toLowerCase() %>" role="button" aria-expanded="true" aria-controls="<%= report[1].name.toLowerCase() %>">
+              <h2>Defective
+                  <%= report[1].name %>
+                </h2>
+              </a>
+          <p>
+        </div>
+        <div class="col"><button class="btn btn-primary btn-right download" data-table-id="defective_<%= report[1].name.toLowerCase() %>">Download CSV</button></div>
+      </div>
+      <div id="defective_<%= report[1].name.toLowerCase() %>" class="collapse">
       <table class="table" id="rejected_projects">
         <thead>
           <tr>
             <th scope="col">Report Date</th>
             <th scope="col">Project Id</th>
-            <th scope="col"><%= report[1].name %></th>
+            <th scope="col">
+              <%= report[1].name %>
+            </th>
             <th scope="col">Number of days</th>
           </tr>
         </thead>
         <tbody>
-            <% report[1].rejectedProjects.forEach(project => { %>
+          <% report[1].rejectedProjects.forEach(project => { %>
           <tr>
-            <td><%= site_data.currentDate %></td>
-            <td><a href="<%=`https://app.liquidplanner.com/space/${site_data.LPWorkspaceId}/projects/show/${project.project_id}`%>" target="_blank"><%= project.project_id %></a></td>
-            <td><%= project.milestone %></td>
-            <td><%= project.days %></td>
+            <td>
+              <%= site_data.currentDate %>
+            </td>
+            <td><a href="<%=`https://app.liquidplanner.com/space/${site_data.LPWorkspaceId}/projects/show/${project.project_id}`%>"
+                target="_blank">
+                <%= project.project_id %></a></td>
+            <td>
+              <%= project.milestone %>
+            </td>
+            <td>
+              <%= project.days %>
+            </td>
           </tr>
           <% }) %>
         </tbody>
       </table>
+      </div>
     </div>
   </div>
   <% }) %>
 </main>
 <script type="text/javascript" src="/js/plugins/papaparse.min.js"></script>
 <script>
-  $('#download_milestones').click(function () {
-  // gather all visable rows in the table
-  let headers = $('table#milstone_reports thead tr').get().map(function (row) {
-    return $(row).find('th').get().map(function (cell) {
-      return $(cell).text().trim();
-    })
-  })
-  let data = $('table#milstone_reports tbody tr').get().map(function (row) {
-    return $(row).find('td').get().map(function (cell) {
-      return $(cell).text().trim();
-    })
-  })
-  data = headers.concat(data)
-  var csv = Papa.unparse(data);
-  // construct and download CSV
-  var blob = new Blob([csv]);
-  if (window.navigator.msSaveOrOpenBlob)  // IE hack; see http://msdn.microsoft.com/en-us/library/ie/hh779016.aspx
-    window.navigator.msSaveBlob(blob, "milstone_reports.csv");
-  else {
-    var a = window.document.createElement("a");
-    a.href = window.URL.createObjectURL(blob, { type: "text/plain" });
-    a.download = "milstone_reports.csv";
-    document.body.appendChild(a);
-    a.click();  // IE: "Access is denied"; see: https://connect.microsoft.com/IE/feedback/details/797361/ie-10-treats-blob-url-as-cross-origin-and-denies-access
-    document.body.removeChild(a);
-  }
-  })
-  $('#download_defective').click(function () {
+  $('.download').click(function () {
+    let tableID = $(this).data('table-id')
+    console.log(tableID)
     // gather all visable rows in the table
-  let headers = $('table#rejected_projects thead tr').get().map(function (row) {
-    return $(row).find('th').get().map(function (cell) {
-      return $(cell).text().trim();
+    let headers = $(`div#${tableID} table thead tr`).get().map(function (row) {
+      return $(row).find('th').get().map(function (cell) {
+        return $(cell).text().trim();
+      })
     })
-  })
-  let data = $('table#rejected_projects tbody tr').get().map(function (row) {
-    return $(row).find('td').get().map(function (cell) {
-      return $(cell).text().trim();
+    let data = $(`div#${tableID} table tbody tr`).get().map(function (row) {
+      return $(row).find('td').get().map(function (cell) {
+        return $(cell).text().trim();
+      })
     })
-  })
-  data = headers.concat(data)
-  var csv = Papa.unparse(data);
-  // construct and download CSV
-  var blob = new Blob([csv]);
-  if (window.navigator.msSaveOrOpenBlob)  // IE hack; see http://msdn.microsoft.com/en-us/library/ie/hh779016.aspx
-    window.navigator.msSaveBlob(blob, "rejected_projects.csv");
-  else {
-    var a = window.document.createElement("a");
-    a.href = window.URL.createObjectURL(blob, { type: "text/plain" });
-    a.download = "rejected_projects.csv";
-    document.body.appendChild(a);
-    a.click();  // IE: "Access is denied"; see: https://connect.microsoft.com/IE/feedback/details/797361/ie-10-treats-blob-url-as-cross-origin-and-denies-access
-    document.body.removeChild(a);
-  }
+    data = headers.concat(data)
+    var csv = Papa.unparse(data);
+    // construct and download CSV
+    var blob = new Blob([csv]);
+    if (window.navigator.msSaveOrOpenBlob)  // IE hack; see http://msdn.microsoft.com/en-us/library/ie/hh779016.aspx
+      window.navigator.msSaveBlob(blob, `${tableID}.csv`);
+    else {
+      var a = window.document.createElement("a");
+      a.href = window.URL.createObjectURL(blob, { type: "text/plain" });
+      a.download = `${tableID}.csv`;
+      document.body.appendChild(a);
+      a.click();  // IE: "Access is denied"; see: https://connect.microsoft.com/IE/feedback/details/797361/ie-10-treats-blob-url-as-cross-origin-and-denies-access
+      document.body.removeChild(a);
+    }
   })
 </script>
 <% include ../../../partials/footer.ejs %>

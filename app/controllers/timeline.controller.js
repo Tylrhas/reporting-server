@@ -3,7 +3,8 @@ const Op = db.Sequelize.Op
 const dates = require('./dates.controller')
 const site_data = require('./site_data.controller')
 module.exports = {
-  timeline
+  timeline,
+  detail
 }
 
 async function timeline(req, res) {
@@ -21,31 +22,19 @@ async function timeline(req, res) {
   res.render('pages/ps/reports/team-timeline', { user: req.user, lp_space_id: process.env.LPWorkspaceId, slug: 'timeline', site_data: site_data.all(), averageTime: averageTime });
 }
 
+async function detail(req, res) {
+  let teamID = req.params.teamid
+  let projects = await getMilestones(teamID)
+  let milestoneGroups = groupMilestones(projects)
+  res.render('pages/ps/reports/team-timeline-detail', { user: req.user, lp_space_id: process.env.LPWorkspaceId, slug: 'timeline', site_data: site_data.all(), averageTime: milestoneGroups })
+  // res.send(milestoneGroups)
+}
+
 function getSum(total, num) {
   return total + num;
 }
 async function milestoneTimeline(teamID, todaysDate) {
-  let projects = await db.lp_project.findAll({
-    where: {
-      is_done: false,
-      is_archived: false,
-      cft_id: teamID
-    },
-    include: [
-      {
-        model: db.treeitem,
-        where: {
-          name: {
-            [Op.or]: [{ [Op.like]: 'Contract Execution' },{ [Op.like]: 'Implementation Ready' }, { [Op.like]: 'Implementation Start' }, { [Op.iLike]: '%Build Ready%' }, { [Op.like]: 'Staging Links Delivered%' }, { [Op.like]: 'Launch Approval%' }, { [Op.like]: 'Website(s) Live%' }, { [Op.like]: 'Services Activated%' }, {[Op.like]: 'Project Closed%'}]
-          },
-          date_done: {
-            [Op.not] : null
-          },
-          child_type: 'milestone'
-          }
-        }
-    ]
-  })
+  let projects = await getMilestones(teamID)
 
   let milestoneData = {
     averages: {
@@ -87,18 +76,18 @@ async function milestoneTimeline(teamID, todaysDate) {
     rejectedProjects: []
   }
 
-  projects.forEach(project  => {
-   let milestones = {
-     contractExecution: null,
-     impReady: null,
-     impStart: null, 
-     buildReady: null,
-     stgLinksDel: null, 
-     clientApproval: null, 
-     launchApproval: null, 
-     websitesLive: null,
-     servsActivated: null, 
-     projectClosed:  null
+  projects.forEach(project => {
+    let milestones = {
+      contractExecution: null,
+      impReady: null,
+      impStart: null,
+      buildReady: null,
+      stgLinksDel: null,
+      clientApproval: null,
+      launchApproval: null,
+      websitesLive: null,
+      servsActivated: null,
+      projectClosed: null
     }
     project.treeitems.forEach(milestone => {
       let milestoneName = milestone.name
@@ -121,12 +110,12 @@ async function milestoneTimeline(teamID, todaysDate) {
         milestones.servsActivated = milestone.date_done
       } else if (milestoneName.includes('Project Closed')) {
         milestones.projectClosed = milestone.date_done
-      } 
+      }
     })
     milestoneData = buildAverageTimes(milestones, project, milestoneData)
   })
   Object.entries(milestoneData.averages).forEach(data => {
-    if (data[0].includes('milestone')){
+    if (data[0].includes('milestone')) {
       milestoneData.averages[data[0]].value = average(data[1].value)
     }
   })
@@ -141,7 +130,7 @@ function buildAverageTimes(milestones, project, milestoneData) {
     let datedif = dates.bussinessDaysBetween(milestones.impReady, milestones.contractExecution)
     if (datedif <= 0) {
       milestoneData.totalRejectedProjects++
-      milestoneData.rejectedProjects.push({ project_id: project_id, milestone: milestoneData.averages.milestone1.name , days: datedif })
+      milestoneData.rejectedProjects.push({ project_id: project_id, milestone: milestoneData.averages.milestone1.name, days: datedif })
     } else {
       milestoneData.averages.milestone1.value.push(datedif)
     }
@@ -155,7 +144,7 @@ function buildAverageTimes(milestones, project, milestoneData) {
     } else {
       milestoneData.averages.milestone2.value.push(datedif)
     }
-  } 
+  }
   if (milestones.impStart && milestones.buildReady) {
     milestoneData.totalMilestones++
     let datedif = dates.bussinessDaysBetween(milestones.buildReady, milestones.impStart)
@@ -196,7 +185,7 @@ function buildAverageTimes(milestones, project, milestoneData) {
       milestoneData.averages.milestone6.value.push(datedif)
     }
   }
-  if (milestones.launchApproval && milestones.websitesLive ) {
+  if (milestones.launchApproval && milestones.websitesLive) {
     milestoneData.totalMilestones++
     let datedif = dates.bussinessDaysBetween(milestones.websitesLive, milestones.launchApproval)
     if (datedif < 0) {
@@ -219,7 +208,7 @@ function buildAverageTimes(milestones, project, milestoneData) {
   return milestoneData
 }
 async function taskTimeline(teamID, todaysDate) {
- 
+
   let projects = await db.lp_project.findAll({
     where: {
       is_done: false,
@@ -423,24 +412,184 @@ async function taskTimeline(teamID, todaysDate) {
   averageTime = {
     averages: averageTime,
     totalMilestones: milestones.total,
-    totalRejectedProjects: milestones.rejected ,
+    totalRejectedProjects: milestones.rejected,
     rejectedProjects: rejectedProjects
   }
   Object.entries(averageTime.averages).forEach(data => {
-    if (data[0].includes('milestone')){
+    if (data[0].includes('milestone')) {
       averageTime.averages[data[0]].value = average(data[1].value)
     }
   })
   return averageTime
 }
+function getMilestones(teamID) {
+  return db.lp_project.findAll({
+    where: {
+      is_done: false,
+      is_archived: false,
+      cft_id: teamID
+    },
+    include: [
+      {
+        model: db.treeitem,
+        where: {
+          name: {
+            [Op.or]: [{ [Op.like]: 'Contract Execution' }, { [Op.like]: 'Implementation Ready' }, { [Op.like]: 'Implementation Start' }, { [Op.iLike]: '%Build Ready%' }, { [Op.like]: 'Staging Links Delivered%' }, { [Op.like]: 'Launch Approval%' }, { [Op.like]: 'Website(s) Live%' }, { [Op.like]: 'Services Activated%' }, { [Op.like]: 'Project Closed%' }]
+          },
+          date_done: {
+            [Op.not]: null
+          },
+          child_type: 'milestone'
+        }
+      }
+    ]
+  })
+}
+function groupMilestones(projects) {
 
+  let milestones = [
+    {
+      name: 'Contract Execution to Implementation Ready',
+      values: []
+    },
+    {
+      name: 'Implementation Ready to Implementation Start',
+      values: []
+    },
+    {
+      name: 'Implementation Start to Build Ready',
+      values: []
+    },
+    {
+      name: 'Build Ready to Staging Links Delivered',
+      values: []
+    },
+    {
+      name: 'Staging Links Delivered to Services Activated',
+      values: []
+    },
+    {
+      name: 'Staging Links Delivered to Launch Approval',
+      values: []
+    },
+    {
+      name: 'Services Activated to Website(s) Live',
+      values: []
+    },
+    {
+      name: 'Website(s) Live to Project Closed',
+      values: []
+    }
+  ]
+  projects.forEach(project => {
+    let projectMilestones = findMilestones(project)
+    projectMilestones.project_id = project.id
+    milestones = pushProjectMilestones(projectMilestones, milestones)
+  })
+  return milestones
+}
+function pushProjectMilestones (projectMilestones, milestones) {
+  if (projectMilestones.contractExecution && projectMilestones.impReady) {
+    let datedif = dates.bussinessDaysBetween(projectMilestones.impReady, projectMilestones.contractExecution)
+    if (datedif > 0) {
+      milestones[0].values.push({projectID: projectMilestones.project_id, days: datedif })
+    }
+  }
+  if (projectMilestones.impReady && projectMilestones.impStart) {
+    let datedif = dates.bussinessDaysBetween(projectMilestones.impStart, projectMilestones.impReady)
+    if (datedif > 0) {
+    milestones[1].values.push({projectID: projectMilestones.project_id, days: datedif})
+    }
+  }
+  if (projectMilestones.impStart && projectMilestones.buildReady) {
+    let datedif = dates.bussinessDaysBetween(projectMilestones.buildReady, projectMilestones.impStart)
+    if (datedif > 0) {
+    milestones[2].values.push({projectID: projectMilestones.project_id, days: datedif})
+    }
+  }
+  if (projectMilestones.buildReady && projectMilestones.stgLinksDel) {
+    let datedif = dates.bussinessDaysBetween(projectMilestones.stgLinksDel, projectMilestones.buildReady)
+    if (datedif > 0) {
+    milestones[3].values.push({projectID: projectMilestones.project_id, days: datedif})
+    }
+  }
+  if (projectMilestones.stgLinksDel && projectMilestones.servsActivated) {
+    let datedif = dates.bussinessDaysBetween(projectMilestones.servsActivated, projectMilestones.stgLinksDel)
+    if (datedif > 0) {
+    milestones[4].values.push({projectID: projectMilestones.project_id, days: datedif})
+    }
+  }
+  if (projectMilestones.stgLinksDel && projectMilestones.launchApproval) {
+    let datedif = dates.bussinessDaysBetween(projectMilestones.launchApproval, projectMilestones.stgLinksDel)
+    if (datedif > 0) {
+    milestones[5].values.push({projectID: projectMilestones.project_id, days: datedif})
+    }
+  }
+  if (projectMilestones.servsActivated && projectMilestones.websitesLive) {
+    let datedif = dates.bussinessDaysBetween(projectMilestones.websitesLive, projectMilestones.servsActivated)
+    if (datedif > 0) {
+    milestones[6].values.push({projectID: projectMilestones.project_id, days: datedif})
+    }
+  }
+  if (projectMilestones.websitesLive && projectMilestones.projectClosed) {
+    let datedif = dates.bussinessDaysBetween(projectMilestones.projectClosed, projectMilestones.websitesLive)
+    if (datedif > 0) {
+    milestones[7].values.push({projectID: projectMilestones.project_id, days: datedif})
+    }
+  }
+
+  return milestones
+}
+
+function findMilestones(project, ) {
+  let milestones = {
+    contractExecution: null,
+    impReady: null,
+    impStart: null,
+    buildReady: null,
+    stgLinksDel: null,
+    launchApproval: null,
+    websitesLive: null,
+    servsActivated: null,
+    projectClosed: null
+  }
+  project.treeitems.forEach(milestone => {
+    milestoneName = milestone.name
+    if (milestoneName.includes('Contract Execution')) {
+      milestones.contractExecution = milestone.date_done
+    } else if (milestoneName.includes('Implementation Ready')) {
+      milestones.impReady = milestone.date_done
+    } else if (milestoneName.includes('Implementation Start')) {
+      milestones.impStart = milestone.date_done
+    } else if (milestoneName.includes('Build Ready')) {
+      milestones.buildReady = milestone.date_done
+    } else if (milestoneName.includes('Staging Links Delivered')) {
+      // if there is more than one staging links delivered get the latest date
+      if (milestones.stgLinksDel != null && milestones.stgLinksDel < milestone.date_done) {
+        milestones.stgLinksDel = milestone.date_done
+      } else if (milestones.stgLinksDel == null) {
+        milestones.stgLinksDel = milestone.date_done
+      }
+    } else if (milestoneName.includes('Launch Approval')) {
+      milestones.launchApproval = milestone.date_done
+    } else if (milestoneName.includes('Website(s) Live')) {
+      milestones.websitesLive = milestone.date_done
+    } else if (milestoneName.includes('Services Activated')) {
+      milestones.servsActivated = milestone.date_done
+    } else if (milestoneName.includes('Project Closed')) {
+      milestones.projectClosed = milestone.date_done
+    }
+  })
+
+  return milestones
+}
 function average(numbers) {
   var sum = 0;
   numbers.forEach(number => {
     sum += number
   })
-  
-  var avg = sum/numbers.length;
+
+  var avg = sum / numbers.length;
 
   return avg
 }

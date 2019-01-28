@@ -1,0 +1,56 @@
+<% include ../../../partials/header.ejs %>
+<% include ../../../partials/nav.ejs %>
+<main class="app-content">
+  <div class="app-title">
+    <div>
+      <h1>El Coco Loco Milestone Times</h1>
+    </div>
+    <ul class="app-breadcrumb breadcrumb">
+      <li class="breadcrumb-item">
+        <i class="fa fa-home fa-lg"></i>
+      </li>
+      <li class="breadcrumb-item">PS</li>
+      <li class="breadcrumb-item">Reports</li>
+      <li class="breadcrumb-item">Projects</li>
+      <li class="breadcrumb-item">Timeline</li>
+      <li class="breadcrumb-item active">Team Name</li>
+    </ul>
+  </div>
+  <%   averageTime.forEach( (report, index) => { %>
+    <div class="col">
+    <div class="tile">
+      <div class="row">
+        <div class="col">
+          <a data-toggle="collapse" href="#milestone_<%= index %>" role="button" aria-expanded="true" aria-controls="milestone_<%= index %>">
+            <h2><%= report.name %></h2>
+          </a>
+        </div>
+      </div>
+      <div id="milestone_<%= index %>" class="collapse">
+      <table class="table" id="milstone_reports">
+        <thead>
+          <tr>
+            <th scope="col">Project Id</th>
+            <th scope="col">Days</th>
+          </tr>
+        </thead>
+        <tbody>
+            <% report.values.forEach(milestone => { %>
+              <tr>
+                <td><%= milestone.projectID %></td>
+                <td><%= milestone.days %></td>
+              </tr>
+              <%})%>
+        </tbody>
+        <tfoot>
+          <tr></tr>
+          <tr></tr>
+          <tr></tr>
+        </tfoot>
+      </table>
+    </div>
+    </div>
+  </div>
+  <% }) %>
+</main>
+<% include ../../../partials/footer.ejs %>
