@@ -7,7 +7,8 @@ module.exports = {
   cftDashboard,
   teamActiveProjects,
   teamScheduledProjects,
-  allProjects
+  allProjects,
+  teamIntakeProjects
 }
 async function dashboard (req, res) {
   var builder = {}
@@ -86,6 +87,14 @@ async function dashboard (req, res) {
 
   // res.json(activeProjects)
   res.render('pages/scheduledimp.ejs', { user: req.user, slug: 'team_wordload', lp_space_id: process.env.LPWorkspaceId, site_data: site_data.all(), projects: scheduledProjects })
+ }
+ async function teamIntakeProjects (req, res) {
+  var teamID = parseInt(req.params.teamID)
+  // get all active project for a team
+  var intakeProjects = await scheduledimplementation.getIntakeProjects(teamID)
+
+  // res.json(activeProjects)
+  res.render('pages/scheduledimp.ejs', { user: req.user, slug: 'team_wordload', lp_space_id: process.env.LPWorkspaceId, site_data: site_data.all(), projects: intakeProjects })
  }
  async function allProjects (req, res) {
   var teamID = parseInt(req.params.teamID)

@@ -34,7 +34,11 @@
         </thead>
         <tbody>
          <tr>
-           <td>12</td>
+           <td>
+              <a href="/ps/reports/workload/cft/<%= queue[i].id %>/intake"> 
+             <%= queue[i].intake.length %>
+              </a>
+            </td>
           <td>
            <a href="/ps/reports/workload/cft/<%= queue[i].id %>/active">
             <%= queue[i].active.length %>
