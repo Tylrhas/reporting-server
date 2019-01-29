@@ -1,5 +1,5 @@
 <% include ../partials/header.ejs %>
-  <% include ../partials/nav.ejs %>
+<% include ../partials/nav.ejs %>
     <main class="app-content">
 
       <div class="app-title">
@@ -18,7 +18,7 @@
           <div class="tile center">
               <h4>Add NetSuite Data</h4>
               <hp>Upload via CSV</hp>
-              <p><b>Last Update: </b> <%= moment(jobs['ns_backlog'].lastRun).format( 'MMM-DD-YYYY hh:MM:SS A') %></p>
+              <p><b>Last Update: </b> <%= site_data.convert.moment(jobs['ns_backlog'].lastRun).format( 'MMM-DD-YYYY hh:mm:SS A') %></p>
               <p><b>Last Run Status: </b> <%= jobs['ns_backlog'].lastRunStatus %></p>
               <input type="file" id="files" class="form-control" accept=".csv" required />
               <button id="backlogUpload">Upload</button>
@@ -28,7 +28,7 @@
           <div class="tile center">
               <h4>Update LP Data</h4>
               <p>Fetch Updated Data from the External Server</p>
-              <p><b>Last Update: </b> <%= moment(jobs['external_update'].lastRun).format( 'MMM-DD-YYYY hh:MM:SS A') %></p>
+              <p><b>Last Update: </b> <%= site_data.convert.moment(jobs['external_update'].lastRun).format( 'MMM-DD-YYYY hh:mm:SS A') %></p>
               <p><b>Last Run Status: </b> <%= jobs['external_update'].lastRunStatus %></p>
               <button id="update_lp" class="center">Update</button>
           </div>
@@ -37,9 +37,9 @@
           <div class="tile center">
               <h4>Match LP LBS</h4>
               <p>Look for LP LBS tasks that are not matched with a project</p>
-              <p><b>Last Update: </b> <%= moment(jobs['match_lbs'].lastRun).format( 'MMM-DD-YYYY hh:MM:SS A') %></p>
+              <p><b>Last Update: </b> <%= site_data.convert.moment(jobs['match_lbs'].lastRun).format( 'MMM-DD-YYYY hh:mm:SS A') %></p>
               <p><b>Last Run Status: </b> <%= jobs['match_lbs'].lastRunStatus %></p>
-              <button id="backfill_lp" class="center">Match</button>
+              <button id="match_lbs" class="center">Match</button>
           </div>
         </div>
       </div>
@@ -48,11 +48,20 @@
           <div class="tile center">
               <h4>Update Archived Projects</h4>
               <p>Update projects that are archived</p>
-              <p><b>Last Update: </b> <%= moment(jobs['archived_projects'].lastRun).format( 'MMM-DD-YYYY hh:MM:SS A') %></p>
+              <p><b>Last Update: </b> <%= site_data.convert.moment(jobs['archived_projects'].lastRun).format( 'MMM-DD-YYYY hh:mm:SS A') %></p>
               <p><b>Last Run Status: </b> <%= jobs['archived_projects'].lastRunStatus %></p>
               <button id="archived_projects" class="center">Update</button>
           </div>
         </div>
+        <div class="col-md-4">
+         <div class="tile center">
+             <h4>Update LBS Data</h4>
+             <p>Pull dates and statuses from LP</p>
+             <p><b>Last Update: </b> <%= site_data.convert.moment(jobs['update_lbs'].lastRun).format( 'MMM-DD-YYYY hh:mm:SS A') %></p>
+             <p><b>Last Run Status: </b> <%= jobs['update_lbs'].lastRunStatus %></p>
+             <button id="update_lbs" class="center">Update</button>
+         </div>
+       </div>
       </div>
     </main>
     <script src="/js/plugins/papaparse.min.js"></script>
@@ -78,8 +87,8 @@
       })
       function submitUpdates(results, file) {
         $.ajax({
-          type: "POST",
-          url: '/api/csv/netsuitebacklog/update',
+          type: "PUT",
+          url: '/api/lbs',
           data: results,
           success: success,
           dataType: 'JSON'
@@ -93,8 +102,8 @@
     <script>
     $('#archived_projects').click(function() {
       $.ajax({
-          type: "post",
-          url: '/api/admin/update/projects/archived',
+          type: "PUT",
+          url: '/api/jobs/archive',
           success: function (data) {
 
           },
@@ -103,18 +112,28 @@
     })
     $('#update_lp').click(function() {
       $.ajax({
-          type: "get",
-          url: '/api/projects/update',
+          type: "PUT",
+          url: '/api/jobs/active',
           success: function (data) {
 
           },
           dataType: 'JSON'
         })
     })
-    $('#backfill_lp').click(function() {
+    $('#match_lbs').click(function() {
       $.ajax({
-          type: "get",
-          url: '/api/admin/lbs/match',
+          type: "PUT",
+          url: '/api/lbs/match',
+          success: function (data) {
+          },
+          dataType: 'JSON'
+        })
+    })
+
+        $('#update_lbs').click(function() {
+      $.ajax({
+          type: "PUT",
+          url: '/api/360/lbs',
           success: function (data) {
           },
           dataType: 'JSON'

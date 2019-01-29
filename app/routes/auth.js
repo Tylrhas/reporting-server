@@ -1,10 +1,4 @@
-var Sequelize = require("sequelize")
-const Op = Sequelize.Op
-//Models
-var db = require("../models")
-var moment = require('moment')
-
-module.exports = function (app, passport) {
+module.exports = (app, passport) => {
 
     app.get('/g5_auth/users/auth/g5',
         passport.authenticate('oauth2'))

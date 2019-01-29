@@ -14,7 +14,7 @@
       <li class="breadcrumb-item">PS</li>
       <li class="breadcrumb-item">Team Goals</li>
       <li class="breadcrumb-item">Backlog</li>
-      <li class="breadcrumb-item"><a href="/ps/reports/mrr/teams/<%= link_data.date.year %>/<%= link_data.date.month %>">MRR</a></li>
+      <li class="breadcrumb-item"><a href="/ps/reports/mrr/teams/<%= site_data.pageYear %>/<%= site_data.pageMonth %>">MRR</a></li>
       <li class="breadcrumb-item active">
         <%= cftName.name %>
       </li>
@@ -86,7 +86,7 @@
                   <tr>
 
                     <td>
-                      <a href="https://system.na2.netsuite.com/app/accounting/project/project.nl?id=<%= lbs.locations.id %>&whence="
+                      <a href="https://system.na2.netsuite.com/app/accounting/project/project.nl?id=<%= lbs.locations[i].id %>&whence="
                         target="_blank">
                         <%= lbs.locations[i].id %>
                       </a>
@@ -99,7 +99,7 @@
                     </td>
                     <td>
                       <!-- activation Date -->
-                      <%= moment(lbs.locations[i].estimated_go_live).format( 'MMM-DD-YYYY') %>
+                      <%= site_data.convert.moment(lbs.locations[i].estimated_go_live).format( 'MMM-DD-YYYY') %>
                     </td>
                     <td>
                       <!-- activation Date -->

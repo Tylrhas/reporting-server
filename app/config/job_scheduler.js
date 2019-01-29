@@ -1,4 +1,3 @@
-// REQUIRED PACKAGES
 var schedule = require('node-schedule')
 var apiController = require('../controllers/apicontroller.js')
 
@@ -18,5 +17,11 @@ schedule.scheduleJob('30 * * * *', function() {
 schedule.scheduleJob('0 1 * * *', function() {
   console.log('updating LP data')
   apiController.findLBSProjects(null,null)
+})
+
+// match LBS once a day 
+schedule.scheduleJob('55 * * * *', function() {
+ console.log('updating LP data')
+ apiController.lbsAPIUpdate(null,null)
 })
 }

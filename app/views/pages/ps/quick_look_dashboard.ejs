@@ -22,10 +22,10 @@
                 <%= quick_look_report.backlog %>
               </td>
               <td>$
-                <%= quick_look_report.activatedMRR %>
+                <%= quick_look_report.activated %>
               </td>
               <td>$
-                  <%= quick_look_report.totalMRR %>
+                  <%= quick_look_report.total %>
               </td>
               <td class="<%= quick_look_report.class %> bold">
                   $<%= quick_look_report.variance %>
@@ -43,10 +43,8 @@
           <tbody>
             <tr>
               <td>
-                <!-- <a href="ps/reports/mrr/teams/<%= link_data.date.year %>/<%= link_data.date.year %>"> -->
                 $
                 <%= quick_look_report.psActivated %>
-                <!-- </a> -->
               </td>
               <td>$
                 <%= quick_look_report.daActivated %>

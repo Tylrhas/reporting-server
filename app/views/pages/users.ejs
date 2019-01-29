@@ -42,7 +42,7 @@
                       </select>
                     </td>
                     <td>
-                      <%= moment(users[i].updatedAt).format( 'MMM-DD-YYYY') %>
+                      <%= site_data.convert.moment(users[i].updatedAt).format( 'MMM-DD-YYYY') %>
                     </td>
                     <td>
                       <button class="btn btn-primary update_user" userID="<%= users[i].id  %>">Update User</button>

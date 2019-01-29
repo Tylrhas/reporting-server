@@ -24,7 +24,7 @@
           <% for (i2 = 0; i2 < months.length; i2++) { %>
           <div class="col-md-1 center">
             <a href="/ps/reports/mrr/teams/<%= years[i] %>/<%= months[i2] %>">
-              <%= moment(months[i2] + '/1/' + years[i]) .format( 'MMM') %>
+              <%= site_data.convert.moment(months[i2] + '/1/' + years[i]) .format( 'MMM') %>
             </a>
           </div>
           <%} %>

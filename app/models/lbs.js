@@ -54,6 +54,21 @@ module.exports = function (sequelize, Sequelize) {
     },
     actual_go_live: {
       type: Sequelize.DATE
+    },
+    original_estimated_go_live: {
+      type: Sequelize.DATE
+    },
+    website_launch_date: {
+      type: Sequelize.DATE
+    },
+    start_date: {
+      type: Sequelize.DATE
+    },
+    project_lost_date: {
+      type: Sequelize.DATE
+    },
+    stage: {
+      type: Sequelize.TEXT
     }
   },
     {

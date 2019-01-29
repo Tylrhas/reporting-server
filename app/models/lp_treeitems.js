@@ -18,7 +18,7 @@ module.exports = function (sequelize, Sequelize) {
     },
     child_type: {
       type: Sequelize.ENUM('folder', 'milestone','task', 'project'),
-      defaultValue: 'folder'
+      defaultValue: null
     },
     // Dates
     e_start: {
