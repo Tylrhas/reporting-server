@@ -15,7 +15,8 @@ function all (month, year) {
     convert: dates,
     pageMonth: month,
     pageYear: year,
-    pageQuarter: __getQuarter(month + '/1/' + year)
+    pageQuarter: __getQuarter(month + '/1/' + year),
+    LPWorkspaceId: process.env.LPWorkspaceId
   }
   if (month == null || year == null) {
       siteData.pageMonth = siteData.currentMonth

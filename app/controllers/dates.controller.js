@@ -85,7 +85,8 @@ function lastDay(month, year) {
 function bussinessDaysBetween (lastDay, firstDay) {
   let days
   if (moment(firstDay).isAfter(lastDay)) {
-    days = moment(lastDay).diff(firstDay,'days')
+    days = momentBusinessDays(firstDay, 'MM-DD-YYYY').businessDiff(momentBusinessDays(lastDay,'MM-DD-YYYY'))
+    days = 0 - days
   } else {
     days = momentBusinessDays(lastDay, 'MM-DD-YYYY').businessDiff(momentBusinessDays(firstDay,'MM-DD-YYYY'))
   }

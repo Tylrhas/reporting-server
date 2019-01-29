@@ -6,7 +6,8 @@ module.exports = {
   getQueue,
   getActiveProjects,
   getScheduledProjects,
-  getAllProjects
+  getAllProjects,
+  getIntakeProjects
 }
 async function getQueue() {
   // get all projects that are not complete
@@ -14,7 +15,7 @@ async function getQueue() {
     attributtes: ['cft_id', 'id'],
     where: {
       cft_id: {
-        [Op.not]: 0
+        [Op.notIn]: [0, 48803247] 
       },
       done_on: null,
       is_done: false,
@@ -34,12 +35,14 @@ async function getQueue() {
   for (let i = 0; i < activeProjects.length; i++) {
     var implementationStart = { status: false }
     var implementationReady = { status: false }
+    var contractExecution = { status: false }
     var websiteLive = { status: false }
     let project = activeProjects[i]
     if (!(teams.hasOwnProperty(project.cft_id)) && project.cft_id !== 0) {
       teams[project.cft_id] = {
         active: [],
-        scheduled: []
+        scheduled: [],
+        intake: []
       }
     }
     if (project.cft_id !== 0) {
@@ -48,6 +51,15 @@ async function getQueue() {
       // check if the implementation start milestone is complete
       for (let i2 = 0; i2 < project.dataValues.treeitems.length; i2++) {
         let milestone = project.dataValues.treeitems[i2]
+        if (milestone.name.trim() === 'Contract Execution') {
+          // project is scheduled
+          contractExecution = {
+            milestone: milestone
+          }
+          if (milestone.date_done !== null) {
+            contractExecution.status = true
+          }
+        }
         if (milestone.name.trim() === 'Implementation Start') {
           // project is scheduled
           implementationStart = {
@@ -72,7 +84,10 @@ async function getQueue() {
           }
         }
       }
-      if (implementationReady.status && !implementationStart.status) {
+      if (contractExecution.status && !implementationReady.status) {
+        teams[project.cft_id].intake.push(project.id)
+      }
+      else if (implementationReady.status && !implementationStart.status) {
         // project is scheduled
         teams[project.cft_id].scheduled.push(project.id)
       } else if (implementationReady.status && implementationStart.status && !websiteLive.status) {
@@ -261,6 +276,74 @@ async function getScheduledProjects(teamId) {
     }
   }
   return scheduledProjects
+}
+async function getIntakeProjects(teamId) {
+  var intakeProject
+  var intakeProjects = []
+  var projects = await db.lp_project.findAll({
+    attributes: ['id', 'cft_id'],
+    where: {
+      cft_id: teamId,
+      is_done: false,
+      is_on_hold: false,
+      is_archived: false
+    },
+    include: [
+      {
+        model: db.treeitem,
+        where: {
+          child_type: {
+            [Op.or]: ['milestone', 'project']
+          }
+        }
+      },
+      {
+        model: db.lbs
+      }
+    ],
+    order: [
+      [db.treeitem, 'child_type']
+    ]
+  })
+
+  for (let i = 0; i < projects.length; i++) {
+    let project = projects[i]
+    var milestones = project.treeitems
+    var contractExecution = { status: false }
+    var implementationReady = { status: false }
+    for (let i2 = 0; i2 < milestones.length; i2++) {
+      let milestone = milestones[i2]
+      if (milestone.name === 'Contract Execution') {
+        // project is scheduled
+        contractExecution = {
+          milestone: milestone
+        }
+        if (milestone.date_done !== null) {
+          contractExecution.status = true
+        }
+      }
+      if (milestone.name === 'Implementation Ready') {
+        implementationReady = {
+          milestone: milestone
+        }
+        if (milestone.date_done !== null) {
+          implementationReady.status = true
+        }
+      }
+    }
+    if (contractExecution.status && !implementationReady.status) {
+      // the project is scheduled
+      intakeProject = {
+        id: projects[i].id,
+        name: milestones[milestones.length - 1].name,
+        locations: project.lbs.length,
+        total_mrr: sumLBS(project.lbs),
+        start_date: contractExecution.milestone.date_done
+      }
+      intakeProjects.push(intakeProject)
+    }
+  }
+  return intakeProjects
 }
 
 function sumLBS(lbs) {

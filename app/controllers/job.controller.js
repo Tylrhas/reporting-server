@@ -15,9 +15,20 @@ async function updateArchiveProjects(req, res) {
   if (req) {
     res.sendStatus(200)
   }
-  let response = await throttledRequest.promise({ url: process.env.LP_ARCHIVE_PROJECTS, method: 'GET', headers: { "Authorization": LPauth } })
-  var projects = response.rows
-  _updateProjects(projects)
+  try {
+    let job = await db.job.findOne({
+      where: {
+        jobname: 'archived_projects'
+      }
+    })
+    await job.update({status: 'running'})
+    let response = await throttledRequest.promise({ url: process.env.LP_ARCHIVE_PROJECTS, method: 'GET', headers: { "Authorization": LPauth } })
+    var projects = response.rows
+    await _updateProjects(projects)
+    await job.update({lastrun: dates.now(), status: 'active'}) 
+  } catch (error) {
+    Honeybadger.notify(error)
+  }
 }
 
 async function updateActiveProjects(req, res) {
@@ -28,7 +39,14 @@ async function updateActiveProjects(req, res) {
   let response = await throttledRequest.promise({ url: process.env.LP_ACTIVE_PROJECTS, method: 'GET', headers: { "Authorization": LPauth } })
   var projects = response.rows
   try {
-    _updateProjects(projects)
+    let job = await db.job.findOne({
+      where: {
+        jobname: 'external_update'
+      }
+    })
+    await job.update({status: 'running'})
+    await _updateProjects(projects)
+    job.update({lastrun: dates.now(), status: 'active'})
   } catch (error) {
     Honeybadger.notify(error)
   }
@@ -42,6 +60,7 @@ async function _updateProjects(projects) {
       await _updateProject(project)
       console.error('DONE!!!!!!!!!')
     }
+    return
   } catch (error) {
     Honeybadger.notify(error, {
       context: {

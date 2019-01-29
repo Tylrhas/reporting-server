@@ -1,7 +1,9 @@
 const db = require('../models')
+Op = db.Sequelize.Op
 module.exports = {
   realTeams,
-  getName
+  getName,
+  noAssociatedTeam
 }
 
 async function realTeams() {
@@ -27,4 +29,19 @@ async function getName (id) {
     teamName = team.name
   }
   return teamName
+}
+
+async function noAssociatedTeam () {
+  var teams = await db.cft.findAll({
+    where: {
+      real_team: true,
+      id : {
+        [Op.not]: 0
+      }
+    },
+    order: [
+      ['id', 'DESC']
+    ]
+  })
+  return teams
 }

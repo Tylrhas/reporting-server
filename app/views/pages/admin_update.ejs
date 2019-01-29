@@ -21,7 +21,11 @@
               <p><b>Last Update: </b> <%= site_data.convert.moment(jobs['ns_backlog'].lastRun).format( 'MMM-DD-YYYY hh:mm:SS A') %></p>
               <p><b>Last Run Status: </b> <%= jobs['ns_backlog'].lastRunStatus %></p>
               <input type="file" id="files" class="form-control" accept=".csv" required />
-              <button id="backlogUpload">Upload</button>
+              <% if (jobs['ns_backlog'].status !== "active") { %>
+                <button id="backlogUpload" disabled>Running</button>
+              <% } else {%>
+                <button id="backlogUpload">Upload</button>
+                <% } %>
           </div>
         </div>
         <div class="col-md-4">
@@ -30,7 +34,11 @@
               <p>Fetch Updated Data from the External Server</p>
               <p><b>Last Update: </b> <%= site_data.convert.moment(jobs['external_update'].lastRun).format( 'MMM-DD-YYYY hh:mm:SS A') %></p>
               <p><b>Last Run Status: </b> <%= jobs['external_update'].lastRunStatus %></p>
-              <button id="update_lp" class="center">Update</button>
+              <% if (jobs['external_update'].status !== "active") { %>
+                <button id="update_lp" disabled>Running</button>
+              <% } else {%>
+                <button id="update_lp" class="center">Update</button>
+                <% } %>
           </div>
         </div>
         <div class="col-md-4">
@@ -39,7 +47,11 @@
               <p>Look for LP LBS tasks that are not matched with a project</p>
               <p><b>Last Update: </b> <%= site_data.convert.moment(jobs['match_lbs'].lastRun).format( 'MMM-DD-YYYY hh:mm:SS A') %></p>
               <p><b>Last Run Status: </b> <%= jobs['match_lbs'].lastRunStatus %></p>
-              <button id="match_lbs" class="center">Match</button>
+              <% if (jobs['match_lbs'].status !== "active") { %>
+                <button id="match_lbs" class="center" disabled>Running</button>
+              <% } else {%>
+                <button id="match_lbs" class="center">Match</button>
+                <% } %>
           </div>
         </div>
       </div>
@@ -50,7 +62,11 @@
               <p>Update projects that are archived</p>
               <p><b>Last Update: </b> <%= site_data.convert.moment(jobs['archived_projects'].lastRun).format( 'MMM-DD-YYYY hh:mm:SS A') %></p>
               <p><b>Last Run Status: </b> <%= jobs['archived_projects'].lastRunStatus %></p>
-              <button id="archived_projects" class="center">Update</button>
+              <% if (jobs['archived_projects'].status !== "active") { %>
+                <button id="archived_projects" class="center" disabled>Running</button>
+              <% } else {%>
+                <button id="archived_projects" class="center">Update</button>
+                <% } %>
           </div>
         </div>
         <div class="col-md-4">
@@ -59,7 +75,11 @@
              <p>Pull dates and statuses from LP</p>
              <p><b>Last Update: </b> <%= site_data.convert.moment(jobs['update_lbs'].lastRun).format( 'MMM-DD-YYYY hh:mm:SS A') %></p>
              <p><b>Last Run Status: </b> <%= jobs['update_lbs'].lastRunStatus %></p>
-             <button id="update_lbs" class="center">Update</button>
+             <% if (jobs['update_lbs'].status !== "active") { %>
+              <button id="update_lbs" class="center" disabled>Running</button>
+            <% } else {%>
+              <button id="update_lbs" class="center">Update</button>
+              <% } %>
          </div>
        </div>
       </div>
