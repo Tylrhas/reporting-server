@@ -226,8 +226,15 @@ async function __getCFTId (project) {
       teamID = cft_id
     }
   }
+  if (teamID === 0) {
+    let db_project = await db.lp_project.findOne({
+      where: {
+        id: project.id
+      }
+    })
+    if ( teamID === 0 && db_project != null && db_project.cft_id !== 0) {
+      teamID = db_project.cft_id
+    }
+  }
   return teamID
 }
-// update archive projects and tasks folder
-// update LBS dates 
-// update lp projects and tasks 
