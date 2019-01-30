@@ -607,5 +607,5 @@ function average(numbers) {
 
   var avg = sum / numbers.length;
 
-  return avg
+  return site_data.roundNumber(avg,2)
 }

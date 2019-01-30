@@ -2,7 +2,8 @@ const dates = require('./dates.controller')
 module.exports = {
   all,
   checkVariance,
-  archive_years
+  archive_years,
+  roundNumber
 } 
 
 function all (month, year) {
@@ -61,4 +62,12 @@ function checkVariance (total, target) {
   } else {
     return 'red'
   }
+}
+
+function roundNumber (number, digits) {
+  if (number !== 0) {
+    let power = Math.pow(10,digits) 
+    number =  Math.round(number * power) / power
+  }
+  return number
 }
