@@ -24,7 +24,7 @@ async function update(req, res) {
   try {
     let job = await db.job.findOne({
       where: {
-        jobname: 'archived_projects'
+        jobname: 'update_lbs'
       }
     })
     await job.update({status: 'running'})
