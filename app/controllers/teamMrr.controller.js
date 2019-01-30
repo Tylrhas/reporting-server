@@ -41,6 +41,7 @@ async function backlogTotal(firstDay, lastDay, teamId) {
       model: db.lbs,
       attributes: ['total_mrr', 'project_id'],
       where: {
+        actual_go_live: null,
         estimated_go_live: {
         [Op.between]: [firstDay, lastDay]
        }
