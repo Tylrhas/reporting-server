@@ -27,7 +27,7 @@ async function update(req, res) {
         jobname: 'update_lbs'
       }
     })
-    await job.update({status: 'running'})
+    await job.update({ status: 'running' })
     var locations
     start_date = null
     if (req && req.body.start_date) {
@@ -77,13 +77,24 @@ async function update(req, res) {
             update.project_lost_date = dates.pst_to_utc(dates.now())
           }
         }
-        try {
-          await __findTreeItem(update)
-          await lsb[0].update(update)
-        } catch (error) {
-          Honeybadger.notify(error, {
+
+        //  if the actual go live is not null then dont allow it to be updated
+        if (lsb[0].actual_go_live == null) {
+          try {
+            await __findTreeItem(update)
+            await lsb[0].update(update)
+          } catch (error) {
+            Honeybadger.notify(error, {
+              context: {
+                update: update
+              }
+            })
+          }
+        } else {
+          Honeybadger.notify('Actual Go live is set', {
             context: {
-              update: update
+              update: update,
+              lsb: lsb[0]
             }
           })
         }
@@ -303,7 +314,7 @@ async function match(req, res) {
     if (req) {
       res.sendStatus(201)
     }
-    await job.update({status: 'running'})
+    await job.update({ status: 'running' })
     // select LSB from database where there is no task or project id
     var lsb = await db.lbs.findAll({
       where: {
@@ -326,7 +337,7 @@ async function match(req, res) {
         })
       }
     }
-    job.update({lastrun: dates.now(), status: 'active'})
+    job.update({ lastrun: dates.now(), status: 'active' })
   } catch (error) {
     Honeybadger.notify(error, {
       context: {
