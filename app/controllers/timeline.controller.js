@@ -514,7 +514,7 @@ function pushProjectMilestones (projectMilestones, milestones) {
   }
   if (projectMilestones.impReady && projectMilestones.impStart) {
     let datedif = dates.bussinessDaysBetween(projectMilestones.impStart, projectMilestones.impReady)
-    if (datedif > 0) {
+    if (datedif >= 0) {
     milestones[1].values.push({projectID: projectMilestones.project_id, days: datedif})
     }
   }
@@ -570,7 +570,7 @@ function findMilestones(project, ) {
     projectClosed: null
   }
   project.treeitems.forEach(milestone => {
-    milestoneName = milestone.name
+    let milestoneName = milestone.name
     if (milestoneName.includes('Contract Execution')) {
       milestones.contractExecution = milestone.date_done
     } else if (milestoneName.includes('Implementation Ready')) {
