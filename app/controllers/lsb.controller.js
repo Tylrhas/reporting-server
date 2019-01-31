@@ -146,29 +146,34 @@ async function locations(req, res) {
   }
 }
 async function projects(req, res) {
+  
   try {
     var startDate = req.query.startDate
-    var projects = await db.sequelize.query(`
-     SELECT lbs.master_project_id, date.estimated_go_live, date.actual_go_live, date.original_estimated_go_live, date.start_date, date.website_launch_date, date.project_lost_date, lbs.stage, COUNT(lbs.stage) AS stage_count
-     FROM lbs AS lbs
-     JOIN (
-      SELECT master_project_id, MAX(estimated_go_live) AS estimated_go_live, MAX(project_lost_date) AS project_lost_date, MAX(actual_go_live) AS actual_go_live, MAX(original_estimated_go_live) AS original_estimated_go_live, MAX(start_date) AS start_date, MAX(website_launch_date) AS website_launch_date
-      FROM lbs  
-      GROUP BY master_project_id
-     ) date ON date.master_project_id = lbs.master_project_id
-     WHERE lbs."updatedAt" >= :startDate
-     GROUP BY lbs.master_project_id, date.estimated_go_live, date.actual_go_live, date.original_estimated_go_live, date.project_lost_date, date.start_date, date.website_launch_date, lbs.stage
-     ORDER BY lbs.master_project_id ASC`,
-      {
-        replacements: { startDate: startDate },
-        type: db.sequelize.QueryTypes.SELECT
-      }
-    )
+    let lbsProjects = await  db.lbs.findAll({
+      attributes: ['master_project_id'],
+      where: {
+        updatedAt :{
+          [Op.gte]: startDate
+        }
+      },
+      group: ['master_project_id']
+    })
+    let master_project_ids = lbsProjects.map( projectId => projectId.master_project_id)
+    let lbsLocations =  await db.lbs.findAll({
+      attributes: ['master_project_id', 'estimated_go_live', 'actual_go_live', 'original_estimated_go_live', 'start_date', 'website_launch_date', 'project_lost_date', 'stage' ],
+      where: {
+        master_project_id: {
+          [Op.in] : master_project_ids
+        }
+      },
+      group: ['master_project_id', 'estimated_go_live', 'actual_go_live', 'original_estimated_go_live', 'start_date', 'website_launch_date', 'project_lost_date', 'stage' ],
+      order: ['master_project_id']
+    })
     var csv = []
     // create CSV from json object and return it
-    for (let i = 0; i < projects.length; i++) {
+    for (let i = 0; i < lbsLocations.length; i++) {
       try {
-        let project = __getProjectStatus(projects, i)
+        let project = __getProjectStatus(lbsLocations, i)
         csv.push(project.data)
         i = project.newIndex
       } catch (error) {
