@@ -14,6 +14,9 @@ module.exports = function (sequelize, Sequelize) {
         client_id: {
             type: Sequelize.INTEGER,
         },
+        name: {
+            type: Sequelize.TEXT,
+        },
         // Dates
         done_on: {
             type: Sequelize.DATE,
