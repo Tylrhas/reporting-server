@@ -24,8 +24,8 @@ function UpdatebuttonClick () {
     $(button).text('Updating')
     // post them to the update endpoint
     $.ajax({
-      type: "POST",
-      url: '/api/goals/update',
+      type: "PUT",
+      url: '/api/goals',
       data: update,
       success: function (data) {
         // if the response is 200 then change the text of the button to updated
