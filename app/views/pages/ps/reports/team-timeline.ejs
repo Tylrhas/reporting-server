@@ -84,7 +84,7 @@
         <thead>
           <tr>
             <th scope="col">Report Date</th>
-            <th scope="col">Project Id</th>
+            <th scope="col">Project Name</th>
             <th scope="col">
               <%= report[1].name %>
             </th>
@@ -99,7 +99,7 @@
             </td>
             <td><a href="<%=`https://app.liquidplanner.com/space/${site_data.LPWorkspaceId}/projects/show/${project.project_id}`%>"
                 target="_blank">
-                <%= project.project_id %></a></td>
+                <%= project.project_name%></a></td>
             <td>
               <%= project.milestone %>
             </td>

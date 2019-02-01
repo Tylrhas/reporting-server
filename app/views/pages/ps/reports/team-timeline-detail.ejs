@@ -30,14 +30,14 @@
       <table class="table" id="milstone_reports">
         <thead>
           <tr>
-            <th scope="col">Project Id</th>
+            <th scope="col">Project Name</th>
             <th scope="col">Days</th>
           </tr>
         </thead>
         <tbody>
             <% report.values.forEach(milestone => { %>
               <tr>
-                <td><a href="https://app.liquidplanner.com/space/<%= lp_space_id %>/projects/show/<%= milestone.projectID %>"><%= milestone.projectID %></a</td>
+                <td><a href="https://app.liquidplanner.com/space/<%= lp_space_id %>/projects/show/<%= milestone.projectID %>"><%= milestone.project_name %></a</td>
                 <td><%= milestone.days %></td>
               </tr>
               <%})%>
