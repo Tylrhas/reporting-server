@@ -6,7 +6,10 @@ const team = require('./team.controller')
 module.exports = {
   timeline,
   detail,
-  dashboard
+  dashboard,
+  historicalTimeline,
+  historicalTimelineDetail
+
 }
 
 async function dashboard(req, res) {
@@ -17,9 +20,10 @@ async function dashboard(req, res) {
 async function timeline(req, res) {
   let teamID = req.params.teamid
   // find all projects that are active for a given team
-  var todaysDate = dates.today()
-  let taskTimes = await taskTimeline(teamID, todaysDate)
-  let milestoneTimes = await milestoneTimeline(teamID, todaysDate)
+  let activeProjects = await getActiveTasks(teamID)
+  let taskTimes = await taskTimeline(activeProjects)
+  let milestones = await getActiveMilestones(teamID)
+  let milestoneTimes = await milestoneTimeline(milestones)
   milestoneTimes.name = 'Milestones'
   taskTimes.name = 'Tasks'
   let teamName = await db.cft.findOne({
@@ -37,10 +41,7 @@ async function timeline(req, res) {
 }
 async function detail(req, res) {
   let teamID = req.params.teamid
-  let projects = await getMilestones(teamID)
-  for (let i = 0; i < projects.length; i++) {
-    projects[i].name = await getProjectName(projects[i].id)
-  }
+  let projects = await getActiveMilestones(teamID)
   let milestoneGroups = groupMilestones(projects)
   let teamName = await db.cft.findOne({
     attributtes: ['name'],
@@ -50,15 +51,42 @@ async function detail(req, res) {
   })
   res.render('pages/ps/reports/team-timeline-detail', { user: req.user, lp_space_id: process.env.LPWorkspaceId, slug: 'timeline', site_data: site_data.all(), averageTime: milestoneGroups, teamName: teamName.name })
 }
-
-function getSum(total, num) {
-  return total + num;
-}
-async function milestoneTimeline(teamID, todaysDate) {
-  let projects = await getMilestones(teamID)
-  for (let i = 0; i < projects.length; i++) {
-    projects[i].name = await getProjectName(projects[i].id)
+async function historicalTimeline (req, res) {
+  let teamID = req.params.teamid
+  // find all projects that are active for a given team
+  let archivedprojects  = await getArchivedTasks(teamID)
+  let taskTimes = await taskTimeline(archivedprojects)
+  let milestones = await getArchivedMilestones(teamID)
+  let milestoneTimes = await milestoneTimeline(milestones)
+  milestoneTimes.name = 'Milestones'
+  taskTimes.name = 'Tasks'
+  let teamName = await db.cft.findOne({
+    attributtes: ['name'],
+    where: {
+      id: teamID
+    }
+  })
+  let averageTime = {
+    milestoneTimes,
+    taskTimes
   }
+
+  res.render('pages/ps/reports/team-timeline', { user: req.user, lp_space_id: process.env.LPWorkspaceId, slug: 'timeline', site_data: site_data.all(), averageTime: averageTime, teamName: teamName.name, teamID, teamID })
+
+}
+async function historicalTimelineDetail (req, res) {
+  let teamID = req.params.teamid
+  let projects = await getArchivedMilestones(teamID)
+  let milestoneGroups = groupMilestones(projects)
+  let teamName = await db.cft.findOne({
+    attributtes: ['name'],
+    where: {
+      id: teamID
+    }
+  })
+  res.render('pages/ps/reports/team-timeline-detail', { user: req.user, lp_space_id: process.env.LPWorkspaceId, slug: 'timeline', site_data: site_data.all(), averageTime: milestoneGroups, teamName: teamName.name })
+}
+async function milestoneTimeline(projects) {
   let milestoneData = {
     averages: {
       milestone1: {
@@ -229,32 +257,7 @@ function buildAverageTimes(milestones, project, milestoneData) {
   }
   return milestoneData
 }
-async function taskTimeline(teamID, todaysDate) {
-
-  let projects = await db.lp_project.findAll({
-    where: {
-      is_done: false,
-      is_archived: false,
-      cft_id: teamID
-    },
-    include: [
-      {
-        model: db.treeitem,
-        where: {
-          name: {
-            [Op.or]: [{ [Op.like]: '%Implementation Ready%' }, { [Op.like]: '%SEO Checklist Review%' }, { [Op.like]: 'Copy Solution Phase%' }, { [Op.like]: '%Build Ready' }, { [Op.like]: 'Peer Review%' }, { [Op.like]: '%SEO Staging Review%' }, { [Op.like]: 'PM Review%' }, { [Op.like]: '%Staging Quality Control%' }, { [Op.like]: '%Staging Links Delivered%' }]
-          },
-          child_type: {
-            [Op.in]: ['task', 'milestone']
-          }
-        }
-      }
-    ]
-  })
-
-    for (let i = 0; i < projects.length; i++) {
-    projects[i].name = await getProjectName(projects[i].id)
-  }
+async function taskTimeline(projects) {
 
   let averageTime = {
     milestone1: {
@@ -449,8 +452,8 @@ async function taskTimeline(teamID, todaysDate) {
   })
   return averageTime
 }
-function getMilestones(teamID) {
-  return db.lp_project.findAll({
+async function getActiveMilestones(teamID) {
+  let projects = await db.lp_project.findAll({
     where: {
       is_done: false,
       is_archived: false,
@@ -471,6 +474,37 @@ function getMilestones(teamID) {
       }
     ]
   })
+  for (let i = 0; i < projects.length; i++) {
+    projects[i].name = await getProjectName(projects[i].id)
+  }
+  return projects
+}
+async function getArchivedMilestones (teamID) {
+  let projects = await db.lp_project.findAll({
+    where: {
+      is_done: true,
+      is_archived: true,
+      cft_id: teamID
+    },
+    include: [
+      {
+        model: db.treeitem,
+        where: {
+          name: {
+            [Op.or]: [{ [Op.like]: 'Contract Execution' }, { [Op.like]: 'Implementation Ready' }, { [Op.like]: 'Implementation Start' }, { [Op.iLike]: '%Build Ready%' }, { [Op.like]: 'Staging Links Delivered%' }, { [Op.like]: 'Launch Approval%' }, { [Op.like]: 'Website(s) Live%' }, { [Op.like]: 'Services Activated%' }, { [Op.like]: 'Project Closed%' }]
+          },
+          date_done: {
+            [Op.not]: null
+          },
+          child_type: 'milestone'
+        }
+      }
+    ]
+  })
+  for (let i = 0; i < projects.length; i++) {
+    projects[i].name = await getProjectName(projects[i].id)
+  }
+  return projects
 }
 function groupMilestones(projects) {
   let milestones = [
@@ -619,7 +653,60 @@ function average(numbers) {
 
   return site_data.roundNumber(avg, 2)
 }
+async function getActiveTasks (teamID) {
+  let projects = await db.lp_project.findAll({
+    where: {
+      is_done: false,
+      is_archived: false,
+      cft_id: teamID
+    },
+    include: [
+      {
+        model: db.treeitem,
+        where: {
+          name: {
+            [Op.or]: [{ [Op.like]: '%Implementation Ready%' }, { [Op.like]: '%SEO Checklist Review%' }, { [Op.like]: 'Copy Solution Phase%' }, { [Op.like]: '%Build Ready' }, { [Op.like]: 'Peer Review%' }, { [Op.like]: '%SEO Staging Review%' }, { [Op.like]: 'PM Review%' }, { [Op.like]: '%Staging Quality Control%' }, { [Op.like]: '%Staging Links Delivered%' }]
+          },
+          child_type: {
+            [Op.in]: ['task', 'milestone']
+          }
+        }
+      }
+    ]
+  })
 
+    for (let i = 0; i < projects.length; i++) {
+    projects[i].name = await getProjectName(projects[i].id)
+  }
+  return projects
+}
+async function getArchivedTasks (teamID) {
+  let projects = await db.lp_project.findAll({
+    where: {
+      is_done: true,
+      is_archived: true,
+      cft_id: teamID
+    },
+    include: [
+      {
+        model: db.treeitem,
+        where: {
+          name: {
+            [Op.or]: [{ [Op.like]: '%Implementation Ready%' }, { [Op.like]: '%SEO Checklist Review%' }, { [Op.like]: 'Copy Solution Phase%' }, { [Op.like]: '%Build Ready' }, { [Op.like]: 'Peer Review%' }, { [Op.like]: '%SEO Staging Review%' }, { [Op.like]: 'PM Review%' }, { [Op.like]: '%Staging Quality Control%' }, { [Op.like]: '%Staging Links Delivered%' }]
+          },
+          child_type: {
+            [Op.in]: ['task', 'milestone']
+          }
+        }
+      }
+    ]
+  })
+
+    for (let i = 0; i < projects.length; i++) {
+    projects[i].name = await getProjectName(projects[i].id)
+  }
+  return projects
+}
 async function getProjectName(projectID) {
   let project = await db.treeitem.findOne({
     where: {
