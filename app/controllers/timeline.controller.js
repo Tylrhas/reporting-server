@@ -2,26 +2,40 @@ const db = require('../models')
 const Op = db.Sequelize.Op
 const dates = require('./dates.controller')
 const site_data = require('./site_data.controller')
+const projectController = require('./project.controller')
 const team = require('./team.controller')
 module.exports = {
   timeline,
   detail,
-  dashboard
+  dashboard,
+  historicalTimeline,
+  historicalTimelineDetail
+
 }
 
-async function dashboard (req, res) {
+async function dashboard(req, res) {
   let teams = await team.noAssociatedTeam()
-  res.render('pages/ps/reports/milestone_cards', {user: req.user, lp_space_id: process.env.LPWorkspaceId, slug: 'timeline', site_data: site_data.all(), cards: teams})
+  res.render('pages/ps/reports/milestone_cards', { user: req.user, lp_space_id: process.env.LPWorkspaceId, slug: 'timeline', site_data: site_data.all(), cards: teams })
 }
 
 async function timeline(req, res) {
   let teamID = req.params.teamid
   // find all projects that are active for a given team
-  var todaysDate = dates.today()
-  let taskTimes = await taskTimeline(teamID, todaysDate)
-  let milestoneTimes = await milestoneTimeline(teamID, todaysDate)
+  let activeProjects = await getActiveTasks(teamID)
+  let taskTimes = await taskTimeline(activeProjects)
+  let milestones = await getActiveMilestones(teamID)
+  let projectIds = []
+  milestones.forEach(project => {
+    if (!projectIds.includes(project.id)) {
+      projectIds.push(project.id)
+    }
+  })
+  let averageLocCount = await projectController.averageLocCount(projectIds)
+  let milestoneTimes = await milestoneTimeline(milestones)
+  milestoneTimes.averageLocCount = averageLocCount
   milestoneTimes.name = 'Milestones'
   taskTimes.name = 'Tasks'
+  taskTimes.averageLocCount = averageLocCount
   let teamName = await db.cft.findOne({
     attributtes: ['name'],
     where: {
@@ -32,12 +46,12 @@ async function timeline(req, res) {
     milestoneTimes,
     taskTimes
   }
-  
+
   res.render('pages/ps/reports/team-timeline', { user: req.user, lp_space_id: process.env.LPWorkspaceId, slug: 'timeline', site_data: site_data.all(), averageTime: averageTime, teamName: teamName.name, teamID, teamID })
 }
 async function detail(req, res) {
   let teamID = req.params.teamid
-  let projects = await getMilestones(teamID)
+  let projects = await getActiveMilestones(teamID)
   let milestoneGroups = groupMilestones(projects)
   let teamName = await db.cft.findOne({
     attributtes: ['name'],
@@ -47,13 +61,51 @@ async function detail(req, res) {
   })
   res.render('pages/ps/reports/team-timeline-detail', { user: req.user, lp_space_id: process.env.LPWorkspaceId, slug: 'timeline', site_data: site_data.all(), averageTime: milestoneGroups, teamName: teamName.name })
 }
+async function historicalTimeline (req, res) {
+  let teamID = req.params.teamid
+  // find all projects that are active for a given team
+  let archivedprojects  = await getArchivedTasks(teamID)
+  let taskTimes = await taskTimeline(archivedprojects)
+  let milestones = await getArchivedMilestones(teamID)
+  let projectIds = []
+  milestones.forEach(project => {
+    if (!projectIds.includes(project.id)) {
+      projectIds.push(project.id)
+    }
+  })
+  let averageLocCount = await projectController.averageLocCount(projectIds)
+  let milestoneTimes = await milestoneTimeline(milestones)
+  milestoneTimes.name = 'Milestones'
+  taskTimes.name = 'Tasks'
+  milestoneTimes.averageLocCount = averageLocCount
+  taskTimes.averageLocCount = averageLocCount
+  let teamName = await db.cft.findOne({
+    attributtes: ['name'],
+    where: {
+      id: teamID
+    }
+  })
+  let averageTime = {
+    milestoneTimes,
+    taskTimes
+  }
 
-function getSum(total, num) {
-  return total + num;
+  res.render('pages/ps/reports/team-timeline', { user: req.user, lp_space_id: process.env.LPWorkspaceId, slug: 'timeline', site_data: site_data.all(), averageTime: averageTime, teamName: teamName.name, teamID, teamID })
+
 }
-async function milestoneTimeline(teamID, todaysDate) {
-  let projects = await getMilestones(teamID)
-
+async function historicalTimelineDetail (req, res) {
+  let teamID = req.params.teamid
+  let projects = await getArchivedMilestones(teamID)
+  let milestoneGroups = groupMilestones(projects)
+  let teamName = await db.cft.findOne({
+    attributtes: ['name'],
+    where: {
+      id: teamID
+    }
+  })
+  res.render('pages/ps/reports/team-timeline-detail', { user: req.user, lp_space_id: process.env.LPWorkspaceId, slug: 'timeline', site_data: site_data.all(), averageTime: milestoneGroups, teamName: teamName.name })
+}
+async function milestoneTimeline(projects) {
   let milestoneData = {
     averages: {
       milestone1: {
@@ -147,7 +199,7 @@ function buildAverageTimes(milestones, project, milestoneData) {
     let datedif = dates.bussinessDaysBetween(milestones.impReady, milestones.contractExecution)
     if (datedif <= 0) {
       milestoneData.totalRejectedProjects++
-      milestoneData.rejectedProjects.push({ project_id: project_id, milestone: milestoneData.averages.milestone1.name, days: datedif })
+      milestoneData.rejectedProjects.push({ project_id: project_id, project_name: project.name, milestone: milestoneData.averages.milestone1.name, days: datedif })
     } else {
       milestoneData.averages.milestone1.value.push(datedif)
     }
@@ -157,7 +209,7 @@ function buildAverageTimes(milestones, project, milestoneData) {
     let datedif = dates.bussinessDaysBetween(milestones.impStart, milestones.impReady)
     if (datedif < 0) {
       milestoneData.totalRejectedProjects++
-      milestoneData.rejectedProjects.push({ project_id: project_id, milestone: milestoneData.averages.milestone2.name, days: datedif })
+      milestoneData.rejectedProjects.push({ project_id: project_id, project_name: project.name, milestone: milestoneData.averages.milestone2.name, days: datedif })
     } else {
       milestoneData.averages.milestone2.value.push(datedif)
     }
@@ -167,7 +219,7 @@ function buildAverageTimes(milestones, project, milestoneData) {
     let datedif = dates.bussinessDaysBetween(milestones.buildReady, milestones.impStart)
     if (datedif <= 0) {
       milestoneData.totalRejectedProjects++
-      milestoneData.rejectedProjects.push({ project_id: project_id, milestone: milestoneData.averages.milestone3.name, days: datedif })
+      milestoneData.rejectedProjects.push({ project_id: project_id, project_name: project.name, milestone: milestoneData.averages.milestone3.name, days: datedif })
     } else {
       milestoneData.averages.milestone3.value.push(datedif)
     }
@@ -177,7 +229,7 @@ function buildAverageTimes(milestones, project, milestoneData) {
     let datedif = dates.bussinessDaysBetween(milestones.stgLinksDel, milestones.buildReady)
     if (datedif <= 0) {
       milestoneData.totalRejectedProjects++
-      milestoneData.rejectedProjects.push({ project_id: project_id, milestone: milestoneData.averages.milestone4.name, days: datedif })
+      milestoneData.rejectedProjects.push({ project_id: project_id, project_name: project.name, milestone: milestoneData.averages.milestone4.name, days: datedif })
     } else {
       milestoneData.averages.milestone4.value.push(datedif)
     }
@@ -187,7 +239,7 @@ function buildAverageTimes(milestones, project, milestoneData) {
     let datedif = dates.bussinessDaysBetween(milestones.servsActivated, milestones.stgLinksDel)
     if (datedif <= 0) {
       milestoneData.totalRejectedProjects++
-      milestoneData.rejectedProjects.push({ project_id: project_id, milestone: milestoneData.averages.milestone5.name, days: datedif })
+      milestoneData.rejectedProjects.push({ project_id: project_id, project_name: project.name, milestone: milestoneData.averages.milestone5.name, days: datedif })
     } else {
       milestoneData.averages.milestone5.value.push(datedif)
     }
@@ -197,7 +249,7 @@ function buildAverageTimes(milestones, project, milestoneData) {
     let datedif = dates.bussinessDaysBetween(milestones.launchApproval, milestones.stgLinksDel)
     if (datedif <= 0) {
       milestoneData.totalRejectedProjects++
-      milestoneData.rejectedProjects.push({ project_id: project_id, milestone: milestoneData.averages.milestone6.name, days: datedif })
+      milestoneData.rejectedProjects.push({ project_id: project_id, project_name: project.name, milestone: milestoneData.averages.milestone6.name, days: datedif })
     } else {
       milestoneData.averages.milestone6.value.push(datedif)
     }
@@ -207,7 +259,7 @@ function buildAverageTimes(milestones, project, milestoneData) {
     let datedif = dates.bussinessDaysBetween(milestones.websitesLive, milestones.launchApproval)
     if (datedif < 0) {
       milestoneData.totalRejectedProjects++
-      milestoneData.rejectedProjects.push({ project_id: project_id, milestone: milestoneData.averages.milestone7.name, days: datedif })
+      milestoneData.rejectedProjects.push({ project_id: project_id, project_name: project.name, milestone: milestoneData.averages.milestone7.name, days: datedif })
     } else {
       milestoneData.averages.milestone7.value.push(datedif)
     }
@@ -217,35 +269,15 @@ function buildAverageTimes(milestones, project, milestoneData) {
     let datedif = dates.bussinessDaysBetween(milestones.projectClosed, milestones.websitesLive)
     if (datedif <= 0) {
       milestoneData.totalRejectedProjects++
-      milestoneData.rejectedProjects.push({ project_id: project_id, milestone: milestoneData.averages.milestone8.name, days: datedif })
+      milestoneData.rejectedProjects.push({ project_id: project_id, project_name: project.name, milestone: milestoneData.averages.milestone8.name, days: datedif })
     } else {
       milestoneData.averages.milestone8.value.push(datedif)
     }
   }
   return milestoneData
 }
-async function taskTimeline(teamID, todaysDate) {
+async function taskTimeline(projects) {
 
-  let projects = await db.lp_project.findAll({
-    where: {
-      is_done: false,
-      is_archived: false,
-      cft_id: teamID
-    },
-    include: [
-      {
-        model: db.treeitem,
-        where: {
-          name: {
-            [Op.or]: [{ [Op.like]: '%Implementation Ready%' }, { [Op.like]: '%SEO Checklist Review%' }, { [Op.like]: 'Copy Solution Phase%' }, { [Op.like]: '%Build Ready' }, { [Op.like]: 'Peer Review%' }, { [Op.like]: '%SEO Staging Review%' }, { [Op.like]: 'PM Review%' }, { [Op.like]: '%Staging Quality Control%' }, { [Op.like]: '%Staging Links Delivered%' }]
-          },
-          child_type: {
-            [Op.in]: ['task', 'milestone']
-          }
-        }
-      }
-    ]
-  })
   let averageTime = {
     milestone1: {
       name: 'Implementation Ready to SEO Checklist (SEO Review)',
@@ -329,7 +361,7 @@ async function taskTimeline(teamID, todaysDate) {
       let datedif = dates.bussinessDaysBetween(seoChecklist, impReady)
       if (datedif < 0) {
         milestones.rejected++
-        rejectedProjects.push({ project_id: projects[i].id, milestone: averageTime.milestone1.name, days: datedif })
+        rejectedProjects.push({ project_id: projects[i].id, project_name: projects[i].name, milestone: averageTime.milestone1.name, days: datedif })
         console.log(projects[i].id)
       } else {
         averageTime.milestone1.value.push(datedif);
@@ -340,7 +372,7 @@ async function taskTimeline(teamID, todaysDate) {
       let datedif = dates.bussinessDaysBetween(buildReady, seoChecklist)
       if (datedif < 0) {
         milestones.rejected++
-        rejectedProjects.push({ project_id: projects[i].id, milestone: averageTime.milestone2.name, days: datedif })
+        rejectedProjects.push({ project_id: projects[i].id, project_name: projects[i].name, milestone: averageTime.milestone2.name, days: datedif })
         console.log(projects[i].id)
       } else {
         averageTime.milestone2.value.push(datedif);
@@ -351,7 +383,7 @@ async function taskTimeline(teamID, todaysDate) {
       let datedif = dates.bussinessDaysBetween(copySolution, seoChecklist)
       if (datedif < 0) {
         milestones.rejected++
-        rejectedProjects.push({ project_id: projects[i].id, milestone: averageTime.milestone3.name, days: datedif })
+        rejectedProjects.push({ project_id: projects[i].id, project_name: projects[i].name, milestone: averageTime.milestone3.name, days: datedif })
         console.log(projects[i].id)
       } else {
         averageTime.milestone3.value.push(datedif);
@@ -362,7 +394,7 @@ async function taskTimeline(teamID, todaysDate) {
       let datedif = dates.bussinessDaysBetween(buildReady, copySolution)
       if (datedif < 0) {
         milestones.rejected++
-        rejectedProjects.push({ project_id: projects[i].id, milestone: averageTime.milestone4.name, days: datedif })
+        rejectedProjects.push({ project_id: projects[i].id, project_name: projects[i].name, milestone: averageTime.milestone4.name, days: datedif })
         console.log(projects[i].id)
       } else {
         averageTime.milestone4.value.push(datedif);
@@ -373,7 +405,7 @@ async function taskTimeline(teamID, todaysDate) {
       let datedif = dates.bussinessDaysBetween(peerReview, buildReady)
       if (datedif < 0) {
         milestones.rejected++
-        rejectedProjects.push({ project_id: projects[i].id, milestone: averageTime.milestone5.name, days: datedif })
+        rejectedProjects.push({ project_id: projects[i].id, project_name: projects[i].name, milestone: averageTime.milestone5.name, days: datedif })
         console.log(projects[i].id)
       } else {
         averageTime.milestone5.value.push(datedif);
@@ -384,7 +416,7 @@ async function taskTimeline(teamID, todaysDate) {
       let datedif = dates.bussinessDaysBetween(seoStaging, peerReview)
       if (datedif < 0) {
         milestones.rejected++
-        rejectedProjects.push({ project_id: projects[i].id, milestone: 'Peer Review to SEO Staging (SEO Staging)', days: datedif })
+        rejectedProjects.push({ project_id: projects[i].id, project_name: projects[i].name, milestone: 'Peer Review to SEO Staging (SEO Staging)', days: datedif })
         console.log(projects[i].id)
       } else {
         averageTime.milestone6.value.push(datedif);
@@ -395,7 +427,7 @@ async function taskTimeline(teamID, todaysDate) {
       let datedif = dates.bussinessDaysBetween(pmRevew, seoStaging)
       if (datedif < 0) {
         milestones.rejected++
-        rejectedProjects.push({ project_id: projects[i].id, milestone: averageTime.milestone7.name, days: datedif })
+        rejectedProjects.push({ project_id: projects[i].id, project_name: projects[i].name, milestone: averageTime.milestone7.name, days: datedif })
         console.log(projects[i].id)
       } else {
         averageTime.milestone7.value.push(datedif);
@@ -406,7 +438,7 @@ async function taskTimeline(teamID, todaysDate) {
       let datedif = dates.bussinessDaysBetween(stagingQC, pmRevew)
       if (datedif < 0) {
         milestones.rejected++
-        rejectedProjects.push({ project_id: projects[i].id, milestone: averageTime.milestone8.name, days: datedif })
+        rejectedProjects.push({ project_id: projects[i].id, project_name: projects[i].name, milestone: averageTime.milestone8.name, days: datedif })
         console.log(projects[i].id)
       } else {
         averageTime.milestone8.value.push(datedif);
@@ -417,7 +449,7 @@ async function taskTimeline(teamID, todaysDate) {
       let datedif = dates.bussinessDaysBetween(linksDelivered, stagingQC)
       if (datedif < 0) {
         milestones.rejected++
-        rejectedProjects.push({ project_id: projects[i].id, milestone: averageTime.milestone9.name, days: datedif })
+        rejectedProjects.push({ project_id: projects[i].id, project_name: projects[i].name, milestone: averageTime.milestone9.name, days: datedif })
         console.log(projects[i].id)
       } else {
         averageTime.milestone9.value.push(datedif);
@@ -439,8 +471,8 @@ async function taskTimeline(teamID, todaysDate) {
   })
   return averageTime
 }
-function getMilestones(teamID) {
-  return db.lp_project.findAll({
+async function getActiveMilestones(teamID) {
+  let projects = await db.lp_project.findAll({
     where: {
       is_done: false,
       is_archived: false,
@@ -461,9 +493,39 @@ function getMilestones(teamID) {
       }
     ]
   })
+  for (let i = 0; i < projects.length; i++) {
+    projects[i].name = await getProjectName(projects[i].id)
+  }
+  return projects
+}
+async function getArchivedMilestones (teamID) {
+  let projects = await db.lp_project.findAll({
+    where: {
+      is_done: true,
+      is_archived: true,
+      cft_id: teamID
+    },
+    include: [
+      {
+        model: db.treeitem,
+        where: {
+          name: {
+            [Op.or]: [{ [Op.like]: 'Contract Execution' }, { [Op.like]: 'Implementation Ready' }, { [Op.like]: 'Implementation Start' }, { [Op.iLike]: '%Build Ready%' }, { [Op.like]: 'Staging Links Delivered%' }, { [Op.like]: 'Launch Approval%' }, { [Op.like]: 'Website(s) Live%' }, { [Op.like]: 'Services Activated%' }, { [Op.like]: 'Project Closed%' }]
+          },
+          date_done: {
+            [Op.not]: null
+          },
+          child_type: 'milestone'
+        }
+      }
+    ]
+  })
+  for (let i = 0; i < projects.length; i++) {
+    projects[i].name = await getProjectName(projects[i].id)
+  }
+  return projects
 }
 function groupMilestones(projects) {
-
   let milestones = [
     {
       name: 'Contract Execution to Implementation Ready',
@@ -501,57 +563,58 @@ function groupMilestones(projects) {
   projects.forEach(project => {
     let projectMilestones = findMilestones(project)
     projectMilestones.project_id = project.id
+    projectMilestones.project_name = project.name
     milestones = pushProjectMilestones(projectMilestones, milestones)
   })
   return milestones
 }
-function pushProjectMilestones (projectMilestones, milestones) {
+function pushProjectMilestones(projectMilestones, milestones) {
   if (projectMilestones.contractExecution && projectMilestones.impReady) {
     let datedif = dates.bussinessDaysBetween(projectMilestones.impReady, projectMilestones.contractExecution)
     if (datedif > 0) {
-      milestones[0].values.push({projectID: projectMilestones.project_id, days: datedif })
+      milestones[0].values.push({ projectID: projectMilestones.project_id, days: datedif, project_name: projectMilestones.project_name })
     }
   }
   if (projectMilestones.impReady && projectMilestones.impStart) {
     let datedif = dates.bussinessDaysBetween(projectMilestones.impStart, projectMilestones.impReady)
     if (datedif >= 0) {
-    milestones[1].values.push({projectID: projectMilestones.project_id, days: datedif})
+      milestones[1].values.push({ projectID: projectMilestones.project_id, days: datedif, project_name: projectMilestones.project_name })
     }
   }
   if (projectMilestones.impStart && projectMilestones.buildReady) {
     let datedif = dates.bussinessDaysBetween(projectMilestones.buildReady, projectMilestones.impStart)
     if (datedif > 0) {
-    milestones[2].values.push({projectID: projectMilestones.project_id, days: datedif})
+      milestones[2].values.push({ projectID: projectMilestones.project_id, days: datedif, project_name: projectMilestones.project_name })
     }
   }
   if (projectMilestones.buildReady && projectMilestones.stgLinksDel) {
     let datedif = dates.bussinessDaysBetween(projectMilestones.stgLinksDel, projectMilestones.buildReady)
     if (datedif > 0) {
-    milestones[3].values.push({projectID: projectMilestones.project_id, days: datedif})
+      milestones[3].values.push({ projectID: projectMilestones.project_id, days: datedif, project_name: projectMilestones.project_name })
     }
   }
   if (projectMilestones.stgLinksDel && projectMilestones.servsActivated) {
     let datedif = dates.bussinessDaysBetween(projectMilestones.servsActivated, projectMilestones.stgLinksDel)
     if (datedif > 0) {
-    milestones[4].values.push({projectID: projectMilestones.project_id, days: datedif})
+      milestones[4].values.push({ projectID: projectMilestones.project_id, days: datedif, project_name: projectMilestones.project_name })
     }
   }
   if (projectMilestones.stgLinksDel && projectMilestones.launchApproval) {
     let datedif = dates.bussinessDaysBetween(projectMilestones.launchApproval, projectMilestones.stgLinksDel)
     if (datedif > 0) {
-    milestones[5].values.push({projectID: projectMilestones.project_id, days: datedif})
+      milestones[5].values.push({ projectID: projectMilestones.project_id, days: datedif, project_name: projectMilestones.project_name })
     }
   }
   if (projectMilestones.servsActivated && projectMilestones.websitesLive) {
     let datedif = dates.bussinessDaysBetween(projectMilestones.websitesLive, projectMilestones.servsActivated)
     if (datedif > 0) {
-    milestones[6].values.push({projectID: projectMilestones.project_id, days: datedif})
+      milestones[6].values.push({ projectID: projectMilestones.project_id, days: datedif, project_name: projectMilestones.project_name })
     }
   }
   if (projectMilestones.websitesLive && projectMilestones.projectClosed) {
     let datedif = dates.bussinessDaysBetween(projectMilestones.projectClosed, projectMilestones.websitesLive)
     if (datedif > 0) {
-    milestones[7].values.push({projectID: projectMilestones.project_id, days: datedif})
+      milestones[7].values.push({ projectID: projectMilestones.project_id, days: datedif, project_name: projectMilestones.project_name })
     }
   }
 
@@ -607,5 +670,67 @@ function average(numbers) {
 
   var avg = sum / numbers.length;
 
-  return site_data.roundNumber(avg,2)
+  return site_data.roundNumber(avg, 2)
+}
+async function getActiveTasks (teamID) {
+  let projects = await db.lp_project.findAll({
+    where: {
+      is_done: false,
+      is_archived: false,
+      cft_id: teamID
+    },
+    include: [
+      {
+        model: db.treeitem,
+        where: {
+          name: {
+            [Op.or]: [{ [Op.like]: '%Implementation Ready%' }, { [Op.like]: '%SEO Checklist Review%' }, { [Op.like]: 'Copy Solution Phase%' }, { [Op.like]: '%Build Ready' }, { [Op.like]: 'Peer Review%' }, { [Op.like]: '%SEO Staging Review%' }, { [Op.like]: 'PM Review%' }, { [Op.like]: '%Staging Quality Control%' }, { [Op.like]: '%Staging Links Delivered%' }]
+          },
+          child_type: {
+            [Op.in]: ['task', 'milestone']
+          }
+        }
+      }
+    ]
+  })
+
+    for (let i = 0; i < projects.length; i++) {
+    projects[i].name = await getProjectName(projects[i].id)
+  }
+  return projects
+}
+async function getArchivedTasks (teamID) {
+  let projects = await db.lp_project.findAll({
+    where: {
+      is_done: true,
+      is_archived: true,
+      cft_id: teamID
+    },
+    include: [
+      {
+        model: db.treeitem,
+        where: {
+          name: {
+            [Op.or]: [{ [Op.like]: '%Implementation Ready%' }, { [Op.like]: '%SEO Checklist Review%' }, { [Op.like]: 'Copy Solution Phase%' }, { [Op.like]: '%Build Ready' }, { [Op.like]: 'Peer Review%' }, { [Op.like]: '%SEO Staging Review%' }, { [Op.like]: 'PM Review%' }, { [Op.like]: '%Staging Quality Control%' }, { [Op.like]: '%Staging Links Delivered%' }]
+          },
+          child_type: {
+            [Op.in]: ['task', 'milestone']
+          }
+        }
+      }
+    ]
+  })
+
+    for (let i = 0; i < projects.length; i++) {
+    projects[i].name = await getProjectName(projects[i].id)
+  }
+  return projects
+}
+async function getProjectName(projectID) {
+  let project = await db.treeitem.findOne({
+    where: {
+      id: projectID
+    }
+  })
+  return project.name
 }
