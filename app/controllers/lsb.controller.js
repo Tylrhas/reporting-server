@@ -122,17 +122,31 @@ async function locations(req, res) {
       }
     })
     var csv = []
+    let updatedLocations = await throttledRequest.promise({ url: process.env.LP_LBS_UPDATE, method: 'GET', headers: { "Authorization": LPauth } })
+    updatedLocations = updatedLocations.rows
+    let updatedLocationIds = []
+    updatedLocations.forEach(location => {
+      let id  = location.name.split(/\s(.+)/, 2)[0]
+      try {
+        id = parseInt(id)
+        updatedLocationIds.push(id)
+      } catch (e) {
+        console.error(e)
+      }
+    })
     for (let i = 0; i < locations.length; i++) {
-      csv.push({
-        'Internal ID': locations[i].dataValues['Internal ID'],
-        'Current Estimated Go-Live Date': dates.utc_to_pst_no_time(locations[i].dataValues['Current Estimated Go-Live Date']),
-        'Actual Go-Live Date': dates.utc_to_pst_no_time(locations[i].dataValues['Actual Go-Live Date']),
-        'Original Estimated Go-live': dates.utc_to_pst_no_time(locations[i].dataValues['Original Estimated Go-live']),
-        'Website Launch Date': dates.utc_to_pst_no_time(locations[i].dataValues['Website Launch Date']),
-        'Start Date': dates.utc_to_pst_no_time(locations[i].dataValues['Start Date']),
-        'Project Lost date': dates.utc_to_pst_no_time(locations[i].dataValues['Project Lost date']),
-        'Stage': locations[i].dataValues['Stage']
-      })
+      if (updatedLocationIds.indexOf(locations[i].dataValues['Internal ID']) !== -1) {
+        csv.push({
+          'Internal ID': locations[i].dataValues['Internal ID'],
+          'Current Estimated Go-Live Date': dates.utc_to_pst_no_time(locations[i].dataValues['Current Estimated Go-Live Date']),
+          'Actual Go-Live Date': dates.utc_to_pst_no_time(locations[i].dataValues['Actual Go-Live Date']),
+          'Original Estimated Go-live': dates.utc_to_pst_no_time(locations[i].dataValues['Original Estimated Go-live']),
+          'Website Launch Date': dates.utc_to_pst_no_time(locations[i].dataValues['Website Launch Date']),
+          'Start Date': dates.utc_to_pst_no_time(locations[i].dataValues['Start Date']),
+          'Project Lost date': dates.utc_to_pst_no_time(locations[i].dataValues['Project Lost date']),
+          'Stage': locations[i].dataValues['Stage']
+        })
+      }
     }
 
     csv = Papa.unparse(csv)
@@ -146,27 +160,27 @@ async function locations(req, res) {
   }
 }
 async function projects(req, res) {
-  
+
   try {
     var startDate = req.query.startDate
-    let lbsProjects = await  db.lbs.findAll({
+    let lbsProjects = await db.lbs.findAll({
       attributes: ['master_project_id'],
       where: {
-        updatedAt :{
+        updatedAt: {
           [Op.gte]: startDate
         }
       },
       group: ['master_project_id']
     })
-    let master_project_ids = lbsProjects.map( projectId => projectId.master_project_id)
-    let lbsLocations =  await db.lbs.findAll({
-      attributes: ['master_project_id', 'estimated_go_live', 'actual_go_live', 'original_estimated_go_live', 'start_date', 'website_launch_date', 'project_lost_date', 'stage' ],
+    let master_project_ids = lbsProjects.map(projectId => projectId.master_project_id)
+    let lbsLocations = await db.lbs.findAll({
+      attributes: ['master_project_id', 'estimated_go_live', 'actual_go_live', 'original_estimated_go_live', 'start_date', 'website_launch_date', 'project_lost_date', 'stage'],
       where: {
         master_project_id: {
-          [Op.in] : master_project_ids
+          [Op.in]: master_project_ids
         }
       },
-      group: ['master_project_id', 'estimated_go_live', 'actual_go_live', 'original_estimated_go_live', 'start_date', 'website_launch_date', 'project_lost_date', 'stage' ],
+      group: ['master_project_id', 'estimated_go_live', 'actual_go_live', 'original_estimated_go_live', 'start_date', 'website_launch_date', 'project_lost_date', 'stage'],
       order: ['master_project_id']
     })
     var csv = []
