@@ -71,3 +71,8 @@ function roundNumber (number, digits) {
   }
   return number
 }
+
+function sum(total, num) {
+  return total + num;
+}
+

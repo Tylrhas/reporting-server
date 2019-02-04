@@ -26,8 +26,10 @@
               <%= report[1].name %>
             </h2>
             </a>
+            <p>Locations per Project: <%= report[1].averageLocCount %></p>
           </div>
-          <div class="col"><button class="btn btn-primary btn-right download" data-table-id="<%= report[1].name.toLowerCase() %>">Download CSV</button>
+          <div class="col">
+            <button class="btn btn-primary btn-right download" data-table-id="<%= report[1].name.toLowerCase() %>">Download CSV</button>
             <% if (report[1].name === 'Milestones') { %>
               <a href="<%= teamID %>/detail"><button class="btn btn-primary btn-right" style="margin-right: 10px;">View Details</button></a>
             <% } %>

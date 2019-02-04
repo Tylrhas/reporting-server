@@ -2,6 +2,7 @@ const db = require('../models')
 const Op = db.Sequelize.Op
 const dates = require('./dates.controller')
 const site_data = require('./site_data.controller')
+const projectController = require('./project.controller')
 const team = require('./team.controller')
 module.exports = {
   timeline,
@@ -23,9 +24,18 @@ async function timeline(req, res) {
   let activeProjects = await getActiveTasks(teamID)
   let taskTimes = await taskTimeline(activeProjects)
   let milestones = await getActiveMilestones(teamID)
+  let projectIds = []
+  milestones.forEach(project => {
+    if (!projectIds.includes(project.id)) {
+      projectIds.push(project.id)
+    }
+  })
+  let averageLocCount = await projectController.averageLocCount(projectIds)
   let milestoneTimes = await milestoneTimeline(milestones)
+  milestoneTimes.averageLocCount = averageLocCount
   milestoneTimes.name = 'Milestones'
   taskTimes.name = 'Tasks'
+  taskTimes.averageLocCount = averageLocCount
   let teamName = await db.cft.findOne({
     attributtes: ['name'],
     where: {
@@ -57,9 +67,18 @@ async function historicalTimeline (req, res) {
   let archivedprojects  = await getArchivedTasks(teamID)
   let taskTimes = await taskTimeline(archivedprojects)
   let milestones = await getArchivedMilestones(teamID)
+  let projectIds = []
+  milestones.forEach(project => {
+    if (!projectIds.includes(project.id)) {
+      projectIds.push(project.id)
+    }
+  })
+  let averageLocCount = await projectController.averageLocCount(projectIds)
   let milestoneTimes = await milestoneTimeline(milestones)
   milestoneTimes.name = 'Milestones'
   taskTimes.name = 'Tasks'
+  milestoneTimes.averageLocCount = averageLocCount
+  taskTimes.averageLocCount = averageLocCount
   let teamName = await db.cft.findOne({
     attributtes: ['name'],
     where: {
