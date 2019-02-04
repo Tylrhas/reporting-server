@@ -160,19 +160,32 @@ async function locations(req, res) {
   }
 }
 async function projects(req, res) {
-
   try {
-    var startDate = req.query.startDate
-    let lbsProjects = await db.lbs.findAll({
-      attributes: ['master_project_id'],
-      where: {
-        updatedAt: {
-          [Op.gte]: startDate
-        }
-      },
-      group: ['master_project_id']
+    let updatedLocations = await throttledRequest.promise({ url: process.env.LP_LBS_UPDATE, method: 'GET', headers: { "Authorization": LPauth } })
+    updatedLocations = updatedLocations.rows
+    let updatedLocationIds = []
+    updatedLocations.forEach(location => {
+      let id  = location.name.split(/\s(.+)/, 2)[0]
+      try {
+        id = parseInt(id)
+        updatedLocationIds.push(id)
+      } catch (e) {
+        console.error(e)
+      }
     })
-    let master_project_ids = lbsProjects.map(projectId => projectId.master_project_id)
+    let master_project_ids = []
+    let updated_master_project_ids = await db.lbs.findAll({
+      where: {
+        id: {
+          [Op.in] : updatedLocationIds
+        }
+      }
+    })
+    updated_master_project_ids.forEach(location => {
+      if (!master_project_ids.includes(location.master_project_id)) {
+        master_project_ids.push(location.master_project_id)
+      }
+    })
     let lbsLocations = await db.lbs.findAll({
       attributes: ['master_project_id', 'estimated_go_live', 'actual_go_live', 'original_estimated_go_live', 'start_date', 'website_launch_date', 'project_lost_date', 'stage'],
       where: {
