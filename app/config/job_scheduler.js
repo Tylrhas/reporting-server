@@ -1,27 +1,29 @@
-var schedule = require('node-schedule')
-var apiController = require('../controllers/apicontroller.js')
+const schedule = require('node-schedule')
+const jobController = require('../controllers/job.controller')
+const lsbController = require('../controllers/lsb.controller') 
+
 
 if (process.env.production =="true") {
 // update LP data every hour
 schedule.scheduleJob('0 * * * *', function() {
-  console.log('updating LP data')
-  apiController.updateProjects(null,null)
+  console.log('updating Active Projects')
+  jobController.updateActiveProjects(null, null)
 })
 // update LP data every hour
 schedule.scheduleJob('30 * * * *', function() {
  console.log('Updating Archived projects')
- apiController.updateArchivedProjects(null,null)
+ jobController.updateArchiveProjects(null, null)
 })
 
 // match LBS once a day 
 schedule.scheduleJob('0 1 * * *', function() {
   console.log('updating LP data')
-  apiController.findLBSProjects(null,null)
+  lsbController.match(null, null)
 })
 
-// match LBS once a day 
+// Update LBS dates every hour
 schedule.scheduleJob('55 * * * *', function() {
- console.log('updating LP data')
- apiController.lbsAPIUpdate(null,null)
+ console.log('Updating LBS Dates')
+ lsbController.update(null,null)
 })
 }
