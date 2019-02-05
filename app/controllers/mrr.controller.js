@@ -1,6 +1,7 @@
 const db = require('../models')
 const Op = db.Sequelize.Op
 const dates = require('./dates.controller')
+const site_data = require('./site_data.controller')
 const quater_month_map = {
   1: {
     months: [1, 2, 3],
@@ -43,14 +44,16 @@ async function month_detail(month, year) {
   }
 
   let backlog = await __getBacklog(backlogfirstDay, lastDay)
+  let startingBacklog = await __startingbacklog(month, year)
   let target = await __getTargetMonth(month, year)
   let activated = await __getActivated(firstDay, lastDay)
+  let percentActivated = site_data.percent(activated, startingBacklog)
   let variance = __roundNumber(((backlog + activated) - target), 2)
   let total = activated + backlog
   let psActivated = await __getPSActivated(firstDay, lastDay)
   let daActivated = await __getDAActivated(firstDay, lastDay)
 
-  return { target, backlog, activated, variance, psActivated, daActivated, total }
+  return { target, backlog, activated, variance, psActivated, daActivated, total, startingBacklog, percentActivated }
 }
 
 async function quarter_detail(quarter, year) {
@@ -79,6 +82,21 @@ async function quarter_detail(quarter, year) {
 
   return { target, backlog, activated, variance, psActivated, daActivated, total }
 
+}
+
+async function __startingbacklog(month, year) {
+  let mrr = 0
+  let backlog = await db.mrr_backlog.findOne({
+    where: {
+      cft_id: null,
+      month: month,
+      year: year
+    }
+  })
+  if (backlog) {
+    mrr = backlog.backlog
+  }
+  return mrr
 }
 
 async function year_detail(year) {
@@ -254,10 +272,10 @@ async function __getDAActivated(firstDay, lastDay) {
   return __roundNumber(daActivated, 2)
 }
 
-function __roundNumber (number, digits) {
+function __roundNumber(number, digits) {
   if (number !== 0) {
-    let power = Math.pow(10,digits) 
-    number =  Math.round(number * power) / power
+    let power = Math.pow(10, digits)
+    number = Math.round(number * power) / power
   }
   return number
 }
