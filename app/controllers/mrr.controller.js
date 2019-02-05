@@ -45,6 +45,8 @@ async function month_detail(month, year) {
 
   let backlog = await __getBacklog(backlogfirstDay, lastDay)
   let startingBacklog = await __startingbacklog(month, year)
+  let psStartingBacklog = await __teamStartingBacklog(month, year, 1)
+  let daStartingBacklog = await __teamStartingBacklog(month, year, 2)
   let target = await __getTargetMonth(month, year)
   let activated = await __getActivated(firstDay, lastDay)
   let percentActivated = site_data.percent(activated, startingBacklog)
@@ -53,7 +55,7 @@ async function month_detail(month, year) {
   let psActivated = await __getPSActivated(firstDay, lastDay)
   let daActivated = await __getDAActivated(firstDay, lastDay)
 
-  return { target, backlog, activated, variance, psActivated, daActivated, total, startingBacklog, percentActivated }
+  return { target, backlog, activated, variance, psActivated, daActivated, total, startingBacklog, percentActivated, psStartingBacklog, daStartingBacklog }
 }
 
 async function quarter_detail(quarter, year) {
@@ -89,6 +91,21 @@ async function __startingbacklog(month, year) {
   let backlog = await db.mrr_backlog.findOne({
     where: {
       cft_id: null,
+      month: month,
+      year: year
+    }
+  })
+  if (backlog) {
+    mrr = backlog.backlog
+  }
+  return mrr
+}
+
+async function __teamStartingBacklog(month, year, teamID) {
+  let mrr = 0
+  let backlog = await db.mrr_backlog.findOne({
+    where: {
+      cft_id: teamID,
       month: month,
       year: year
     }

@@ -13,7 +13,7 @@
         <table class="table center col-md-12 center">
           <thead>
             <tr>
-              <th>Backlog</th>
+              <th>Current Backlog</th>
               <th>Activated</th>
               <th>Total</th>
               <th>Variance</th>
@@ -36,40 +36,60 @@
             </tr>
           </tbody>
         </table>
+        <% if (quick_look_report.startingBacklog != null) { %>
         <table class="table center col-md-12 center">
           <thead>
             <tr>
-              <% if (quick_look_report.startingBacklog) { %>
               <th>Starting Backlog</th>
-              <% } %>
-              <% if (quick_look_report.startingBacklog) { %>
-              <th>% Backlog Activated</th>
-              <% } %>
-              <th>PS Activated</th>
-              <th>DA Activated</th>
+              <th>PS Starting Backlog</th>
+              <th>DA Starting Backlog</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <% if (quick_look_report.startingBacklog) { %>
+              <% if (quick_look_report.startingBacklog != null) { %>
               <td>
                 $ <%= quick_look_report.startingBacklog %></td>
               <% } %>
-              <% if (quick_look_report.startingBacklog) { %>
-              <td>
-                <%= quick_look_report.percentActivated %> %
-              </td>
-              <% } %>
               <td>
                 $
-                <%= quick_look_report.psActivated %>
+                <%= quick_look_report.psStartingBacklog %>
               </td>
               <td>$
-                <%= quick_look_report.daActivated %>
+                <%= quick_look_report.daStartingBacklog %>
               </td>
             </tr>
           </tbody>
         </table>
+        <% } %>
+        <table class="table center col-md-12 center">
+            <thead>
+              <tr>
+                <% if (quick_look_report.startingBacklog != null) { %>
+                <th>% Backlog Activated</th>
+                <% } %>
+                <th>PS Activated</th>
+                <th>DA Activated</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <% if (quick_look_report.startingBacklog != null) { %>
+                <td>
+                  <%= quick_look_report.percentActivated %> %
+                </td>
+                <% } %>
+                <td>
+                  $
+                  <%= quick_look_report.psActivated %>
+                </td>
+                <td>$
+                  <%= quick_look_report.daActivated %>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          
       </div>
     </div>
     <% if (quick_look_report.link != null) { %>
