@@ -21,7 +21,7 @@ schedule.scheduleJob('0 1 * * *', function() {
   lsbController.match(null, null)
 })
 
-// match LBS once a day 
+// Update LBS dates every hour
 schedule.scheduleJob('55 * * * *', function() {
  console.log('Updating LBS Dates')
  lsbController.update(null,null)
