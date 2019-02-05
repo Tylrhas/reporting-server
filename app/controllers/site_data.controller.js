@@ -3,7 +3,8 @@ module.exports = {
   all,
   checkVariance,
   archive_years,
-  roundNumber
+  roundNumber,
+  percent
 } 
 
 function all (month, year) {
@@ -74,5 +75,9 @@ function roundNumber (number, digits) {
 
 function sum(total, num) {
   return total + num;
+}
+
+function percent(first, second) {
+  return roundNumber(((first/ second)*100),2)
 }
 
