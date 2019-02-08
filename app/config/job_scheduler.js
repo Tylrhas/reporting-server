@@ -1,6 +1,7 @@
 const schedule = require('node-schedule')
 const jobController = require('../controllers/job.controller')
 const lsbController = require('../controllers/lsb.controller') 
+const SchedImpTimeline = require('../controllers/scheduledImpTimeline.controller')
 
 
 if (process.env.production =="true") {
@@ -26,4 +27,14 @@ schedule.scheduleJob('55 * * * *', function() {
  console.log('Updating LBS Dates')
  lsbController.update(null,null)
 })
+
+// Update LBS dates every hour
+schedule.scheduleJob('0 7 * * 5', function() {
+  console.log('Capturing sched imp Data')
+  try {
+    SchedImpTimeline.captureData()
+  } catch (e) {
+
+  }
+ })
 }
