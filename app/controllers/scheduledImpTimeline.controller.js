@@ -2,6 +2,8 @@ const db = require('../models')
 const Teamcontroller = require('./team.controller')
 const Op = db.Sequelize.Op
 const dateController = require('./dates.controller')
+const site_data = require('../controllers/site_data.controller')
+const projectController = require('../controllers/project.controller')
 
 module.exports = {
   captureData,
@@ -10,32 +12,50 @@ module.exports = {
 async function displayData(req, res) {
   // let data = await db.scheduledImp.findAll({
   //   where: {
-  //     cft_id: req.params.teamId
+  //     cft_id: req.params.teamID
   //   }
   // })
   let today = dateController.today()
-  let startDate = dateController.moment(today).endOf('day').subtract(8, 'days').format()
+  let startDate = dateController.moment(today).endOf('day').subtract(31, 'days').format()
   let endDate = dateController.moment(today).endOf('day').subtract(1, 'days').format()
-  res.json(await getProjectIds(req.params.teamID, startDate, endDate))
+  let data = await getProjectIds(req.params.teamID, startDate, endDate)
+  let projectCount = data.projectData.length
+  let number_of_locations = data.number_of_locations
+  let duration1 = calcDuration(data.projectData, 1)
+  let duration2 = calcDuration(data.projectData, 2)
+  let captureDate = dateController.today()
+  res.json({ projectCount, number_of_locations, duration1, duration2, captureDate, data })
 }
-async function captureData() {
+async function captureData(req, res) {
+  if (req) {
+    res.send(200)
+  }
   let today = dateController.today()
-  let startDate = dateController.moment(today).endOf('day').subtract(8, 'days')
-  let endDate = dateController.moment(today).endOf('day').subtract(1, 'days')
-  let teams = Teamcontroller.noAssociatedTeam()
+  let startDate = dateController.moment(today).endOf('day').subtract(31, 'days').format()
+  let endDate = dateController.moment(today).endOf('day').subtract(1, 'days').format()
+  let teams = await Teamcontroller.noAssociatedTeam()
   for (let i = 0; i < teams.length; i++) {
-    let team = teams[i]
-    let projectIds = await getProjectIds(team.id, startDate, endDate)
-    //    Count project done in last 7 days 
-    let projectCount = await projectCount(team.id)
-    //    Count locations in those projects
-    //    Average duration between imp start and stg links del
-    //    Average duration between imp start and website(s) live
+    try {
+      let team = teams[i]
+      let cft_id = team.id
+      let data = await getProjectIds(team.id, startDate, endDate)
+      let projectCount = data.projectData.length
+      let number_of_locations = data.number_of_locations
+      let duration1 = calcDuration(data.projectData, 1)
+      let duration2 = calcDuration(data.projectData, 2)
+      let captureDate = dateController.today()
+      await db.scheduledImp.create({ cft_id, projectCount, number_of_locations, duration1, duration2, captureDate })
+    } catch (e) {
+      console.error(e)
+    }
   }
 }
 async function getProjectIds(teamID, startDate, endDate) {
   let projectArray = []
   let projects = await db.lp_project.findAll({
+    where: {
+      cft_id: teamID
+    },
     include: [
       {
         model: db.treeitem,
@@ -44,15 +64,16 @@ async function getProjectIds(teamID, startDate, endDate) {
           name: {
             [Op.like]: 'Website(s) Live%'
           },
-          date_done: {
-            [Op.between]: [startDate, endDate]
-          }
+          [Op.or]: [{ date_done: { [Op.between]: [startDate, endDate] } }, { date_done: null }]
         }
       }
     ]
   })
   for (let i = 0; i < projects.length; i++) {
     let project = projects[i]
+    if (project.id == 47443008) {
+      debugger
+    }
     if (project.treeitems.length === 1) {
       projectArray.push(project.id)
     } else {
@@ -78,7 +99,8 @@ async function getProjectIds(teamID, startDate, endDate) {
   }
   // verify that other milstones are present
   let projectData = await verifyProjects(projectArray)
-  return projectData
+  let number_of_locations = await projectController.locationCount(projectArray)
+  return { projectData, number_of_locations }
 }
 async function verifyProjects(projectArray) {
   let projectData = []
@@ -95,9 +117,6 @@ async function verifyProjects(projectArray) {
           name: {
             [Op.or]: [{ [Op.like]: 'Implementation Start' }, { [Op.like]: 'Staging Links Delivered%' }, { [Op.like]: 'Website(s) Live%' }]
           },
-          date_done: {
-            [Op.not]: null
-          },
           child_type: 'milestone'
         }
       }
@@ -109,7 +128,8 @@ async function verifyProjects(projectArray) {
       projectId: project.id,
       impStart: null,
       stgLink: null,
-      websiteLive: null
+      websiteLive: null,
+      complete: true
     }
     project.treeitems.forEach(milestone => {
       if (milestone.name.includes('Implementation Start')) {
@@ -131,6 +151,9 @@ async function verifyProjects(projectArray) {
         }
       }
       if (milestone.name.includes('Website(s) Live')) {
+        if (milestone.date_done == null) {
+          data.complete = false
+        }
         if (data.websiteLive == null) {
           data.websiteLive = milestone.date_done
         } else {
@@ -140,12 +163,30 @@ async function verifyProjects(projectArray) {
         }
       }
     })
-    if (data.stgLink == null || data.impStart == null || data.websiteLive == null) {
+    if (data.impStart == null) {
       passing = false
     }
     if (passing) {
       projectData.push(data)
     }
+    if (!data.complete) {
+      data.websiteLive = null
+    }
   })
   return projectData
+}
+
+function calcDuration(projectData, durationNumber) {
+  let durationNumbers = []
+  projectData.forEach(project => {
+    if (project.complete) {
+      if (durationNumber == 1) {
+        durationNumbers.push(dateController.bussinessDaysBetween(project.websiteLive, project.impStart))
+      } else if (durationNumber == 2) {
+        durationNumbers.push(dateController.bussinessDaysBetween(project.stgLink, project.impStart))
+      }
+    }
+  })
+  let duration = site_data.average(durationNumbers)
+  return duration
 }

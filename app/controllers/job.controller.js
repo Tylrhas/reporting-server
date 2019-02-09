@@ -152,6 +152,12 @@ function _addCustomFieldValues(customFields, projectUpdate) {
 }
 
 async function _updateProject(project) {
+  // 
+  await db.treeitem.destroy({
+    where: {
+      project_id: project.id
+  }
+})
   if (project.type = 'Project') {
     // update the project in the database
     var projectUpdate = {
@@ -168,6 +174,7 @@ async function _updateProject(project) {
       package: null,
       project_type: null,
       ps_phase: null,
+      name: project.name
     }
     // check if the archived folder is a parent of this project 
     if (project.parent_ids.includes(parseInt(process.env.LPArchiveFolder))) {
@@ -194,7 +201,7 @@ async function _updateProject(project) {
     })
   }
   try {
-    await _checkForChildren(project) 
+    await _checkForChildren(project)
   } catch (error) {
     Honeybadger.notify(error, {
       context: {

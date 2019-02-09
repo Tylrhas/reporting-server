@@ -23,7 +23,7 @@ module.exports = function (sequelize, Sequelize) {
     projectCount: {
       type: Sequelize.REAL
     },
-    locationCount: {
+    number_of_locations: {
       type: Sequelize.REAL
     },
     duration1: {

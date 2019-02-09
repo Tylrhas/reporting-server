@@ -26,7 +26,8 @@ module.exports = function (app, passport) {
 
   app.put('/api/goals', auth.isAdmin, apiController.updateGoal)
  
-  app.get('/api/scheduledimp/:teamID', scheduledimpController.displayData )
+  app.get('/api/scheduledimp/:teamID', scheduledimpController.displayData)
+  app.get('/api/jobs/scheduledimp/capture', scheduledimpController.captureData)
 
   // app.get('/api/jobs/updatetasks', auth.basic , apiController.updatelptasksapi)
   // app.get('/api/projects/update', apiController.updateProjects)
