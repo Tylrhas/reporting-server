@@ -53,10 +53,18 @@ async function requestProject(projectKey) {
 async function _updateProjects(projects) {
   try {
     for (let i = 0; i < projects.length; i++) {
+      const today = dates.today()
       const project = projects[i];
       const projectRequest = await requestProject(project.key);
       await _updateProject(projectRequest)
-      console.error('DONE!!!!!!!!!')
+      await db.treeitem.destroy({
+        where: {
+          project_id: projectRequest.id,
+          updatedAt: {
+            [Op.lte]: today
+          }
+      }
+    })
     }
   } catch (error) {
     Honeybadger.notify(error, {
