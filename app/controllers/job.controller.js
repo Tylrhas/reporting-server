@@ -10,134 +10,128 @@ module.exports = {
   updateActiveProjects,
   _updateProject
 }
+
+async function updateProjects(req, res, jobName, url) {
+    // get the job from the database and set its status to running 
+    if (req) {
+      res.sendStatus(200)
+    }
+    try {
+      var job = await db.job.findOne({
+        where: {
+          jobname: jobName
+        }
+      })
+      await job.update({ status: 'running' })
+      const projects = await getProjects(url);
+      await _updateProjects(projects)
+    } catch (error) {
+      Honeybadger.notify(error)
+    } finally {
+      await job.update({ lastrun: dates.now(), status: 'active' })
+    }
+}
+
+async function getProjects(url) {
+  const response = await throttledRequest.promise({ url, method: 'GET', headers: { "Authorization": LPauth } });
+  return response.rows;
+}
+
 async function updateArchiveProjects(req, res) {
-  // get the job from the database and set its status to running 
-  if (req) {
-    res.sendStatus(200)
-  }
-  try {
-    let job = await db.job.findOne({
-      where: {
-        jobname: 'archived_projects'
-      }
-    })
-    await job.update({status: 'running'})
-    let response = await throttledRequest.promise({ url: process.env.LP_ARCHIVE_PROJECTS, method: 'GET', headers: { "Authorization": LPauth } })
-    var projects = response.rows
-    await _updateProjects(projects)
-    await job.update({lastrun: dates.now(), status: 'active'}) 
-  } catch (error) {
-    Honeybadger.notify(error)
-  }
+  await updateProjects(req, res, 'archived_projects', process.env.LP_ARCHIVE_PROJECTS);
 }
 
 async function updateActiveProjects(req, res) {
-  // get the job from the database and set its status to running 
-  if (req) {
-    res.sendStatus(200)
-  }
-  let response = await throttledRequest.promise({ url: process.env.LP_ACTIVE_PROJECTS, method: 'GET', headers: { "Authorization": LPauth } })
-  var projects = response.rows
-  try {
-    let job = await db.job.findOne({
-      where: {
-        jobname: 'external_update'
-      }
-    })
-    await job.update({status: 'running'})
-    await _updateProjects(projects)
-    job.update({lastrun: dates.now(), status: 'active'})
-  } catch (error) {
-    Honeybadger.notify(error)
-  }
+  await updateProjects(req, res, 'external_update', process.env.LP_ACTIVE_PROJECTS);
 }
+
+async function requestProject(projectKey) {
+  const projectURL = `https://app.liquidplanner.com/api/v1/workspaces/${process.env.LPWorkspaceId}/treeitems/${projectKey}?depth=-1&leaves=true`
+  return await throttledRequest.promise({ url: projectURL, method: 'GET', headers: { "Authorization": LPauth } })
+}
+
 async function _updateProjects(projects) {
   try {
     for (let i = 0; i < projects.length; i++) {
-      var project = projects[i]
-      let projectURL = `https://app.liquidplanner.com/api/v1/workspaces/158330/treeitems/${project.key}?depth=-1&leaves=true`
-      var project = await throttledRequest.promise({ url: projectURL, method: 'GET', headers: { "Authorization": LPauth } })
-      await _updateProject(project)
+      const project = projects[i];
+      const projectRequest = await requestProject(project.key);
+      await _updateProject(projectRequest)
       console.error('DONE!!!!!!!!!')
     }
-    return
   } catch (error) {
     Honeybadger.notify(error, {
       context: {
-      project: project
+        project: project
       }
     })
   }
 }
+
 async function _checkForChildren(parent) {
   if (parent.hasOwnProperty('children')) {
     for (let i = 0; i < parent.children.length; i++) {
       var child = parent.children[i]
       // update the database
-      var dbChild = await db.treeitem.findOrCreate({
-        where: {
-          id: child.id
-        }
-      })
-      var childUpdate = {
-        parent_id: child.parent_id,
-        project_id: child.project_id,
-        child_type: child.type.toLowerCase(),
-        e_start: dates.pst_to_utc(child.expected_start),
-        e_finish: dates.pst_to_utc(child.expected_finish),
-        // deadline: child.promise_by,
-        started_on: dates.pst_to_utc(child.started_on),
-        is_done: child.is_done,
-        date_done: dates.pst_to_utc(child.done_on),
-        hrs_logged: child.work,
-        hrs_remaning: child.high_effort_remaining,
-        name: child.name
-      }
-      if (child.project_id === 49432637) {
-        debugger
-      }
-      if (child.hasOwnProperty('custom_field_values')) {
-        childUpdate = _addCustomFieldValues(child.custom_field_values, childUpdate)
-        if (childUpdate.hasOwnProperty('task_type') && childUpdate.task_type === 'Location Service Billing') {
-          // create an LSB task for it
-          // parse the id from the name
-          let splitName = childUpdate.name.split(/\s(.+)/, 2)
-          if (!isNaN(splitName[0])) {
-            let lsb = await db.lbs.findOrCreate({
-              where: {
-                id: splitName[0]
-              }
-            })
-            await lsb[0].update({
-              project_id: childUpdate.project_id,
-              task_id: child.id
-            })
-            await dbChild[0].update(childUpdate)
-          } else {
-            Honeybadger.notify(`ID is not a number - ${splitName[0]}`, {
-              context: {
-              dbItem: dbChild[0].dataValues, 
-              update: childUpdate
-              }
-            })
-          }
-        }
-      }
-      await dbChild[0].update(childUpdate)
       try {
-        await _checkForChildren(child) 
-      } catch (error) {
-        Honeybadger.notify(error, {
+        await updateChild(child)
+        await _checkForChildren(child)
+      } catch(e) {
+        console.error(e)
+      }
+    }
+  }
+}
+
+async function updateChild(child) {
+  var dbChild = await db.treeitem.findOrCreate({
+    where: {
+      id: child.id
+    }
+  })
+  var childUpdate = {
+    parent_id: child.parent_id,
+    project_id: child.project_id,
+    child_type: child.type.toLowerCase(),
+    e_start: dates.pst_to_utc(child.expected_start),
+    e_finish: dates.pst_to_utc(child.expected_finish),
+    // deadline: child.promise_by,
+    started_on: dates.pst_to_utc(child.started_on),
+    is_done: child.is_done,
+    date_done: dates.pst_to_utc(child.done_on),
+    hrs_logged: child.work,
+    hrs_remaning: child.high_effort_remaining,
+    name: child.name
+  }
+  if (child.hasOwnProperty('custom_field_values')) {
+    childUpdate = _addCustomFieldValues(child.custom_field_values, childUpdate)
+    if (childUpdate.hasOwnProperty('task_type') && childUpdate.task_type === 'Location Service Billing') {
+      // create an LSB task for it
+      // parse the id from the name
+      let splitName = childUpdate.name.split(/\s(.+)/, 2)
+      if (!isNaN(splitName[0])) {
+        let lsb = await db.lbs.findOrCreate({
+          where: {
+            id: splitName[0]
+          }
+        })
+        await lsb[0].update({
+          project_id: childUpdate.project_id,
+          task_id: child.id
+        })
+        await dbChild[0].update(childUpdate)
+      } else {
+        Honeybadger.notify(`ID is not a number - ${splitName[0]}`, {
           context: {
-            child: child
+            dbItem: dbChild[0].dataValues,
+            update: childUpdate
           }
         })
       }
     }
-  } else {
-    return
   }
+  await dbChild[0].update(childUpdate)
 }
+
 
 function _addCustomFieldValues(customFields, projectUpdate) {
   // fill out the custom values
@@ -152,12 +146,6 @@ function _addCustomFieldValues(customFields, projectUpdate) {
 }
 
 async function _updateProject(project) {
-  // 
-  await db.treeitem.destroy({
-    where: {
-      project_id: project.id
-  }
-})
   if (project.type = 'Project') {
     // update the project in the database
     var projectUpdate = {
@@ -200,8 +188,15 @@ async function _updateProject(project) {
       name: project.name
     })
   }
+
   try {
     await _checkForChildren(project)
+    console.log('hey')
+    // await db.treeitem.destroy({
+    //   where: {
+    //     project_id: project.id
+    //   }
+    // })
   } catch (error) {
     Honeybadger.notify(error, {
       context: {
@@ -209,7 +204,6 @@ async function _updateProject(project) {
       }
     })
   }
-  return
   // after everything is complete update the job to have a complete status
 }
 
@@ -224,12 +218,12 @@ async function _getCFTsArray() {
 
   return cftsArray
 }
-async function __getCFTId (project) {
+async function __getCFTId(project) {
   let teamID = 0
   var cfts = await _getCFTsArray()
   for (let i = 0; i < cfts.length; i++) {
     let cft_id = cfts[i]
-    if(project.parent_ids.indexOf(cft_id) !== -1) {
+    if (project.parent_ids.indexOf(cft_id) !== -1) {
       teamID = cft_id
     }
   }
@@ -239,7 +233,7 @@ async function __getCFTId (project) {
         id: project.id
       }
     })
-    if ( teamID === 0 && db_project != null && db_project.cft_id !== 0) {
+    if (teamID === 0 && db_project != null && db_project.cft_id !== 0) {
       teamID = db_project.cft_id
     }
   }
