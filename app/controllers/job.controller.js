@@ -8,9 +8,17 @@ const Honeybadger = require('honeybadger').configure({
 module.exports = {
   updateArchiveProjects,
   updateActiveProjects,
+  rebuildTreeitemHierarchy,
   _updateProject
 }
-
+async function rebuildTreeitemHierarchy (req,res) {
+  res.send(200)
+  try {
+    await db.treeitem.rebuildHierarchy()
+  } catch (e) {
+    console.error(e)
+  }
+}
 async function updateProjects(req, res, jobName, url) {
     // get the job from the database and set its status to running 
     if (req) {
@@ -199,7 +207,7 @@ async function _updateProject(project) {
 
   try {
     await _checkForChildren(project)
-    console.log('hey')
+
     // await db.treeitem.destroy({
     //   where: {
     //     project_id: project.id
