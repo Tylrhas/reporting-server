@@ -17,6 +17,8 @@ async function rebuildTreeitemHierarchy (req,res) {
     await db.treeitem.rebuildHierarchy()
   } catch (e) {
     console.error(e)
+  } finally {
+    console.log('Rebuild Completed')
   }
 }
 async function updateProjects(req, res, jobName, url) {
@@ -61,23 +63,14 @@ async function requestProject(projectKey) {
 async function _updateProjects(projects) {
   try {
     for (let i = 0; i < projects.length; i++) {
-      const today = dates.today()
       const project = projects[i];
       const projectRequest = await requestProject(project.key);
       await _updateProject(projectRequest)
-      await db.treeitem.destroy({
-        where: {
-          project_id: projectRequest.id,
-          updatedAt: {
-            [Op.lte]: today
-          }
-      }
-    })
     }
   } catch (error) {
     Honeybadger.notify(error, {
       context: {
-        project: project
+        project: projectRequest
       }
     })
   }
@@ -207,12 +200,15 @@ async function _updateProject(project) {
 
   try {
     await _checkForChildren(project)
-
-    // await db.treeitem.destroy({
-    //   where: {
-    //     project_id: project.id
-    //   }
-    // })
+    const today = dates.today()
+    await db.treeitem.destroy({
+      where: {
+        project_id: project.id,
+        updatedAt: {
+          [Op.lte]: today
+        }
+    }
+  })
   } catch (error) {
     Honeybadger.notify(error, {
       context: {
