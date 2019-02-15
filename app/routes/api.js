@@ -28,7 +28,7 @@ module.exports = function (app, passport) {
  
   app.get('/api/scheduledimp/:teamID', scheduledimpController.displayData)
   app.get('/api/jobs/scheduledimp/capture', scheduledimpController.captureData)
-  app.get('/api/jobs/rebuildTreeitem', jobController.rebuildTreeitemHierarchy)
+  // app.get('/api/jobs/rebuildTreeitem', jobController.rebuildTreeitemHierarchy)
 
   // app.get('/api/jobs/updatetasks', auth.basic , apiController.updatelptasksapi)
   // app.get('/api/projects/update', apiController.updateProjects)
