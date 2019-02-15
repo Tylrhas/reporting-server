@@ -79,7 +79,7 @@ async function update(req, res) {
         }
 
         //  if the actual go live is not null then dont allow it to be updated
-        if (lsb[0].actual_go_live == null) {
+        if ( lsb[0].actual_go_live == null || dates.moment(lsb[0].actual_go_live).format('MM-DD-YYYY') == dates.moment(update.actual_go_live).format('MM-DD-YYYY')) {
           try {
             await __findTreeItem(update)
             await lsb[0].update(update)
@@ -403,6 +403,9 @@ async function __findTreeItem(update) {
 }
 function __getProjectStatus(locations, i) {
   let currentProjectId = locations[i].master_project_id
+  if (currentProjectId == 2861404) {
+    debugger
+  }
   var stages = []
   var stage = null
   var data = {
@@ -415,7 +418,16 @@ function __getProjectStatus(locations, i) {
     'Project Lost date': dates.utc_to_pst_no_time(locations[i].project_lost_date)
   }
   // push the first project into it
-  while (i < locations.length && locations[i].master_project_id === currentProjectId) {
+  while (i < locations.length && locations[i].master_project_id == currentProjectId) {
+    if (data['Current Estimated Go-Live Date'] < dates.utc_to_pst_no_time(locations[i].estimated_go_live)) {
+      data['Current Estimated Go-Live Date'] = dates.utc_to_pst_no_time(locations[i].estimated_go_live)
+    }
+    if (data['Actual Go-Live Date'] < dates.utc_to_pst_no_time(locations[i].actual_go_live)) {
+      data['Actual Go-Live Date'] = dates.utc_to_pst_no_time(locations[i].actual_go_live)
+    }
+    if (data['Website Launch Date'] < dates.utc_to_pst_no_time(locations[i].website_launch_date)) {
+      data['Website Launch Date'] = dates.utc_to_pst_no_time(locations[i].website_launch_date)
+    }
     stages.push(locations[i].stage)
     i++
   }
@@ -438,6 +450,7 @@ function __getProjectStatus(locations, i) {
   data.Stage = stage
   if (data.Stage !== 'Complete') {
     data['Actual Go-Live Date'] = null
+    data['Website Launch Date'] = null
   }
 
   if (data.Stage !== 'Lost') {
