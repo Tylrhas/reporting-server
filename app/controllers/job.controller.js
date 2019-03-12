@@ -8,75 +8,95 @@ const Honeybadger = require('honeybadger').configure({
 module.exports = {
   updateArchiveProjects,
   updateActiveProjects,
-  rebuildTreeitemHierarchy,
-  _updateProject
+  _updateProject,
+  rebuildTreeitems
 }
-async function rebuildTreeitemHierarchy (req,res) {
+async function rebuildTreeitems (req, res) {
   res.send(200)
   try {
-    await db.treeitem.rebuildHierarchy()
+    // disassociate all of the lbs from treeitems 
+    await db.lbs.update({ task_id: null }, { where: { task_id: { [Op.not]: null } } })
+    let projectIds = []
+    let projectUpdates = []
+    let projects = await db.lp_project.findAll()
+    projects.forEach(project => {
+      projectIds.push(project.id)
+      projectUpdates.push({ key: project.id })
+    })
+    while (projectIds.length > 0) {
+      let idGroupd = projectIds.slice(0, 5)
+      projectIds = projectIds.slice(5, projectIds.length)
+      await db.treeitem.destroy({ where: { project_id: idGroupd } })
+    }
+    // clean up any garbage
+    await db.treeitem.destroy({ where: { id: { [Op.not]: null } } })
+    // start the rebuild process
+    await _updateProjects(projectUpdates)
+    console.log('Rebuild Completed')
   } catch (e) {
     console.error(e)
   } finally {
-    console.log('Rebuild Completed')
+    console.log('Job done')
   }
 }
-async function updateProjects(req, res, jobName, url) {
-    // get the job from the database and set its status to running 
-    if (req) {
-      res.sendStatus(200)
-    }
-    try {
-      var job = await db.job.findOne({
-        where: {
-          jobname: jobName
-        }
-      })
-      await job.update({ status: 'running' })
-      const projects = await getProjects(url);
-      await _updateProjects(projects)
-    } catch (error) {
-      Honeybadger.notify(error)
-    } finally {
-      await job.update({ lastrun: dates.now(), status: 'active' })
-    }
+async function updateProjects (req, res, jobName, url) {
+  // get the job from the database and set its status to running 
+  if (req) {
+    res.sendStatus(200)
+  }
+  try {
+    var job = await db.job.findOne({
+      where: {
+        jobname: jobName
+      }
+    })
+    await job.update({ status: 'running' })
+    const projects = await getProjects(url);
+    await _updateProjects(projects)
+  } catch (error) {
+    Honeybadger.notify(error)
+  } finally {
+    await job.update({ lastrun: dates.now(), status: 'active' })
+  }
 }
 
-async function getProjects(url) {
+async function getProjects (url) {
   const response = await throttledRequest.promise({ url, method: 'GET', headers: { "Authorization": LPauth } });
   return response.rows;
 }
 
-async function updateArchiveProjects(req, res) {
+async function updateArchiveProjects (req, res) {
   await updateProjects(req, res, 'archived_projects', process.env.LP_ARCHIVE_PROJECTS);
 }
 
-async function updateActiveProjects(req, res) {
+async function updateActiveProjects (req, res) {
   await updateProjects(req, res, 'external_update', process.env.LP_ACTIVE_PROJECTS);
 }
 
-async function requestProject(projectKey) {
+async function requestProject (projectKey) {
   const projectURL = `https://app.liquidplanner.com/api/v1/workspaces/${process.env.LPWorkspaceId}/treeitems/${projectKey}?depth=-1&leaves=true`
   return await throttledRequest.promise({ url: projectURL, method: 'GET', headers: { "Authorization": LPauth } })
 }
 
-async function _updateProjects(projects) {
-  try {
-    for (let i = 0; i < projects.length; i++) {
+async function _updateProjects (projects) {
+  for (let i = 0; i < projects.length; i++) {
+    try {
       const project = projects[i];
       const projectRequest = await requestProject(project.key);
-      await _updateProject(projectRequest)
-    }
-  } catch (error) {
-    Honeybadger.notify(error, {
-      context: {
-        project: projectRequest
+      if (!projectRequest.hasOwnProperty('error')) {
+        await _updateProject(projectRequest)
       }
-    })
+    } catch (error) {
+      Honeybadger.notify(error, {
+        context: {
+          project: projectRequest
+        }
+      })
+    }
   }
 }
 
-async function _checkForChildren(parent) {
+async function _checkForChildren (parent) {
   if (parent.hasOwnProperty('children')) {
     for (let i = 0; i < parent.children.length; i++) {
       var child = parent.children[i]
@@ -84,14 +104,14 @@ async function _checkForChildren(parent) {
       try {
         await updateChild(child)
         await _checkForChildren(child)
-      } catch(e) {
+      } catch (e) {
         console.error(e)
       }
     }
   }
 }
 
-async function updateChild(child) {
+async function updateChild (child) {
   var dbChild = await db.treeitem.findOrCreate({
     where: {
       id: child.id
@@ -141,8 +161,7 @@ async function updateChild(child) {
   await dbChild[0].update(childUpdate)
 }
 
-
-function _addCustomFieldValues(customFields, projectUpdate) {
+function _addCustomFieldValues (customFields, projectUpdate) {
   // fill out the custom values
   for (let i = 0; i < Object.keys(customFields).length; i++) {
     let key = Object.keys(customFields)[i]
@@ -154,7 +173,7 @@ function _addCustomFieldValues(customFields, projectUpdate) {
   return projectUpdate
 }
 
-async function _updateProject(project) {
+async function _updateProject (project) {
   if (project.type = 'Project') {
     // update the project in the database
     var projectUpdate = {
@@ -207,8 +226,8 @@ async function _updateProject(project) {
         updatedAt: {
           [Op.lte]: today
         }
-    }
-  })
+      }
+    })
   } catch (error) {
     Honeybadger.notify(error, {
       context: {
@@ -219,7 +238,7 @@ async function _updateProject(project) {
   // after everything is complete update the job to have a complete status
 }
 
-async function _getCFTsArray() {
+async function _getCFTsArray () {
   var cfts = await db.cft.findAll({
     attributes: ['id']
   })
@@ -230,7 +249,7 @@ async function _getCFTsArray() {
 
   return cftsArray
 }
-async function __getCFTId(project) {
+async function __getCFTId (project) {
   let teamID = 0
   var cfts = await _getCFTsArray()
   for (let i = 0; i < cfts.length; i++) {

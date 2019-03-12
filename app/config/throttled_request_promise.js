@@ -5,7 +5,7 @@ const request = require("request"),
 
 //This will throttle the requests so no more than 12 are made every 15 seconds 
 throttledRequest.configure({
-  requests: 10,
+  requests: 5,
   milliseconds: 15000
 })
 

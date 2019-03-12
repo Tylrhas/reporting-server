@@ -168,7 +168,9 @@ async function projects(req, res) {
       let id  = location.name.split(/\s(.+)/, 2)[0]
       try {
         id = parseInt(id)
-        updatedLocationIds.push(id)
+        if (!isNaN(id)) {
+          updatedLocationIds.push(id)
+        }
       } catch (e) {
         console.error(e)
       }
