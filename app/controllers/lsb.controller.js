@@ -55,7 +55,6 @@ async function update(req, res) {
         estimated_go_live: dates.pst_to_utc(location["date_custom_field:147376"]),
         actual_go_live: dates.pst_to_utc(location["date_custom_field:151495"]),
         website_launch_date: dates.pst_to_utc(location["date_custom_field:151496"]),
-        start_date: dates.pst_to_utc(location["date_custom_field:151496"]),
         project_lost_date: null,
       }
       if (isNaN(LBSId)) {
@@ -114,7 +113,7 @@ async function locations(req, res) {
   try {
     var startDate = req.query.startDate
     var locations = await db.lbs.findAll({
-      attributes: [['id', 'Internal ID'], ['estimated_go_live', 'Current Estimated Go-Live Date'], ['actual_go_live', 'Actual Go-Live Date'], ['original_estimated_go_live', 'Original Estimated Go-live'], ['website_launch_date', 'Website Launch Date'], ['start_date', 'Start Date'], ['project_lost_date', 'Project Lost date'], ['stage', 'Stage']],
+      attributes: [['id', 'Internal ID'], ['estimated_go_live', 'Current Estimated Go-Live Date'], ['actual_go_live', 'Actual Go-Live Date'], ['original_estimated_go_live', 'Original Estimated Go-live'], ['website_launch_date', 'Website Launch Date'], ['project_lost_date', 'Project Lost date'], ['stage', 'Stage']],
       where: {
         updatedAt: {
           [db.Sequelize.Op.gte]: startDate
@@ -142,7 +141,6 @@ async function locations(req, res) {
           'Actual Go-Live Date': dates.utc_to_pst_no_time(locations[i].dataValues['Actual Go-Live Date']),
           'Original Estimated Go-live': dates.utc_to_pst_no_time(locations[i].dataValues['Original Estimated Go-live']),
           'Website Launch Date': dates.utc_to_pst_no_time(locations[i].dataValues['Website Launch Date']),
-          'Start Date': dates.utc_to_pst_no_time(locations[i].dataValues['Start Date']),
           'Project Lost date': dates.utc_to_pst_no_time(locations[i].dataValues['Project Lost date']),
           'Stage': locations[i].dataValues['Stage']
         })
@@ -189,13 +187,13 @@ async function projects(req, res) {
       }
     })
     let lbsLocations = await db.lbs.findAll({
-      attributes: ['master_project_id', 'estimated_go_live', 'actual_go_live', 'original_estimated_go_live', 'start_date', 'website_launch_date', 'project_lost_date', 'stage'],
+      attributes: ['master_project_id', 'estimated_go_live', 'actual_go_live', 'original_estimated_go_live', 'website_launch_date', 'project_lost_date', 'stage'],
       where: {
         master_project_id: {
           [Op.in]: master_project_ids
         }
       },
-      group: ['master_project_id', 'estimated_go_live', 'actual_go_live', 'original_estimated_go_live', 'start_date', 'website_launch_date', 'project_lost_date', 'stage'],
+      group: ['master_project_id', 'estimated_go_live', 'actual_go_live', 'original_estimated_go_live', 'website_launch_date', 'project_lost_date', 'stage'],
       order: ['master_project_id']
     })
     var csv = []
@@ -416,7 +414,6 @@ function __getProjectStatus(locations, i) {
     'Actual Go-Live Date': dates.utc_to_pst_no_time(locations[i].actual_go_live),
     'Original Estimated Go-live': dates.utc_to_pst_no_time(locations[i].original_estimated_go_live),
     'Website Launch Date': dates.utc_to_pst_no_time(locations[i].website_launch_date),
-    'Start Date': dates.utc_to_pst_no_time(locations[i].start_date),
     'Project Lost date': dates.utc_to_pst_no_time(locations[i].project_lost_date)
   }
   // push the first project into it
