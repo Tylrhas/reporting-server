@@ -71,9 +71,6 @@ async function getProjectIds(teamID, startDate, endDate) {
   })
   for (let i = 0; i < projects.length; i++) {
     let project = projects[i]
-    if (project.id == 47443008) {
-      debugger
-    }
     if (project.treeitems.length === 1) {
       projectArray.push(project.id)
     } else {
@@ -131,6 +128,7 @@ async function verifyProjects(projectArray) {
       websiteLive: null,
       complete: true
     }
+    
     project.treeitems.forEach(milestone => {
       if (milestone.name.includes('Implementation Start')) {
         if (data.impStart == null) {
@@ -187,6 +185,9 @@ function calcDuration(projectData, durationNumber) {
       }
     }
   })
-  let duration = site_data.average(durationNumbers)
+  let duration = 0
+  durationNumbers.forEach(number => {
+    duration += number
+  })
   return duration
 }
