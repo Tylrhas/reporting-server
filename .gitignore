@@ -3,3 +3,4 @@ node_modules
 .DS_Store
 app/config/client_secret.json
 .env.dev
+.backups_db

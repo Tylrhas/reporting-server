@@ -1,0 +1,47 @@
+<% include ../partials/header.ejs %>
+<% include ../partials/nav.ejs %>
+
+<main class="app-content">
+
+  <div class="app-title">
+    <div class="container">
+      <h1>CFT Delivery Rates</h1>
+    </div>
+    <ul class="app-breadcrumb breadcrumb">
+      <li class="breadcrumb-item">
+        <i class="fa fa-home fa-lg"></i>
+      </li>
+      <li class="breadcrumb-item">PS</li>
+      <li class="breadcrumb-item active">
+        <a href="#">Team Delivery Rates</a>
+      </li>
+    </ul>
+  </div>
+
+  <div class="row">
+    <div class="container">
+      <div class="tile">
+        <h2 class="tile-header center"><%= locDelivery.title %></h2>
+        <canvas id="<%= locDelivery.chartId %>" width="800" height="400"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="container">
+      <div class="tile">
+        <h2 class="tile-header center"><%= projDelivery.title %></h2>
+        <canvas id="<%= projDelivery.chartId %>" width="800" height="400"></canvas>
+      </div>
+    </div>
+  </div>
+
+</main>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.0/Chart.bundle.js"></script>
+
+<script>
+const locChart = new Chart(document.getElementById("<%= locDelivery.chartId %>"), <%- JSON.stringify(locDelivery.chartData) %>)
+const projChart = new Chart(document.getElementById("<%= projDelivery.chartId %>").getContext('2d'), <%- JSON.stringify(projDelivery.chartData) %>)
+
+</script>
+<% include ../partials/footer.ejs %>

@@ -24,8 +24,111 @@ async function displayData(req, res) {
   let duration1 = calcDuration(data.projectData, 1)
   let duration2 = calcDuration(data.projectData, 2)
   let captureDate = dateController.today()
-  res.json({ projectCount, number_of_locations, duration1, duration2, captureDate, data })
+  // res.json({ projectCount, number_of_locations, duration1, duration2, captureDate, data })
+  res.render('pages/delivery-rate', {
+    user: req.user,
+    slug: 'delivery-rate',
+    site_data: site_data.all(),
+    locDelivery: {
+      title: 'Location Delivery Rate',
+      chartId: 'loc-delivery',
+      chartData: {
+        type: 'line',
+        data: {
+          labels: [
+            '2019-03-01',
+            '2019-03-08',
+            '2019-03-15',
+            '2019-03-22',
+            '2019-03-29',
+            '2019-04-05'
+          ],
+          datasets: [
+            {
+              label: 'Start ➔ Links',
+              data: [55,120,111,75,85,90],
+              backgroundColor: ['RGBA(213,108,155,0.3)'],
+              fill: false,
+              borderColor: ['RGBA(213,108,155,1.00)'],
+              borderWidth: 4,
+              lineTension: 0.1
+            },
+            {
+              label: 'Start ➔ Go-Live',
+              data: [75,65,130,120,45,40],
+              backgroundColor: ['RGBA(133,0,81,0.3)'],
+              fill: false,
+              borderColor: ['RGBA(133,0,81,1.00)'],
+              borderWidth: 4,
+              lineTension: 0.1
+            },
+            {
+              label: 'Location Count',
+              data: [12,34,54,32,15,17],
+              backgroundColor: ['RGBA(255,183,214,0.3)'],
+              fill: false,
+              borderColor: ['RGBA(255,183,214,1.00)'],
+              borderWidth: 4,
+              lineTension: 0.1
+            }
+          ]
+        }
+      }
+    },
+    projDelivery: {
+      title: 'Project Delivery Rate',
+      chartId: 'proj-delivery',
+      chartData: {
+        type: 'line',
+        data: {
+          labels: [
+            '2019-03-01',
+            '2019-03-08',
+            '2019-03-15',
+            '2019-03-22',
+            '2019-03-29',
+            '2019-04-05'
+          ],
+          datasets: [
+            {
+              label: 'Start ➔ Links',
+              data: [55,120,111,75,85,90],
+              backgroundColor: ['RGBA(213,108,155,0.2)'],
+              fill: true,
+              borderColor: ['RGBA(213,108,155,0.3)'],
+              borderCapStyle: 'round',
+              borderWidth: 0,
+              lineTension: 0.4,
+              showLine: true
+            },
+            {
+              label: 'Start ➔ Go-Live',
+              data: [75,65,130,120,45,40],
+              backgroundColor: ['RGBA(133,0,81,0.2)'],
+              fill: true,
+              borderColor: ['RGBA(133,0,81,0.3'],
+              borderWidth: 0,
+              lineTension: 0.4,
+              showLine: true
+            },
+            {
+              label: 'Project Count',
+              data: [12,34,54,32,15,17],
+              backgroundColor: ['RGBA(255,183,214,0.4)'],
+              fill: true,
+              borderColor: ['RGBA(255,183,214,0.5)'],
+              borderWidth: 0,
+              lineTension: 0.4,
+              showLine: true
+            }
+          ]
+        },
+        options: {}
+      }
+    }
+  })
 }
+
 async function captureData(req, res) {
   if (req) {
     res.send(200)
