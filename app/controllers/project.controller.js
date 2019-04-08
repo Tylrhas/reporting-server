@@ -42,7 +42,7 @@ async function locationCount(projectIds) {
     ]
   })
   projects.forEach(project => {
-    if (project.number_of_locations == null) {
+    if (project.dataValues.number_of_locations == null) {
       locationCount = locationCount + project.lbs.length
     } else {
       locationCount = locationCount + project.number_of_locations
