@@ -14,12 +14,13 @@ async function displayData(req, res) {
     title: 'Project Delivery Rate',
     chartId: 'proj-delivery',
     chartData: {
-      type: 'line',
+      type: 'bar',
       data: {
         labels: [],
         datasets: [
           {
             label: 'Start ➔ Links',
+            type: 'line',
             data: [],
             backgroundColor: ['RGBA(213,108,155,0.2)'],
             fill: true,
@@ -31,6 +32,7 @@ async function displayData(req, res) {
           },
           {
             label: 'Start ➔ Go-Live',
+            type: 'line',
             data: [],
             backgroundColor: ['RGBA(133,0,81,0.2)'],
             fill: true,
@@ -42,28 +44,72 @@ async function displayData(req, res) {
           {
             label: 'Project Count',
             data: [],
-            backgroundColor: ['RGBA(255,183,214,0.4)'],
-            fill: true,
-            borderColor: ['RGBA(255,183,214,0.5)'],
-            borderWidth: 0,
-            lineTension: 0.4,
-            showLine: true
+            backgroundColor: 'RGBA(194,230,247,0.5)',
+            borderWidth: 0
           }
         ]
       },
-      options: {}
+      options: {
+        scales: {
+          yAxes: [
+            {
+              id: 'y-primary',
+              position: 'left',
+              display: true,
+              scaleLabel: {
+                display: true,
+                labelString: '[Avg] Projects / Day'
+              },
+              gridLines: {
+                display: true
+              },
+              ticks: {
+                suggestedMin: 0,
+                suggestedMax: 50
+              }
+            },
+            {
+              id: 'y-secondary',
+              position: 'right',
+              display: true,
+              scaleLabel: {
+                display: true,
+                labelString: '# Projects'
+              },
+              gridLines: {
+                display: false
+              },
+              ticks: {
+                suggestedMin: 0,
+                suggestedMax: 200
+              }
+            }
+          ],
+          xAxes: [{
+            scaleLabel: {
+              display: true,
+              labelString: '[Biz] Week Ending'
+            },
+            gridLines: {
+                display: false
+            }
+          }]
+        }
+      }
     }
   }
   let locDelivery = {
     title: 'Location Delivery Rate',
     chartId: 'loc-delivery',
     chartData: {
-      type: 'line',
+      type: 'bar',
       data: {
         labels: [],
         datasets: [
           {
             label: 'Start ➔ Links',
+            type: 'line',
+            yAxisID: 'y-primary',
             data: [],
             backgroundColor: ['RGBA(213,108,155,0.3)'],
             fill: false,
@@ -73,6 +119,8 @@ async function displayData(req, res) {
           },
           {
             label: 'Start ➔ Go-Live',
+            type: 'line',
+            yAxisID: 'y-primary',
             data: [],
             backgroundColor: ['RGBA(133,0,81,0.3)'],
             fill: false,
@@ -82,18 +130,63 @@ async function displayData(req, res) {
           },
           {
             label: 'Location Count',
+            yAxisID: 'y-secondary',
             data: [],
-            backgroundColor: ['RGBA(255,183,214,0.3)'],
-            fill: false,
-            borderColor: ['RGBA(255,183,214,1.00)'],
-            borderWidth: 4,
-            lineTension: 0.1
+            backgroundColor: 'RGBA(194,230,247,0.5)',
+            borderWidth: 0
           }
         ]
+      },
+      options: {
+        scales: {
+          yAxes: [
+            {
+              id: 'y-primary',
+              position: 'left',
+              display: true,
+              scaleLabel: {
+                display: true,
+                labelString: '[Avg] Locations / Day'
+              },
+              gridLines: {
+                display: true
+              },
+              ticks: {
+                suggestedMin: 0,
+                suggestedMax: 50
+              }
+            },
+            {
+              id: 'y-secondary',
+              position: 'right',
+              display: true,
+              scaleLabel: {
+                display: true,
+                labelString: '# Locations'
+              },
+              gridLines: {
+                display: false
+              },
+              ticks: {
+                suggestedMin: 0,
+                suggestedMax: 200
+              }
+            }
+          ],
+          xAxes: [{
+            scaleLabel: {
+              display: true,
+              labelString: '[Biz] Week Ending'
+            },
+            gridLines: {
+                display: false
+            }
+          }]
+        }
       }
     }
   }
-  let CFTName = await db.cft.findOne({
+  let cftName = await db.cft.findOne({
     where: {
       id: req.params.teamID
     }
@@ -125,7 +218,6 @@ dataPoints.forEach(dataPoint => {
   projDelivery.chartData.data.datasets[1].data.push(projectDuration2)
   projDelivery.chartData.data.datasets[2].data.push(projectCount)
 })
-  // res.json({ projectCount, number_of_locations, duration1, duration2, captureDate, data })
   res.render('pages/delivery-rate', {
     user: req.user,
     slug: 'delivery-rate',
