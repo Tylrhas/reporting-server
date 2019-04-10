@@ -23,10 +23,10 @@ async function displayData(req, res) {
             type: 'line',
             data: [],
             backgroundColor: ['RGBA(213,108,155,0.2)'],
-            fill: true,
-            borderColor: ['RGBA(213,108,155,0.3)'],
+            fill: false,
+            borderColor: ['RGBA(213,108,155,1.00)'],
             borderCapStyle: 'round',
-            borderWidth: 0,
+            borderWidth: 4,
             lineTension: 0.4,
             showLine: true
           },
@@ -35,14 +35,15 @@ async function displayData(req, res) {
             type: 'line',
             data: [],
             backgroundColor: ['RGBA(133,0,81,0.2)'],
-            fill: true,
-            borderColor: ['RGBA(133,0,81,0.3'],
-            borderWidth: 0,
+            fill: false,
+            borderColor: ['RGBA(133,0,81,1.0)'],
+            borderWidth: 4,
             lineTension: 0.4,
             showLine: true
           },
           {
             label: 'Project Count',
+            yAxisID: 'y-secondary',
             data: [],
             backgroundColor: 'RGBA(194,230,247,0.5)',
             borderWidth: 0
@@ -58,14 +59,14 @@ async function displayData(req, res) {
               display: true,
               scaleLabel: {
                 display: true,
-                labelString: '[Avg] Projects / Day'
+                labelString: 'Projects / Day'
               },
               gridLines: {
                 display: true
               },
               ticks: {
                 suggestedMin: 0,
-                suggestedMax: 50
+                suggestedMax: 1
               }
             },
             {
@@ -81,7 +82,7 @@ async function displayData(req, res) {
               },
               ticks: {
                 suggestedMin: 0,
-                suggestedMax: 200
+                suggestedMax: 50
               }
             }
           ],
@@ -146,14 +147,14 @@ async function displayData(req, res) {
               display: true,
               scaleLabel: {
                 display: true,
-                labelString: '[Avg] Locations / Day'
+                labelString: 'Locations / Day'
               },
               gridLines: {
                 display: true
               },
               ticks: {
                 suggestedMin: 0,
-                suggestedMax: 50
+                suggestedMax: 1
               }
             },
             {
@@ -169,7 +170,7 @@ async function displayData(req, res) {
               },
               ticks: {
                 suggestedMin: 0,
-                suggestedMax: 200
+                suggestedMax: 60
               }
             }
           ],

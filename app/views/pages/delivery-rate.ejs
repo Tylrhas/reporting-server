@@ -6,14 +6,21 @@
   <div class="app-title">
     <div class="container">
       <h1>CFT Delivery Rates</h1>
+      <p><%= cftName %></p>
     </div>
     <ul class="app-breadcrumb breadcrumb">
       <li class="breadcrumb-item">
         <i class="fa fa-home fa-lg"></i>
       </li>
-      <li class="breadcrumb-item">PS</li>
+      <li class="breadcrumb-item">ps</li>
+      <li class="breadcrumb-item">reports</li>
+      <li class="breadcrumb-item">workload</li>
+      <li class="breadcrumb-item">cft</li>
+      <li class="breadcrumb-item">
+        <a href="#"><%= cftName %></a>
+      </li>
       <li class="breadcrumb-item active">
-        <a href="#">Team Delivery Rates</a>
+        <a href="#">delivery-rate</a>
       </li>
     </ul>
   </div>
@@ -37,11 +44,16 @@
   </div>
 
 </main>
+
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.0/Chart.bundle.js"></script>
 
 <script>
-const locChart = new Chart(document.getElementById("<%= locDelivery.chartId %>"), <%- JSON.stringify(locDelivery.chartData) %>)
-const projChart = new Chart(document.getElementById("<%= projDelivery.chartId %>").getContext('2d'), <%- JSON.stringify(projDelivery.chartData) %>)
+
+const locContext = document.getElementById("<%= locDelivery.chartId %>").getContext('2d')
+const projContext = document.getElementById("<%= projDelivery.chartId %>").getContext('2d')
+
+const locChart = new Chart(locContext, <%- JSON.stringify(locDelivery.chartData) %>)
+const projChart = new Chart(projContext, <%- JSON.stringify(projDelivery.chartData) %>)
 
 </script>
 <% include ../partials/footer.ejs %>
