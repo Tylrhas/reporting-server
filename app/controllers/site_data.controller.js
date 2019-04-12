@@ -4,7 +4,8 @@ module.exports = {
   checkVariance,
   archive_years,
   roundNumber,
-  percent
+  percent,
+  average
 } 
 
 function all (month, year) {
@@ -81,3 +82,13 @@ function percent(first, second) {
   return roundNumber(((first/ second)*100),2)
 }
 
+function average(numbers) {
+  var sum = 0;
+  numbers.forEach(number => {
+    sum += number
+  })
+
+  var avg = sum / numbers.length;
+
+  return roundNumber(avg, 2)
+}

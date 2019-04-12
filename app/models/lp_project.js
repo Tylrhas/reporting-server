@@ -90,7 +90,10 @@ module.exports = function (sequelize, Sequelize) {
         },
         design_complete: {
             type: Sequelize.TEXT,
-        }
+        },
+        number_of_locations: {
+          type: Sequelize.INTEGER,
+      }
     })
 
     LpProject.associate = function (models) {

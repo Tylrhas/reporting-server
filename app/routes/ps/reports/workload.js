@@ -1,4 +1,5 @@
 const auth = require('../../../controllers/auth.controller')
+const scheduledImp = require('../../../controllers/scheduledImpTimeline.controller')
 const workloadController = require('../../../controllers/workload.controller')
 // set the sub dirs for the PS MRR Reporting Routes
 var psWorkloadPath = '/ps/reports/workload'
@@ -9,4 +10,5 @@ module.exports = function (app, passport) {
  app.get(`${psWorkloadPath}/cft/:teamID/scheduled`, auth.basic , workloadController.teamScheduledProjects)
  app.get(`${psWorkloadPath}/cft/:teamID/intake`, auth.basic , workloadController.teamIntakeProjects)
  app.get(`${psWorkloadPath}/cft/:teamID/projects`, auth.basic , workloadController.allProjects)
+ app.get(`${psWorkloadPath}/cft/:teamID/delivery-rate`, auth.basic , scheduledImp.displayData)
 }

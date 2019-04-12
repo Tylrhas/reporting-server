@@ -55,7 +55,6 @@ async function update(req, res) {
         estimated_go_live: dates.pst_to_utc(location["date_custom_field:147376"]),
         actual_go_live: dates.pst_to_utc(location["date_custom_field:151495"]),
         website_launch_date: dates.pst_to_utc(location["date_custom_field:151496"]),
-        start_date: dates.pst_to_utc(location["date_custom_field:151496"]),
         project_lost_date: null,
       }
       if (isNaN(LBSId)) {
@@ -79,7 +78,7 @@ async function update(req, res) {
         }
 
         //  if the actual go live is not null then dont allow it to be updated
-        if (lsb[0].actual_go_live == null) {
+        if ( lsb[0].actual_go_live == null || dates.moment(lsb[0].actual_go_live).format('MM-DD-YYYY') == dates.moment(update.actual_go_live).format('MM-DD-YYYY')) {
           try {
             await __findTreeItem(update)
             await lsb[0].update(update)
@@ -114,7 +113,7 @@ async function locations(req, res) {
   try {
     var startDate = req.query.startDate
     var locations = await db.lbs.findAll({
-      attributes: [['id', 'Internal ID'], ['estimated_go_live', 'Current Estimated Go-Live Date'], ['actual_go_live', 'Actual Go-Live Date'], ['original_estimated_go_live', 'Original Estimated Go-live'], ['website_launch_date', 'Website Launch Date'], ['start_date', 'Start Date'], ['project_lost_date', 'Project Lost date'], ['stage', 'Stage']],
+      attributes: [['id', 'Internal ID'], ['estimated_go_live', 'Current Estimated Go-Live Date'], ['actual_go_live', 'Actual Go-Live Date'], ['original_estimated_go_live', 'Original Estimated Go-live'], ['website_launch_date', 'Website Launch Date'], ['project_lost_date', 'Project Lost date'], ['stage', 'Stage']],
       where: {
         updatedAt: {
           [db.Sequelize.Op.gte]: startDate
@@ -142,7 +141,6 @@ async function locations(req, res) {
           'Actual Go-Live Date': dates.utc_to_pst_no_time(locations[i].dataValues['Actual Go-Live Date']),
           'Original Estimated Go-live': dates.utc_to_pst_no_time(locations[i].dataValues['Original Estimated Go-live']),
           'Website Launch Date': dates.utc_to_pst_no_time(locations[i].dataValues['Website Launch Date']),
-          'Start Date': dates.utc_to_pst_no_time(locations[i].dataValues['Start Date']),
           'Project Lost date': dates.utc_to_pst_no_time(locations[i].dataValues['Project Lost date']),
           'Stage': locations[i].dataValues['Stage']
         })
@@ -168,7 +166,9 @@ async function projects(req, res) {
       let id  = location.name.split(/\s(.+)/, 2)[0]
       try {
         id = parseInt(id)
-        updatedLocationIds.push(id)
+        if (!isNaN(id)) {
+          updatedLocationIds.push(id)
+        }
       } catch (e) {
         console.error(e)
       }
@@ -187,13 +187,13 @@ async function projects(req, res) {
       }
     })
     let lbsLocations = await db.lbs.findAll({
-      attributes: ['master_project_id', 'estimated_go_live', 'actual_go_live', 'original_estimated_go_live', 'start_date', 'website_launch_date', 'project_lost_date', 'stage'],
+      attributes: ['master_project_id', 'estimated_go_live', 'actual_go_live', 'original_estimated_go_live', 'website_launch_date', 'project_lost_date', 'stage'],
       where: {
         master_project_id: {
           [Op.in]: master_project_ids
         }
       },
-      group: ['master_project_id', 'estimated_go_live', 'actual_go_live', 'original_estimated_go_live', 'start_date', 'website_launch_date', 'project_lost_date', 'stage'],
+      group: ['master_project_id', 'estimated_go_live', 'actual_go_live', 'original_estimated_go_live', 'website_launch_date', 'project_lost_date', 'stage'],
       order: ['master_project_id']
     })
     var csv = []
@@ -403,6 +403,9 @@ async function __findTreeItem(update) {
 }
 function __getProjectStatus(locations, i) {
   let currentProjectId = locations[i].master_project_id
+  if (currentProjectId == 2861404) {
+    debugger
+  }
   var stages = []
   var stage = null
   var data = {
@@ -411,11 +414,19 @@ function __getProjectStatus(locations, i) {
     'Actual Go-Live Date': dates.utc_to_pst_no_time(locations[i].actual_go_live),
     'Original Estimated Go-live': dates.utc_to_pst_no_time(locations[i].original_estimated_go_live),
     'Website Launch Date': dates.utc_to_pst_no_time(locations[i].website_launch_date),
-    'Start Date': dates.utc_to_pst_no_time(locations[i].start_date),
     'Project Lost date': dates.utc_to_pst_no_time(locations[i].project_lost_date)
   }
   // push the first project into it
-  while (i < locations.length && locations[i].master_project_id === currentProjectId) {
+  while (i < locations.length && locations[i].master_project_id == currentProjectId) {
+    if (data['Current Estimated Go-Live Date'] < dates.utc_to_pst_no_time(locations[i].estimated_go_live)) {
+      data['Current Estimated Go-Live Date'] = dates.utc_to_pst_no_time(locations[i].estimated_go_live)
+    }
+    if (data['Actual Go-Live Date'] < dates.utc_to_pst_no_time(locations[i].actual_go_live)) {
+      data['Actual Go-Live Date'] = dates.utc_to_pst_no_time(locations[i].actual_go_live)
+    }
+    if (data['Website Launch Date'] < dates.utc_to_pst_no_time(locations[i].website_launch_date)) {
+      data['Website Launch Date'] = dates.utc_to_pst_no_time(locations[i].website_launch_date)
+    }
     stages.push(locations[i].stage)
     i++
   }
@@ -438,6 +449,7 @@ function __getProjectStatus(locations, i) {
   data.Stage = stage
   if (data.Stage !== 'Complete') {
     data['Actual Go-Live Date'] = null
+    data['Website Launch Date'] = null
   }
 
   if (data.Stage !== 'Lost') {

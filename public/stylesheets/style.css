@@ -139,6 +139,9 @@ border-right: 2px solid #dee2e6 !important;
 .treeview.is-expanded, .app-sidebar {
     overflow: visible;
 }
+.app-sidebar {
+  background-color: #0C2140;
+}
 ul.treeview-menu.has-children {
     overflow: visible !important;
 }

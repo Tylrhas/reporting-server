@@ -1,5 +1,6 @@
 <% include ../../../partials/header.ejs %>
 <% include ../../../partials/nav.ejs %>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.0/Chart.bundle.js"></script>
 <main class="app-content">
  <div class="app-title">
   <div>
@@ -20,43 +21,120 @@
   <% } %>
     <div class="col-md-4">
       <div class="tile">
-       <h4 class="center">
-        <%= queue[i].name %>
-       </h4>
-       <table class="table center col-md-12 center">
-        <thead>
-         <tr>
-          <th>Intake</th>
-          <th>Active Projects</th>
-          <th>Scheduled Projects</th>
-          <th>WIP Limit</th>
-         </tr>
-        </thead>
-        <tbody>
-         <tr>
-           <td>
-              <a href="/ps/reports/workload/cft/<%= queue[i].id %>/intake"> 
-             <%= queue[i].intake.length %>
-              </a>
-            </td>
-          <td>
-           <a href="/ps/reports/workload/cft/<%= queue[i].id %>/active">
-            <%= queue[i].active.length %>
-           </a>
-          </td>
-          <td>
-           <a href="/ps/reports/workload/cft/<%= queue[i].id %>/scheduled">
-            <%= queue[i].scheduled.length %>
-           </a>
-          </td>
-          <td>
-           <%= queue[i].wipLimit %>
-          </td>
-         </tr>
-        </tbody>
-       </table>
+        <h4 class="center">
+          <%= queue[i].name %>
+        </h4>
+        <table class="table table-bordered center col-md-12 center">
+          <thead>
+            <tr>
+              <th>Intake</th>
+              <th>Scheduled Projects</th>
+              <th>Active Projects</th>
+              <th>WIP Limit</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <a href="/ps/reports/workload/cft/<%= queue[i].id %>/intake"> 
+                  <%= queue[i].intake.length %>
+                </a>
+              </td>
+              <td>
+                <a href="/ps/reports/workload/cft/<%= queue[i].id %>/scheduled">
+                  <%= queue[i].scheduled.length %>
+                </a>
+              </td>
+              <td>
+                <a href="/ps/reports/workload/cft/<%= queue[i].id %>/active">
+                  <%= queue[i].active.length %>
+                </a>
+              </td>
+              <td>
+                <%= queue[i].wipLimit %>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <canvas id="chart-<%= queue[i].id %>" width="100" height="35"></canvas>
+        <script>
+          new Chart(document.getElementById("chart-<%= queue[i].id %>").getContext('2d'), {
+            type: 'horizontalBar',
+            data: {
+              labels: [
+                'Projects'
+              ],
+              datasets: [
+                {
+                  label: 'Intake',
+                  data: [<%- JSON.stringify(queue[i].intake.length) %>],
+                  backgroundColor: '#EB4132'
+                },
+                {
+                  label: 'Scheduled',
+                  data: [<%- JSON.stringify(queue[i].scheduled.length) %>],
+                  backgroundColor: '#51A5CB'
+                },
+                {
+                  label: 'Active',
+                  data: [<%- JSON.stringify(queue[i].active.length) %>],
+                  backgroundColor: '#052242'
+                }
+              ]
+            },
+            options: {
+              tooltips: {
+                enabled: true,
+                position: 'average',
+                backgroundColor: 'RGBA(229,229,229,0.8)',
+                titleFontColor: '#0C2140',
+                titleSpacing: 2,
+                titleMarginBottom: 10,
+                bodyFontColor: '#0C2140',
+                bodySpacing: 2,
+                xPadding: 10,
+                yPadding: 10,
+                displayColors: false,
+                cornerRadius: 10
+              },
+              layout: {
+                padding: 0
+              },
+              legend: {
+                display: true,
+                position: 'bottom',
+                labels: {
+                  padding: 10,
+                  fontSize: 12,
+                  fontStyle: 'bold'
+                }
+              },
+              scales: {
+                xAxes: [
+                  {
+                    display: true,
+                    stacked: true,
+                    gridLines: {
+                      display: false
+                    },
+                    ticks: {
+                      suggestedMin: 0,
+                      suggestedMax: 30
+                    }
+                  }
+                ],
+                yAxes: [
+                  {
+                    display: false,
+                    stacked: true
+                  }
+                ]
+              }
+            }
+          })
+        </script>
       </div>
-     </div>
+    </div>
   <% if ( i === 2 || i === queue.length -1 ) { %>
  </div>
  <% } %>

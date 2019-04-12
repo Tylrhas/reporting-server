@@ -2,6 +2,7 @@ const apiController = require('../controllers/api.controller')
 const jobController = require('../controllers/job.controller')
 const lsbController = require('../controllers/lsb.controller')
 const auth = require('../controllers/auth.controller')
+const scheduledimpController = require('../controllers/scheduledImpTimeline.controller')
 
 module.exports = function (app, passport) {
   // Begin Data Endpoints 
@@ -25,6 +26,9 @@ module.exports = function (app, passport) {
 
   app.put('/api/goals', auth.isAdmin, apiController.updateGoal)
  
+  app.get('/api/scheduledimp/:teamID', scheduledimpController.displayData)
+  app.get('/api/jobs/scheduledimp/capture', scheduledimpController.captureData)
+  app.get('/api/jobs/rebuildTreeitems', jobController.rebuildTreeitems)
 
   // app.get('/api/jobs/updatetasks', auth.basic , apiController.updatelptasksapi)
   // app.get('/api/projects/update', apiController.updateProjects)
