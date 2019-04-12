@@ -56,7 +56,7 @@
             </tr>
           </tbody>
         </table>
-        <canvas id="chart-<%= queue[i].id %>" width="100" height="25"></canvas>
+        <canvas id="chart-<%= queue[i].id %>" width="100" height="35"></canvas>
         <script>
           new Chart(document.getElementById("chart-<%= queue[i].id %>").getContext('2d'), {
             type: 'horizontalBar',
@@ -83,12 +83,26 @@
               ]
             },
             options: {
+              tooltips: {
+                enabled: true,
+                position: 'average',
+                backgroundColor: 'RGBA(229,229,229,0.8)',
+                titleFontColor: '#0C2140',
+                titleSpacing: 2,
+                titleMarginBottom: 10,
+                bodyFontColor: '#0C2140',
+                bodySpacing: 2,
+                xPadding: 10,
+                yPadding: 10,
+                displayColors: false,
+                cornerRadius: 10
+              },
               layout: {
                 padding: 0
               },
               legend: {
                 display: true,
-                position: 'top',
+                position: 'bottom',
                 labels: {
                   padding: 10,
                   fontSize: 12,
