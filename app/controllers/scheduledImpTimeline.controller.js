@@ -210,13 +210,13 @@ dataPoints.forEach(dataPoint => {
   const projectDuration2 = projectCount / duration2
   const projectDuration1 = projectCount / duration1
   locDelivery.chartData.data.labels.push(dateController.utc_to_pst_no_time(captureDate))
-  locDelivery.chartData.data.datasets[0].data.push(locationDuration1)
-  locDelivery.chartData.data.datasets[1].data.push(locationDuration2)
+  locDelivery.chartData.data.datasets[0].data.push(locationDuration2)
+  locDelivery.chartData.data.datasets[1].data.push(locationDuration1)
   locDelivery.chartData.data.datasets[2].data.push(locationCount)
 
   projDelivery.chartData.data.labels.push(dateController.utc_to_pst_no_time(captureDate))
-  projDelivery.chartData.data.datasets[0].data.push(projectDuration1)
-  projDelivery.chartData.data.datasets[1].data.push(projectDuration2)
+  projDelivery.chartData.data.datasets[0].data.push(projectDuration2)
+  projDelivery.chartData.data.datasets[1].data.push(projectDuration1)
   projDelivery.chartData.data.datasets[2].data.push(projectCount)
 })
   res.render('pages/delivery-rate', {
@@ -234,6 +234,9 @@ async function captureData(req, res) {
     res.send(200)
   }
   let today = dateController.today()
+  if (req.query.hasOwnProperty('today')) {
+    today = dateController.moment(req.query.today).format()
+  }
   let startDate = dateController.moment(today).endOf('day').subtract(31, 'days').format()
   let endDate = dateController.moment(today).endOf('day').subtract(1, 'days').format()
   let teams = await Teamcontroller.noAssociatedTeam()
@@ -246,7 +249,7 @@ async function captureData(req, res) {
       let number_of_locations = data.number_of_locations
       let duration1 = calcDuration(data.projectData, 1)
       let duration2 = calcDuration(data.projectData, 2)
-      let captureDate = dateController.today()
+      let captureDate = today
       await db.scheduledImp.create({ cft_id, projectCount, number_of_locations, duration1, duration2, captureDate })
     } catch (e) {
       console.error(e)
