@@ -21,25 +21,30 @@ async function displayData(req, res) {
           {
             label: 'Start ➔ Links',
             type: 'line',
+            yAxisID: 'y-primary',
             data: [],
-            backgroundColor: ['RGBA(213,108,155,0.2)'],
-            fill: false,
+            backgroundColor: ['RGBA(213,108,155,0.3)'],
             borderColor: ['RGBA(213,108,155,1.00)'],
-            borderCapStyle: 'round',
+            fill: false,
             borderWidth: 4,
-            lineTension: 0.4,
-            showLine: true
+            lineTension: 0.1,
+            pointHitRadius: 10,
+            pointHoverBackgroundColor: 'RGBA(213,108,155,0.6)',
+            pointHoverBorderColor: 'RGBA(213,108,155,1.00)'
           },
           {
             label: 'Start ➔ Go-Live',
             type: 'line',
+            yAxisID: 'y-primary',
             data: [],
-            backgroundColor: ['RGBA(133,0,81,0.2)'],
-            fill: false,
+            backgroundColor: ['RGBA(133,0,81,0.3)'],
             borderColor: ['RGBA(133,0,81,1.0)'],
+            fill: false,
             borderWidth: 4,
-            lineTension: 0.4,
-            showLine: true
+            lineTension: 0.1,
+            pointHitRadius: 10,
+            pointHoverBackgroundColor: 'RGBA(133,0,81,0.6)',
+            pointHoverBorderColor: 'RGBA(133,0,81,1.0)'
           },
           {
             label: 'Project Count',
@@ -51,6 +56,18 @@ async function displayData(req, res) {
         ]
       },
       options: {
+        tooltips: {
+          backgroundColor: 'RGBA(229,229,229,0.8)',
+          titleFontColor: '#0C2140',
+          titleSpacing: 2,
+          titleMarginBottom: 10,
+          bodyFontColor: '#0C2140',
+          bodySpacing: 2,
+          xPadding: 10,
+          yPadding: 10,
+          displayColors: false,
+          cornerRadius: 10
+        },
         scales: {
           yAxes: [
             {
@@ -113,10 +130,13 @@ async function displayData(req, res) {
             yAxisID: 'y-primary',
             data: [],
             backgroundColor: ['RGBA(213,108,155,0.3)'],
-            fill: false,
             borderColor: ['RGBA(213,108,155,1.00)'],
+            fill: false,
             borderWidth: 4,
-            lineTension: 0.1
+            lineTension: 0.1,
+            pointHitRadius: 10,
+            pointHoverBackgroundColor: 'RGBA(213,108,155,0.6)',
+            pointHoverBorderColor: 'RGBA(213,108,155,1.00)'
           },
           {
             label: 'Start ➔ Go-Live',
@@ -124,10 +144,13 @@ async function displayData(req, res) {
             yAxisID: 'y-primary',
             data: [],
             backgroundColor: ['RGBA(133,0,81,0.3)'],
-            fill: false,
             borderColor: ['RGBA(133,0,81,1.00)'],
+            fill: false,
             borderWidth: 4,
-            lineTension: 0.1
+            lineTension: 0.1,
+            pointHitRadius: 10,
+            pointHoverBackgroundColor: 'RGBA(133,0,81,0.6)',
+            pointHoverBorderColor: 'RGBA(133,0,81,1.00)'
           },
           {
             label: 'Location Count',
@@ -139,6 +162,18 @@ async function displayData(req, res) {
         ]
       },
       options: {
+        tooltips: {
+          backgroundColor: 'RGBA(229,229,229,0.8)',
+          titleFontColor: '#0C2140',
+          titleSpacing: 2,
+          titleMarginBottom: 10,
+          bodyFontColor: '#0C2140',
+          bodySpacing: 2,
+          xPadding: 10,
+          yPadding: 10,
+          displayColors: false,
+          cornerRadius: 10
+        },
         scales: {
           yAxes: [
             {
@@ -205,10 +240,10 @@ dataPoints.forEach(dataPoint => {
   const duration2 = dataPoint.dataValues.duration2
   const duration1 = dataPoint.dataValues.duration1
   const captureDate = dataPoint.dataValues.captureDate
-  const locationDuration2 = locationCount / duration2
-  const locationDuration1 = locationCount / duration1
-  const projectDuration2 = projectCount / duration2
-  const projectDuration1 = projectCount / duration1
+  const locationDuration2 = (locationCount / duration2).toFixed(2)
+  const locationDuration1 = (locationCount / duration1).toFixed(2)
+  const projectDuration2 = (projectCount / duration2).toFixed(2)
+  const projectDuration1 = (projectCount / duration1).toFixed(2)
   locDelivery.chartData.data.labels.push(dateController.utc_to_pst_no_time(captureDate))
   locDelivery.chartData.data.datasets[0].data.push(locationDuration2)
   locDelivery.chartData.data.datasets[1].data.push(locationDuration1)
