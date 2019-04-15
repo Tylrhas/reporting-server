@@ -4,3 +4,4 @@ node_modules
 app/config/client_secret.json
 .env.dev
 .backups_db
+app/config/config.json

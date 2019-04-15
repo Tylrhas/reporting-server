@@ -28,6 +28,7 @@
     "request": "^2.88.0",
     "request-throttle": "0.0.2",
     "sequelize": "^4.42.0",
+    "sequelize-cli": "^5.4.0",
     "sequelize-hierarchy": "^1.3.2",
     "serve-favicon": "^2.5.0",
     "throttled-request": "^0.1.1"
