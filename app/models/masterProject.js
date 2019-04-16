@@ -58,9 +58,6 @@ module.exports = function (sequelize, Sequelize) {
     projectPhase: {
       type: Sequelize.TEXT
     },
-    projectLostReason: {
-      type: Sequelize.TEXT
-    },
     onHoldDate: {
       type: Sequelize.DATE
     }
@@ -71,6 +68,7 @@ module.exports = function (sequelize, Sequelize) {
       models.masterProject.hasMany(models.lbs, {foreignKey: 'master_project_id', sourceKey: 'id'})
       models.masterProject.belongsTo(models.lp_user, {foreignKey: 'pmId', sourceKey: 'id'})
     }
+    
   return masterProject
 
 }

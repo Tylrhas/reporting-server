@@ -66,9 +66,6 @@ module.exports = {
       projectPhase: {
         type: Sequelize.TEXT
       },
-      projectLostReason: {
-        type: Sequelize.TEXT
-      },
       onHoldDate: {
         type: Sequelize.DATE
       }
