@@ -56,6 +56,9 @@ async function update(req, res) {
         actual_go_live: dates.pst_to_utc(location["date_custom_field:151495"]),
         website_launch_date: dates.pst_to_utc(location["date_custom_field:151496"]),
         project_lost_date: null,
+        estimatedLostDate: null,
+        projectLossReason: location["pick_list_custom_field:109756"],
+        projectPhase: null
       }
       if (isNaN(LBSId)) {
         Honeybadger.notify('id is not a number', {
@@ -74,6 +77,12 @@ async function update(req, res) {
           //  check if the location is currently set to lost
           if (update.project_lost_date == null) {
             update.project_lost_date = dates.pst_to_utc(dates.now())
+          }
+        }
+        if (location['pick_list_custom_field:102670'] === 'On Hold') {
+          //  check if the location is currently set to lost
+          if (update.estimatedLostDate == null) {
+            update.estimatedLostDate = dates.pst_to_utc(dates.now())
           }
         }
 
