@@ -5,3 +5,5 @@ A Node app that Displays Metrics and data for G5 Pro Serv
 * Create the migration file
   * Run ```npx sequelize migration:create --name tableName```
   * Edit the migration file to contain the migration and the undo function if it fails
+  * Run ```npx sequelize db:migrate``` to run the migration
+  * If it fails run ```npx sequelize db:migrate:undo```

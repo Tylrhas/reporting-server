@@ -70,6 +70,15 @@ module.exports = function (sequelize, Sequelize) {
     },
     stage: {
       type: Sequelize.TEXT
+    },
+    projectPhase: {
+      type: Sequelize.TEXT
+    },
+    projectLossReason: {
+      type: Sequelize.TEXT
+    },
+    estimatedLostDate: {
+      type: Sequelize.DATE
     }
   },
     {
