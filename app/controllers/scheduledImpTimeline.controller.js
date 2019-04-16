@@ -428,7 +428,9 @@ function calcDuration(projectData, durationNumber) {
   })
   let duration = 0
   durationNumbers.forEach(number => {
-    duration += number
+    if (number > 0) {
+      duration += number
+    }
   })
   return duration
 }
