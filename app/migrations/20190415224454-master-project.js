@@ -1,5 +1,5 @@
 'use strict';
-
+const moment = require('moment')
 module.exports = {
   up: (queryInterface, Sequelize) => {
     /*
@@ -76,7 +76,8 @@ module.exports = {
         projects = projects[0]
         let bulkInsertData = []
         for (let i = 0; i < projects.length; i++) {
-          bulkInsertData.push({ id: projects[i].master_project_id })
+          console.log({ id: projects[i].master_project_id, createdAt: projects[i].createdAt })
+          bulkInsertData.push({ id: projects[i].master_project_id, createdAt: moment().format(), updatedAt: moment().format() })
         }
         console.log(bulkInsertData)
         return queryInterface.bulkInsert('masterProjects', bulkInsertData).then(() => {

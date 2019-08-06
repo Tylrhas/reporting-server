@@ -82,6 +82,27 @@ module.exports = function (sequelize, Sequelize) {
     }
   },
     {
+      hooks: {
+        afterUpdate : (lsb, options) => {
+          console.log({lsb})
+          console.log({options})
+        },
+        // afterSave: (lsb, options) => {
+        //   console.log({lsb})
+        //   console.log({options})
+        //   // if (lsb.dataValues.master_project_id != null) {
+        //   //   return masterProject.computeandUpdate(lsb.dataValues)
+        //   // }
+        //   return
+        // },
+        afterUpsert: (created, options) => {
+          const [ record, newRecord ] = created
+          if (record.dataValues.master_project_id == null) {
+            return
+          }
+          return masterProject.computeandUpdate(record.dataValues, sequelize)
+        }
+      },
       //use a sinular table name
       freezeTableName: true,
     })
@@ -90,10 +111,5 @@ module.exports = function (sequelize, Sequelize) {
       models.lbs.belongsTo(models.treeitem, {foreignKey: 'task_id', sourceKey: 'id'});
       models.lbs.belongsTo(models.lp_user, {foreignKey: 'pm_id', sourceKey: 'id'});
     }
-    lbs.afterUpdate((lsb, options) => {
-      if (lsb.dataValues.master_project_id != null) {
-        return masterProject.computeandUpdate(lsb.dataValues)
-      }
-    })
   return lbs
 }

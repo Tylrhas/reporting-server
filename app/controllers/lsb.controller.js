@@ -122,7 +122,7 @@ async function locations(req, res) {
   try {
     var startDate = req.query.startDate
     var locations = await db.lbs.findAll({
-      attributes: [['id', 'Internal ID'], ['estimated_go_live', 'Current Estimated Go-Live Date'], ['actual_go_live', 'Actual Go-Live Date'], ['original_estimated_go_live', 'Original Estimated Go-live'], ['website_launch_date', 'Website Launch Date'], ['project_lost_date', 'Project Lost date'], ['stage', 'Stage']],
+      attributes: [['id', 'Internal ID'], ['estimated_go_live', 'Current Estimated Go-Live Date'], ['actual_go_live', 'Actual Go-Live Date'], ['original_estimated_go_live', 'Original Estimated Go-live'], ['website_launch_date', 'Website Launch Date'], ['project_lost_date', 'Project Lost date'], ['stage', 'OpenAir: Project Stage'], ['pm_id', 'Primary PM'], [ 'projectPhase', 'Project Phase'], ['estimatedLostDate','On Hold Date']],
       where: {
         updatedAt: {
           [db.Sequelize.Op.gte]: startDate
@@ -151,11 +151,13 @@ async function locations(req, res) {
           'Original Estimated Go-live': dates.utc_to_pst_no_time(locations[i].dataValues['Original Estimated Go-live']),
           'Website Launch Date': dates.utc_to_pst_no_time(locations[i].dataValues['Website Launch Date']),
           'Project Lost date': dates.utc_to_pst_no_time(locations[i].dataValues['Project Lost date']),
-          'Stage': locations[i].dataValues['Stage']
+          'OpenAir: Project Stage': locations[i].dataValues['OpenAir: Project Stage'],
+          'Primary PM' : locations[i].dataValues['Primary PM'],
+          'Project Phase': locations[i].dataValues['Project Phase'],
+          'On Hold Date': locations[i].dataValues['On Hold Date']
         })
       }
     }
-
     csv = Papa.unparse(csv)
 
     res.send(csv)
@@ -163,7 +165,6 @@ async function locations(req, res) {
   } catch (error) {
     Honeybadger.notify(error)
     res.send(error)
-
   }
 }
 async function projects(req, res) {
@@ -259,7 +260,8 @@ async function updateNSDates(req, res) {
           net_cs: data[i]['Net Creative Services'],
           total_cs_discount: data[i]['Total Creative Services Discount'],
           actual_go_live: dates.pst_to_utc(data[i]['Go-Live Date (Day)']),
-          project_type: data[i]['Project Type']
+          project_type: data[i]['Project Type'],
+          stage: data[i]['OpenAir: Project Stage']
         }
         if (data[i]['Location'].split(/\s(.+)/).length > 1) {
           row.location_name = data[i]['Location'].split(/\s(.+)/)[1]
@@ -304,9 +306,7 @@ async function updateNSDates(req, res) {
         row.opportunity_close_date = null
       }
 
-      updates.push(db.lbs.upsert(row).then(results => {
-        console.log(results)
-      }))
+      updates.push(db.lbs.upsert(row, { returning: true }))
     }
   }
   Promise.all(updates).then(() => {

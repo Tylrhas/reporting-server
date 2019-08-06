@@ -5,10 +5,11 @@ module.exports = {
   computeandUpdate
 }
 
-async function computeandUpdate(locationInformation) {
+async function computeandUpdate(locationInformation, sequelize) {
   try {
     const projectUpdate = await computeData(locationInformation)
     await sequelize.models.masterProject.upsert(projectUpdate)
+    return
   } catch (error) {
     console.error(error)
   }
@@ -49,19 +50,23 @@ function getProjectData(locations) {
     onHoldDate: null,
   }
   for (let i = 0; i < locations.length; i++) {
-    if (data.estimatedGoLive < dates.utc_to_pst_no_time(locations[i].dataValues.estimated_go_live)) {
+    if (needsUpdate(data.estimatedGoLive, locations[i].dataValues.estimated_go_live)) {
       data.estimatedGoLive = dates.utc_to_pst_no_time(locations[i].dataValues.estimated_go_live)
     }
-    if (data.actualGoLive < dates.utc_to_pst_no_time(locations[i].dataValues.actual_go_live)) {
+    console.log(locations[i].dataValues.original_estimated_go_live)
+    if (needsUpdate(data.originalEstimatedGoLive, locations[i].dataValues.original_estimated_go_live)) {
+      data.originalEstimatedGoLive = dates.utc_to_pst_no_time(locations[i].dataValues.original_estimated_go_live)
+    }
+    if (needsUpdate(data.actualGoLive, locations[i].dataValues.actual_go_live)) {
       data.actualGoLive = dates.utc_to_pst_no_time(locations[i].dataValues.actual_go_live)
     }
-    if (data.websiteLaunchDate < dates.utc_to_pst_no_time(locations[i].dataValues.website_launch_date)) {
+    if (needsUpdate(data.websiteLaunchDate, locations[i].dataValues.website_launch_date)) {
       data.websiteLaunchDate = dates.utc_to_pst_no_time(locations[i].dataValues.website_launch_date)
     }
-    if (data.lostDate < dates.utc_to_pst_no_time(locations[i].dataValues.project_lost_date)) {
+    if (needsUpdate(data.lostDate, locations[i].dataValues.project_lost_date)) {
       data.lostDate = dates.utc_to_pst_no_time(locations[i].dataValues.project_lost_date)
     }
-    if (data.onHoldDate < dates.utc_to_pst_no_time(locations[i].dataValues.on_hold_date)) {
+    if (needsUpdate(data.onHoldDate, locations[i].dataValues.on_hold_date)) {
       data.onHoldDate = dates.utc_to_pst_no_time(locations[i].dataValues.on_hold_date)
     }
     // calculate total discounts and MRR
@@ -76,6 +81,7 @@ function getProjectData(locations) {
     stages.push(locations[i].dataValues.stage)
     data.pmId = locations[i].pm_id
   }
+  console.log({ stages })
   // FIND THE GRATEST DATE FOR CEGL AND ACUTAL GO LIVE
   if (stages.indexOf('In Process') !== -1) {
     // a location is in process so set the project to in process
@@ -105,4 +111,16 @@ function getProjectData(locations) {
   }
 
   return data
+}
+function needsUpdate(currentDate, newDate) {
+  if (newDate === null) {
+    return false
+  }
+  if (currentDate == null) {
+    return true
+  }
+  if (currentDate < dates.utc_to_pst_no_time(newDate)) {
+    return true
+  }
+  return false
 }

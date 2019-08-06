@@ -7,11 +7,11 @@ require('sequelize-hierarchy')(Sequelize);
 
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
   pool: {
-    max: process.env.DATABASE_MAX_CONNECTIONS,
-    min: process.env.DATABASE_MIN_CONNECTIONS,
-    idle: process.env.DATABASE_IDLE,
-    acquire: process.env.DATABASE_AQUIRE,
-    evict: process.env.DATABASE_EVICT,
+    max: parseInt(process.env.DATABASE_MAX_CONNECTIONS),
+    min: parseInt(process.env.DATABASE_MIN_CONNECTIONS),
+    idle: parseInt(process.env.DATABASE_IDLE),
+    acquire: parseInt(process.env.DATABASE_AQUIRE),
+    evict: parseInt(process.env.DATABASE_EVICT),
   },
   dialectOptions: {
     // convert the string to a boolean
@@ -36,5 +36,5 @@ Object.keys(db).forEach((modelName) => {
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
-
+console.log({db})
 module.exports = db;
