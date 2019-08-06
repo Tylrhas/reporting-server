@@ -127,7 +127,12 @@ async function locations(req, res) {
         updatedAt: {
           [db.Sequelize.Op.gte]: startDate
         }
-      }
+      },
+      include: [
+        {
+          model: db.lp_user
+        }
+      ]
     })
     var csv = []
     let updatedLocations = await throttledRequest.promise({ url: process.env.LP_LBS_UPDATE, method: 'GET', headers: { "Authorization": LPauth } })
@@ -144,6 +149,12 @@ async function locations(req, res) {
     })
     for (let i = 0; i < locations.length; i++) {
       if (updatedLocationIds.indexOf(locations[i].dataValues['Internal ID']) !== -1) {
+        let first_name = ''
+        let last_name = ''
+        if (locations[i].dataValues.lp_user != null) {
+          first_name = locations[i].dataValues.lp_user.dataValues.first_name
+          last_name = locations[i].dataValues.lp_user.dataValues.last_name
+        }
         csv.push({
           'Internal ID': locations[i].dataValues['Internal ID'],
           'Current Estimated Go-Live Date': dates.utc_to_pst_no_time(locations[i].dataValues['Current Estimated Go-Live Date']),
@@ -152,7 +163,7 @@ async function locations(req, res) {
           'Website Launch Date': dates.utc_to_pst_no_time(locations[i].dataValues['Website Launch Date']),
           'Project Lost date': dates.utc_to_pst_no_time(locations[i].dataValues['Project Lost date']),
           'OpenAir: Project Stage': locations[i].dataValues['OpenAir: Project Stage'],
-          'Primary PM' : locations[i].dataValues['Primary PM'],
+          'Primary PM' : `${first_name} ${last_name}`,
           'Project Phase': locations[i].dataValues['Project Phase'],
           'On Hold Date': locations[i].dataValues['On Hold Date']
         })
@@ -196,23 +207,41 @@ async function projects(req, res) {
         master_project_ids.push(location.master_project_id)
       }
     })
-    let lbsLocations = await db.lbs.findAll({
-      attributes: ['master_project_id', 'estimated_go_live', 'actual_go_live', 'original_estimated_go_live', 'website_launch_date', 'project_lost_date', 'stage'],
+    let lbsLocations = await db.masterProject.findAll({
+      attributes: [['id', 'Internal ID'], ['estimatedGoLive', 'Current Estimated Go-Live Date'], ['actualGoLive', 'Actual Go-Live Date'], ['originalEstimatedGoLive', 'Original Estimated Go-live'], ['websiteLaunchDate', 'Website Launch Date'], ['lostDate', 'Project Lost date'], ['stage', 'OpenAir: Project Stage'], ['pmId', 'Primary PM'], [ 'projectPhase', 'Project Phase'], ['onHoldDate','On Hold Date']],
       where: {
-        master_project_id: {
+        id: {
           [Op.in]: master_project_ids
         }
       },
-      group: ['master_project_id', 'estimated_go_live', 'actual_go_live', 'original_estimated_go_live', 'website_launch_date', 'project_lost_date', 'stage'],
-      order: ['master_project_id']
+      include: [
+        {
+          model: db.lp_user
+        }
+      ]
     })
     var csv = []
     // create CSV from json object and return it
     for (let i = 0; i < lbsLocations.length; i++) {
       try {
-        let project = __getProjectStatus(lbsLocations, i)
-        csv.push(project.data)
-        i = project.newIndex
+        let first_name = ''
+        let last_name = ''
+        if (lbsLocations[i].dataValues.lp_user != null) {
+          first_name = lbsLocations[i].dataValues.lp_user.dataValues.first_name
+          last_name = lbsLocations[i].dataValues.lp_user.dataValues.last_name
+        }
+        csv.push({
+          'Internal ID': lbsLocations[i].dataValues['Internal ID'],
+          'Current Estimated Go-Live Date': dates.utc_to_pst_no_time(lbsLocations[i].dataValues['Current Estimated Go-Live Date']),
+          'Actual Go-Live Date': dates.utc_to_pst_no_time(lbsLocations[i].dataValues['Actual Go-Live Date']),
+          'Original Estimated Go-live': dates.utc_to_pst_no_time(lbsLocations[i].dataValues['Original Estimated Go-live']),
+          'Website Launch Date': dates.utc_to_pst_no_time(lbsLocations[i].dataValues['Website Launch Date']),
+          'Project Lost date': dates.utc_to_pst_no_time(lbsLocations[i].dataValues['Project Lost date']),
+          'OpenAir: Project Stage': lbsLocations[i].dataValues['OpenAir: Project Stage'],
+          'Primary PM' : `${first_name} ${last_name}`,
+          'Project Phase': lbsLocations[i].dataValues['Project Phase'],
+          'On Hold Date': lbsLocations[i].dataValues['On Hold Date']
+        })
       } catch (error) {
         Honeybadger.notify(error)
         slack.sendError(error.message)
