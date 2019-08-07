@@ -135,7 +135,7 @@ async function locations(req, res) {
   try {
     var startDate = req.query.startDate
     var locations = await db.lbs.findAll({
-      attributes: [['id', 'Internal ID'], ['estimated_go_live', 'Current Estimated Go-Live Date'], ['actual_go_live', 'Actual Go-Live Date'], ['original_estimated_go_live', 'Original Estimated Go-live'], ['website_launch_date', 'Website Launch Date'], ['project_lost_date', 'Project Lost date'], ['stage', 'OpenAir: Project Stage'], ['pm_id', 'Primary PM'], [ 'projectPhase', 'Project Phase'], ['estimatedLostDate','On Hold Date']],
+      attributes: [['id', 'Internal ID'], ['estimated_go_live', 'Current Estimated Go-Live Date'], ['actual_go_live', 'Actual Go-Live Date'], ['original_estimated_go_live', 'Original Estimated Go-live'], ['website_launch_date', 'Website Launch Date'], ['project_lost_date', 'Project Lost date'], ['stage', 'OpenAir: Project Stage'], ['pm_id', 'Primary PM'], [ 'projectPhase', 'Project Phase'], ['estimatedLostDate','On Hold Date'], ['projectLossReason','Project Loss Reason']],
       where: {
         updatedAt: {
           [db.Sequelize.Op.gte]: startDate
@@ -178,7 +178,8 @@ async function locations(req, res) {
           'OpenAir: Project Stage': locations[i].dataValues['OpenAir: Project Stage'],
           'Primary PM' : `${first_name} ${last_name}`,
           'Project Phase': locations[i].dataValues['Project Phase'],
-          'On Hold Date': locations[i].dataValues['On Hold Date']
+          'On Hold Date': locations[i].dataValues['On Hold Date'],
+          'Project Loss Reason': locations[i].dataValues['Project Loss Reason']
         })
       }
     }
