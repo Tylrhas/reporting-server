@@ -178,7 +178,7 @@ async function locations(req, res) {
           'OpenAir: Project Stage': locations[i].dataValues['OpenAir: Project Stage'],
           'Primary PM' : `${first_name} ${last_name}`,
           'Project Phase': locations[i].dataValues['Project Phase'],
-          'On Hold Date': locations[i].dataValues['On Hold Date'],
+          'On Hold Date': dates.utc_to_pst_no_time(locations[i].dataValues['On Hold Date']),
           'Project Loss Reason': locations[i].dataValues['Project Loss Reason']
         })
       }

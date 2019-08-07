@@ -34,7 +34,7 @@ function utc_to_pst(date) {
 function utc_to_pst_no_time(date) {
   if (date != null) {
   // convert to pst and remove hours 
-  date = moment(date).tz('America/Los_Angeles').format('MM-DD-YYYY')
+  date = moment(date).tz('America/Los_Angeles').format('MM/DD/YYYY')
   if (date == 'Invalid date') {
     date = null
   }
