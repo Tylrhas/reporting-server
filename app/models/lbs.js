@@ -84,8 +84,10 @@ module.exports = function (sequelize, Sequelize) {
     {
       hooks: {
         afterUpdate : (lsb, options) => {
-          console.log({lsb})
-          console.log({options})
+          if (lsb.dataValues.master_project_id == null) {
+            return
+          }
+          return masterProject.computeandUpdate(lsb.dataValues, sequelize)
         },
         // afterSave: (lsb, options) => {
         //   console.log({lsb})
