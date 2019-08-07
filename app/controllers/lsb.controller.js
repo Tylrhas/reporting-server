@@ -453,66 +453,6 @@ async function __findTreeItem(update) {
   }
   console.log(treeItem)
 }
-function __getProjectStatus(locations, i) {
-  let currentProjectId = locations[i].master_project_id
-  if (currentProjectId == 2861404) {
-    debugger
-  }
-  var stages = []
-  var stage = null
-  var data = {
-    'Internal ID': locations[i].master_project_id,
-    'Current Estimated Go-Live Date': dates.utc_to_pst_no_time(locations[i].estimated_go_live),
-    'Actual Go-Live Date': dates.utc_to_pst_no_time(locations[i].actual_go_live),
-    'Original Estimated Go-live': dates.utc_to_pst_no_time(locations[i].original_estimated_go_live),
-    'Website Launch Date': dates.utc_to_pst_no_time(locations[i].website_launch_date),
-    'Project Lost date': dates.utc_to_pst_no_time(locations[i].project_lost_date)
-  }
-  // push the first project into it
-  while (i < locations.length && locations[i].master_project_id == currentProjectId) {
-    if (data['Current Estimated Go-Live Date'] < dates.utc_to_pst_no_time(locations[i].estimated_go_live)) {
-      data['Current Estimated Go-Live Date'] = dates.utc_to_pst_no_time(locations[i].estimated_go_live)
-    }
-    if (data['Actual Go-Live Date'] < dates.utc_to_pst_no_time(locations[i].actual_go_live)) {
-      data['Actual Go-Live Date'] = dates.utc_to_pst_no_time(locations[i].actual_go_live)
-    }
-    if (data['Website Launch Date'] < dates.utc_to_pst_no_time(locations[i].website_launch_date)) {
-      data['Website Launch Date'] = dates.utc_to_pst_no_time(locations[i].website_launch_date)
-    }
-    stages.push(locations[i].stage)
-    i++
-  }
-  // FIND THE GRATEST DATE FOR CEGL AND ACUTAL GO LIVE
-  if (stages.indexOf('In Process') !== -1) {
-    // a location is in process so set the project to in process
-    stage = "In Process"
-  } else if (stages.indexOf('On Hold') !== -1) {
-    // there are on hold locations and no i process locations
-    stage = "On Hold"
-  } else if (stages.indexOf('Complete') !== -1 && stages.indexOf('On Hold') === -1) {
-    // all locations are complete or lost so the project is complete
-    stage = "Complete"
-  } else if (stages.indexOf('Lost') !== -1 && stages.length === 1) {
-    // all locations are Lost
-    stage = "Lost"
-  } else {
-    throw new Error(`Error in finding the Stage of Master Project ID : ${currentProjectId}`)
-  }
-  data.Stage = stage
-  if (data.Stage !== 'Complete') {
-    data['Actual Go-Live Date'] = null
-    data['Website Launch Date'] = null
-  }
-
-  if (data.Stage !== 'Lost') {
-    data['Project Lost date'] = null
-  }
-
-  return {
-    newIndex: i - 1,
-    data: data
-  }
-}
 function __get_all_lp_users() {
   return db.lp_user.findAll().then(users => {
     userObject = {}
