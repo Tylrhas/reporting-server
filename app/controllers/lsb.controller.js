@@ -44,7 +44,19 @@ async function update(req, res) {
       let splitName = location.name.split(/\s(.+)/, 2)
       let LBSId = splitName[0]
       let locationName = splitName[1]
-
+      let owner = await db.lp_user.findOne({
+        where: {
+          user_name: location.owner
+        }
+      })
+      if (owner == null) {
+        await updatelpUsers()
+        owner = await db.lp_user.findOne({
+          where: {
+            user_name: location.owner
+          }
+        })
+      }
       // create the update object
       let update = {
         task_id: location["key"],
@@ -58,7 +70,8 @@ async function update(req, res) {
         project_lost_date: null,
         estimatedLostDate: null,
         projectLossReason: location["pick_list_custom_field:109756"],
-        projectPhase: null
+        projectPhase: null,
+        pm_id: owner.id
       }
       if (isNaN(LBSId)) {
         Honeybadger.notify('id is not a number', {
@@ -531,4 +544,17 @@ async function __updateJob(jobName, update) {
 
   await job[0].update(update)
   return job[0]
+}
+
+async function updatelpUsers() {
+  let users = await throttledRequest.promise({ url: process.env.LP_USERS, method: 'GET', headers: { "Authorization": LPauth } })
+  for (let i = 0; i < users.length; i++) {
+    let user = users[i]
+    await db.lp_user.upsert({
+        id: user.id,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        user_name: user.user_name
+    })
+  }
 }

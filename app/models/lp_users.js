@@ -13,6 +13,9 @@ module.exports = function (sequelize, Sequelize) {
 
     last_name: {
       type: Sequelize.STRING
+    },
+    user_name: {
+      type: Sequelize.STRING
     }
   })
 
