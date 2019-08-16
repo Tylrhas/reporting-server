@@ -73,7 +73,7 @@ async function update(req, res) {
         projectPhase: null,
         pm_id: owner.id
       }
-      if (isNaN(LBSId)) {
+      if (isNaN(LBSId) || LBSId === '') {
         Honeybadger.notify('id is not a number', {
           context: {
             update: update
