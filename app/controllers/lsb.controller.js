@@ -123,6 +123,7 @@ async function update(req, res) {
     }
     await job.update({ lastrun: dates.pst_to_utc(dates.now()), status: 'active', lastrunstatus: 'complete' })
   } catch (error) {
+    console.log({ error })
     Honeybadger.notify(error, {
       context: {
         update: update,
