@@ -273,120 +273,141 @@ async function projects(req, res) {
   }
 }
 async function updateNSDates(req, res) {
-  var job = await __updateJob('ns_backlog', { status: 'running' })
-  res.status(200)
-  var updates = []
-  var data = req.body.data
-  var row
-  // get the list of users in LP
-  var users = await __get_all_lp_users()
-  for (i = 0; i < data.length; i++) {
-    if (data[i]['Internal ID'] !== undefined) {
-      if (data[i].hasOwnProperty('Go-Live Date (Day)')) {
-        // parse the PM name
-        pmName = data[i]['PM'].trim().toLowerCase()
-        pmName = pmName.replace(/ /g, "_")
-        if (pmName in users) {
-          pmID = users[pmName].id
+  try {
+    var job = await __updateJob('ns_backlog', { status: 'running' })
+    res.status(200)
+    var updates = []
+    var data = req.body.data
+    var row
+    // get the list of users in LP
+    var users = await __get_all_lp_users()
+    for (i = 0; i < data.length; i++) {
+      if (data[i]['Internal ID'] !== undefined) {
+        if (data[i].hasOwnProperty('Go-Live Date (Day)')) {
+          // parse the PM name
+          pmName = data[i]['PM'].trim().toLowerCase()
+          pmName = pmName.replace(/ /g, "_")
+          if (pmName in users) {
+            pmID = users[pmName].id
+          } else {
+            pmID = null
+          }
+          row = {
+            id: data[i]['Internal ID'],
+            location_name: null,
+            total_mrr: data[i]['Total MRR'],
+            pm_id: pmID,
+            gross_ps: data[i]['Gross Professional Services'],
+            net_ps: data[i]['Net Professional Services'],
+            total_ps_discount: data[i]['Total Professional Services Discount'],
+            gross_cs: data[i]['Gross Creative Services'],
+            net_cs: data[i]['Net Creative Services'],
+            total_cs_discount: data[i]['Total Creative Services Discount'],
+            actual_go_live: dates.pst_to_utc(data[i]['Go-Live Date (Day)']),
+            project_type: data[i]['Project Type'],
+            stage: data[i]['OpenAir: Project Stage']
+          }
+          try {
+            master_project_id = parseInt(data[i]['Master Project ID'])
+            if (!isNaN(master_project_id)) {
+              row.master_project_id = master_project_id
+            }
+          } catch (error) {
+            row.master_project_id = ''
+          }
+          console.log({ row })
+          if (data[i]['Location'].split(/\s(.+)/).length > 1) {
+            row.location_name = data[i]['Location'].split(/\s(.+)/)[1]
+          } else {
+            row.location_name = data[i]['Location'].split(/\s(.+)/)[0]
+          }
         } else {
-          pmID = null
+          // parse the PM name
+          pmName = data[i]['PM'].trim().toLowerCase()
+          pmName = pmName.replace(/ /g, "_")
+          if (pmName in users) {
+            pmID = users[pmName].id
+          } else {
+            pmID = null
+          }
+  
+          row = {
+            id: data[i]['Internal ID'],
+            location_name: null,
+            pm_id: pmID,
+            total_mrr: data[i]['Total MRR'],
+            gross_ps: data[i]['Gross Professional Services'],
+            net_ps: data[i]['Net Professional Services'],
+            total_ps_discount: data[i]['Total Professional Services Discount'],
+            gross_cs: data[i]['Gross Creative Services'],
+            net_cs: data[i]['Net Creative Services'],
+            total_cs_discount: data[i]['Total Creative Services Discount'],
+            estimated_go_live: dates.pst_to_utc(data[i]['Estimated Go-Live Date (Day)']),
+            project_type: data[i]['Project Type'],
+            stage: data[i]['OpenAir: Project Stage']
+          }
+          try {
+            master_project_id = parseInt(data[i]['Master Project ID'])
+            if (!isNaN(master_project_id)) {
+              row.master_project_id = master_project_id
+            }
+          } catch (error) {
+            row.master_project_id = ''
+          }
+          if (data[i]['Location'].split(/\s(.+)/).length > 1) {
+            row.location_name = data[i]['Location'].split(/\s(.+)/)[1]
+          } else {
+            row.location_name = data[i]['Location'].split(/\s(.+)/)[0]
+          }
         }
-        row = {
-          id: data[i]['Internal ID'],
-          location_name: null,
-          total_mrr: data[i]['Total MRR'],
-          master_project_id: parseInt(data[i]['Master Project ID']),
-          pm_id: pmID,
-          gross_ps: data[i]['Gross Professional Services'],
-          net_ps: data[i]['Net Professional Services'],
-          total_ps_discount: data[i]['Total Professional Services Discount'],
-          gross_cs: data[i]['Gross Creative Services'],
-          net_cs: data[i]['Net Creative Services'],
-          total_cs_discount: data[i]['Total Creative Services Discount'],
-          actual_go_live: dates.pst_to_utc(data[i]['Go-Live Date (Day)']),
-          project_type: data[i]['Project Type'],
-          stage: data[i]['OpenAir: Project Stage']
-        }
-        if (data[i]['Location'].split(/\s(.+)/).length > 1) {
-          row.location_name = data[i]['Location'].split(/\s(.+)/)[1]
+        if (data[i]['Opportunity Close Date'] != '') {
+          row.opportunity_close_date = dates.pst_to_utc(data[i]['Opportunity Close Date'])
         } else {
-          row.location_name = data[i]['Location'].split(/\s(.+)/)[0]
+          row.opportunity_close_date = null
         }
-      } else {
-        // parse the PM name
-        pmName = data[i]['PM'].trim().toLowerCase()
-        pmName = pmName.replace(/ /g, "_")
-        if (pmName in users) {
-          pmID = users[pmName].id
-        } else {
-          pmID = null
-        }
-
-        row = {
-          id: data[i]['Internal ID'],
-          location_name: null,
-          master_project_id: parseInt(data[i]['Master Project ID']),
-          pm_id: pmID,
-          total_mrr: data[i]['Total MRR'],
-          gross_ps: data[i]['Gross Professional Services'],
-          net_ps: data[i]['Net Professional Services'],
-          total_ps_discount: data[i]['Total Professional Services Discount'],
-          gross_cs: data[i]['Gross Creative Services'],
-          net_cs: data[i]['Net Creative Services'],
-          total_cs_discount: data[i]['Total Creative Services Discount'],
-          estimated_go_live: dates.pst_to_utc(data[i]['Estimated Go-Live Date (Day)']),
-          project_type: data[i]['Project Type'],
-          stage: data[i]['OpenAir: Project Stage']
-        }
-        if (data[i]['Location'].split(/\s(.+)/).length > 1) {
-          row.location_name = data[i]['Location'].split(/\s(.+)/)[1]
-        } else {
-          row.location_name = data[i]['Location'].split(/\s(.+)/)[0]
-        }
+  
+        updates.push(db.lbs.upsert(row, { returning: true }))
       }
-      if (data[i]['Opportunity Close Date'] != '') {
-        row.opportunity_close_date = dates.pst_to_utc(data[i]['Opportunity Close Date'])
-      } else {
-        row.opportunity_close_date = null
-      }
-
-      updates.push(db.lbs.upsert(row, { returning: true }))
     }
-  }
-  Promise.all(updates).then(() => {
-    if (data[0].hasOwnProperty('Estimated Go-Live Date (Day)')) {
-      // get the first day of the month from this backlog
-      var backlogDate = new Date(data[0]['Estimated Go-Live Date (Day)'])
-      var today = new Date()
-      var year = backlogDate.getFullYear()
-      var month = backlogDate.getMonth()
-      var firstDay = new Date(year, month, 1)
-      var lastDay = new Date(year, month + 1, 0)
-
-      // find all LBS tasks that are in this month and not updated today
-      db.lbs.findAll({
-        where: {
-          estimated_go_live: {
-            [Op.between]: [firstDay, lastDay]
-          },
-          updatedAt: {
-            [Op.lt]: today.setHours(0, 0, 0, 0)
-          },
-          actual_go_live: null
-        }
-      }).then(nsLocation => {
-        updates = []
-        for (let i2 = 0; i2 < nsLocation.length; i2++) {
-          updates.push(nsLocation[i2].update({ estimated_go_live: null }))
-        }
-        Promise.all([updates]).then(() => {
-          job.update({ lastrun: dates.moment().format(), lastrunstatus: 'complete', status: 'active' })
+    Promise.all(updates).then(() => {
+      console.log('All updates done')
+      if (data[0].hasOwnProperty('Estimated Go-Live Date (Day)')) {
+        // get the first day of the month from this backlog
+        var backlogDate = new Date(data[0]['Estimated Go-Live Date (Day)'])
+        var today = new Date()
+        var year = backlogDate.getFullYear()
+        var month = backlogDate.getMonth()
+        var firstDay = new Date(year, month, 1)
+        var lastDay = new Date(year, month + 1, 0)
+  
+        // find all LBS tasks that are in this month and not updated today
+        db.lbs.findAll({
+          where: {
+            estimated_go_live: {
+              [Op.between]: [firstDay, lastDay]
+            },
+            updatedAt: {
+              [Op.lt]: today.setHours(0, 0, 0, 0)
+            },
+            actual_go_live: null
+          }
+        }).then(nsLocation => {
+          updates = []
+          for (let i2 = 0; i2 < nsLocation.length; i2++) {
+            updates.push(nsLocation[i2].update({ estimated_go_live: null }))
+          }
+          Promise.all([updates]).then(() => {
+            job.update({ lastrun: dates.moment().format(), lastrunstatus: 'complete', status: 'active' })
+          })
         })
-      })
-    } else {
-      job.update({ lastrun: dates.moment().format(), lastrunstatus: 'complete', status: 'active' })
-    }
-  })
+      } else {
+        console.log('complete')
+        job.update({ lastrun: dates.moment().format(), lastrunstatus: 'complete', status: 'active' })
+      }
+    }) 
+  } catch (error) {
+    console.log( { error} )
+  }
 }
 async function match(req, res) {
   try {
