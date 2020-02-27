@@ -43,6 +43,9 @@ async function update(req, res) {
       // parse out the location ID
       let splitName = location.name.split(/\s(.+)/, 2)
       let LBSId = splitName[0]
+      if (LBSId == 53508715) {
+        debugger
+      }
       let locationName = splitName[1]
       let owner = await db.lp_user.findOne({
         where: {
@@ -57,6 +60,8 @@ async function update(req, res) {
           }
         })
       }
+      console.log({ owner })
+
       // create the update object
       let update = {
         task_id: location["key"],
@@ -70,15 +75,21 @@ async function update(req, res) {
         project_lost_date: null,
         estimatedLostDate: null,
         projectLossReason: location["pick_list_custom_field:109756"],
-        projectPhase: null,
-        pm_id: owner.id
+        projectPhase: null
+      }
+      if (owner !== null ) {
+        update.pm_id = owner.id
       }
       if (isNaN(LBSId) || LBSId === '') {
-        Honeybadger.notify('id is not a number', {
-          context: {
-            update: update
-          }
-        })
+        try {
+          Honeybadger.notify('id is not a number', {
+            context: {
+              update: update
+            }
+          }) 
+        } catch (error) {
+          console.error(error)
+        }
       } else {
         var lsb = await db.lbs.findOrCreate({
           where: {

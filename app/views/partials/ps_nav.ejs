@@ -1,15 +1,15 @@
 <ul class="treeview-menu has-children">
   <li><a class="treeview-item <% if (slug == 'active-projects') {%>active<%} %>" href="/ps">Dashboard</a></li>
-  <li class="dropright"><a class="treeview-item" href="#">Milestone Reports</a>
+  <!-- <li class="dropright"><a class="treeview-item" href="#">Milestone Reports</a>
     <ul class="dropdown-menu dropdown-menu-right">
         <li><a class="treeview-item" href="/ps/reports/milestones/timeline">Active Projects</a></li>
         <li><a class="treeview-item" href="/ps/reports/milestones/archived/timeline">Complete Projects</a></li>
     </ul>
-  </li>
+  </li> -->
   <li class="dropright"><a class="treeview-item" href="#">CFT Reports</a>
     <ul class="dropdown-menu dropdown-menu-right">
         <li><a class="treeview-item" href="/ps/reports/mrr/teams/<%= site_data.currentYear %>/<%= site_data.currentMonth %>"><%= site_data.convert.moment(`${site_data.currentMonth}/1/${site_data.currentYear}`).format('MMM - YYYY')%> Goals</a></li>
-        <li><a class="treeview-item" href="/ps/reports/workload/cft">WIP</a></li>
+        <!-- <li><a class="treeview-item" href="/ps/reports/workload/cft">WIP</a></li> -->
         <li><a class="treeview-item" href="/ps/reports/mrr/teams">MRR Goals Archive</a></li>
     </ul>
   </li>

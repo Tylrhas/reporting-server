@@ -104,7 +104,7 @@ function getProjectData(locations) {
     data.websiteLaunchDate = null
   }
   if (data.stage !== 'Lost') {
-    data.websiteLaunchDate = null
+    data.lostDate = null
   }
   if (data.stage !== 'On Hold') {
     data.onHoldDate = null
